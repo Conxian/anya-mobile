@@ -1,5 +1,5 @@
 import { WalletServiceImpl } from './wallet-service';
-import { WalletStatus } from '../core/domain';
+import * as bip39 from 'bip39';
 
 describe('WalletServiceImpl', () => {
   let walletService: WalletServiceImpl;
@@ -8,29 +8,23 @@ describe('WalletServiceImpl', () => {
     walletService = new WalletServiceImpl();
   });
 
-  it('should create a new wallet', async () => {
-    const wallet = await walletService.createWallet('password');
+  it('should create a new Bitcoin wallet and return the mnemonic', async () => {
+    const { wallet, mnemonic } = await walletService.createWallet('strong-password');
+
     expect(wallet).toBeDefined();
     expect(wallet.id).toBe('wallet-1');
-    expect(wallet.encryptedSeed).toBeDefined();
+    expect(wallet.masterPrivateKey).toMatch(/^[1-9A-HJ-NP-Za-km-z]{80,112}$/);
     expect(wallet.accounts).toEqual([]);
-    const status = await walletService.getWalletStatus();
-    expect(status).toBe(WalletStatus.Unlocked);
+
+    expect(mnemonic).toBeDefined();
+    expect(bip39.validateMnemonic(mnemonic)).toBe(true);
   });
 
-  it('should lock and unlock the wallet', async () => {
-    await walletService.createWallet('password');
-    await walletService.lockWallet();
-    let status = await walletService.getWalletStatus();
-    expect(status).toBe(WalletStatus.Locked);
-    await walletService.unlockWallet('password');
-    status = await walletService.getWalletStatus();
-    expect(status).toBe(WalletStatus.Unlocked);
-  });
+  it('should load a wallet from a mnemonic', async () => {
+    const { wallet: createdWallet, mnemonic } = await walletService.createWallet('strong-password');
+    const loadedWallet = await walletService.loadWalletFromMnemonic(mnemonic, 'strong-password');
 
-  it('should load an existing wallet', async () => {
-    const createdWallet = await walletService.createWallet('password');
-    const loadedWallet = await walletService.loadWallet('password');
-    expect(loadedWallet).toEqual(createdWallet);
+    expect(loadedWallet.id).toEqual(createdWallet.id);
+    expect(loadedWallet.masterPrivateKey).toEqual(createdWallet.masterPrivateKey);
   });
 });

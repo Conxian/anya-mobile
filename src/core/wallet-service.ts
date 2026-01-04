@@ -1,50 +1,49 @@
 import { WalletService } from '../core/ports';
 import { Wallet, WalletStatus } from '../core/domain';
 import * as bip39 from 'bip39';
-import { hdkey } from '@ethereumjs/wallet';
+import { BIP32Factory } from 'bip32';
+import * as ecc from 'tiny-secp256k1';
+
+const bip32 = BIP32Factory(ecc);
 
 export class WalletServiceImpl implements WalletService {
-  private wallet: Wallet | null = null;
-  private status: WalletStatus = WalletStatus.Locked;
-
-  async createWallet(passphrase: string): Promise<Wallet> {
+  async createWallet(passphrase: string): Promise<{ wallet: Wallet; mnemonic: string }> {
     const mnemonic = bip39.generateMnemonic();
-    const seed = await bip39.mnemonicToSeed(mnemonic);
-    const hdWallet = hdkey.EthereumHDKey.fromMasterSeed(seed);
+    const seed = await bip39.mnemonicToSeed(mnemonic, passphrase);
+    const root = bip32.fromSeed(seed);
+
     const wallet: Wallet = {
       id: 'wallet-1',
-      encryptedSeed: hdWallet.privateExtendedKey(),
+      masterPrivateKey: root.toBase58(),
       accounts: [],
     };
-    this.wallet = wallet;
-    this.status = WalletStatus.Unlocked;
-    return wallet;
+
+    return { wallet, mnemonic };
   }
 
-  async loadWallet(passphrase: string): Promise<Wallet> {
-    // This is a mock implementation. In a real wallet, you would load the
-    // encrypted seed from persistence and decrypt it.
-    if (!this.wallet) {
-      throw new Error('Wallet not found.');
-    }
-    this.status = WalletStatus.Unlocked;
-    return this.wallet;
+  async loadWalletFromMnemonic(mnemonic: string, passphrase?: string): Promise<Wallet> {
+    const seed = await bip39.mnemonicToSeed(mnemonic, passphrase);
+    const root = bip32.fromSeed(seed);
+
+    return {
+      id: 'wallet-1',
+      masterPrivateKey: root.toBase58(),
+      accounts: [],
+    };
   }
 
+  // The service is now stateless, so lock/unlock/status are managed by the client.
+  // These methods are kept for interface compatibility but should be deprecated.
   async lockWallet(): Promise<void> {
-    this.status = WalletStatus.Locked;
+    console.warn('WalletService is stateless. Lock is managed by the client.');
   }
 
   async unlockWallet(passphrase: string): Promise<void> {
-    // This is a mock implementation. In a real wallet, you would decrypt the
-    // seed with the passphrase.
-    if (!this.wallet) {
-      throw new Error('Wallet not found.');
-    }
-    this.status = WalletStatus.Unlocked;
+    console.warn('WalletService is stateless. Unlock is managed by the client.');
   }
 
   async getWalletStatus(): Promise<WalletStatus> {
-    return this.status;
+    console.warn('WalletService is stateless. Status is managed by the client.');
+    return WalletStatus.Unlocked; // Represents an operational, stateless service
   }
 }

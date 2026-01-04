@@ -24,10 +24,11 @@ describe('FilePersistence', () => {
       name: 'Test Account',
       address: 'test-address',
       privateKey: 'test-private-key',
+      publicKey: 'test-public-key',
     };
     const wallet: Wallet = {
       id: 'wallet_1',
-      encryptedSeed: 'test-seed',
+      masterPrivateKey: 'test-seed',
       accounts: [account],
     };
 

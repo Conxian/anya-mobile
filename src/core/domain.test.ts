@@ -8,10 +8,11 @@ describe('Domain Objects', () => {
       name: 'My Bitcoin Account',
       address: 'bc1q...',
       privateKey: '...',
+      publicKey: '...',
     };
     const wallet: Wallet = {
       id: 'wallet_1',
-      encryptedSeed: '...',
+      masterPrivateKey: '...',
       accounts: [account],
     };
     expect(wallet.id).toBe('wallet_1');

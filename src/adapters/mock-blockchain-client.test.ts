@@ -28,9 +28,9 @@ describe('MockBlockchainClient', () => {
   });
 
   it('should return mock fee estimates', async () => {
-    const fees = await client.getFeeEstimates(mockAsset);
-    expect(fees.slow.value).toBe('0.00001');
-    expect(fees.medium.value).toBe('0.00002');
-    expect(fees.fast.value).toBe('0.00003');
+    const fees = await client.getFeeEstimates();
+    expect(fees.slow).toBe(1);
+    expect(fees.medium).toBe(2);
+    expect(fees.fast).toBe(3);
   });
 });

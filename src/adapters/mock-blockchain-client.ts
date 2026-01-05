@@ -39,12 +39,12 @@ export class MockBlockchainClient implements BlockchainClient {
     return 'mock-transaction-id';
   }
 
-  async getFeeEstimates(asset: Asset): Promise<FeeEstimates> {
+  async getFeeEstimates(): Promise<FeeEstimates> {
     // Return mock fee estimates for testing purposes.
     return {
-      slow: { asset, value: '0.00001' },
-      medium: { asset, value: '0.00002' },
-      fast: { asset, value: '0.00003' },
+      slow: 1,
+      medium: 2,
+      fast: 3,
     };
   }
 }

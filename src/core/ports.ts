@@ -79,7 +79,7 @@ export interface BlockchainClient {
   getBalance(address: Address, asset: Asset): Promise<Balance>;
   getTransaction(transactionID: TransactionID): Promise<Transaction>;
   broadcastTransaction(signedTransaction: Transaction): Promise<TransactionID>;
-  getFeeEstimates(asset: Asset): Promise<FeeEstimates>;
+  getFeeEstimates(): Promise<FeeEstimates>;
 }
 
 export interface OracleClient {

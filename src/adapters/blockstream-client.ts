@@ -47,14 +47,14 @@ export class BlockstreamClient implements BlockchainClient {
     return response.data;
   }
 
-  async getFeeEstimates(asset: Asset): Promise<FeeEstimates> {
+  async getFeeEstimates(): Promise<FeeEstimates> {
     const response = await axios.get(`${BASE_URL}/fee-estimates`);
     const fees = response.data;
-
+    // Blockstream returns fee estimates in sats/vB. We'll ceil to the nearest integer for safety.
     return {
-      slow: { asset, value: fees['6'].toString() },
-      medium: { asset, value: fees['3'].toString() },
-      fast: { asset, value: fees['1'].toString() },
+      slow: Math.ceil(fees['6']),
+      medium: Math.ceil(fees['3']),
+      fast: Math.ceil(fees['1']),
     };
   }
 }

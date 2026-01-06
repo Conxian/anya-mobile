@@ -68,10 +68,10 @@ describe('BlockstreamClient', () => {
     const response = { data: { '1': 20.123, '3': 10.456, '6': 5.789 } };
     mockedAxios.get.mockResolvedValue(response);
 
-    const fees = await client.getFeeEstimates(asset);
+    const fees = await client.getFeeEstimates();
 
-    expect(fees.fast.value).toBe('20.123');
-    expect(fees.medium.value).toBe('10.456');
-    expect(fees.slow.value).toBe('5.789');
+    expect(fees.fast).toBe(21);
+    expect(fees.medium).toBe(11);
+    expect(fees.slow).toBe(6);
   });
 });

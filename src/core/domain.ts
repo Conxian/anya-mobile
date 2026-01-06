@@ -56,10 +56,13 @@ export interface StakingPosition {
   rewards: Amount;
 }
 
+/**
+ * Fee estimates in satoshis per virtual byte (sat/vB).
+ */
 export interface FeeEstimates {
-  slow: Amount;
-  medium: Amount;
-  fast: Amount;
+  slow: number;
+  medium: number;
+  fast: number;
 }
 
 export interface Price {

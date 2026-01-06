@@ -8,8 +8,7 @@ document.getElementById('createWallet').addEventListener('click', async () => {
   const walletInfo = document.getElementById('walletInfo');
   walletInfo.innerHTML = `
     <p><strong>Mnemonic:</strong> ${wallet.mnemonic}</p>
-    <p><strong>Private Key:</strong> ${wallet.privateKey}</p>
-    <p><strong>Address:</strong> ${wallet.address}</p>
+    <p><strong>Address:</strong> ${wallet.p2wpkhAddress}</p>
     <p><strong>IPFS CID:</strong> Uploading...</p>
   `;
 
@@ -32,8 +31,7 @@ document.getElementById('loadWallet').addEventListener('click', async () => {
 
     walletInfo.innerHTML = `
       <p><strong>Mnemonic:</strong> ${wallet.mnemonic}</p>
-      <p><strong>Private Key:</strong> ${wallet.privateKey}</p>
-      <p><strong>Address:</strong> ${wallet.address}</p>
+      <p><strong>Address:</strong> ${wallet.p2wpkhAddress}</p>
     `;
   } catch (error) {
     walletInfo.innerHTML = `<p>Failed to load wallet from IPFS. Please check the CID and your connection.</p>`;

@@ -6,5 +6,6 @@ esbuild.build({
   outfile: 'public/app.js',
   format: 'esm',
   platform: 'browser',
+  loader: { '.wasm': 'binary' },
   // No external modules, so they will be bundled
 }).catch(() => process.exit(1));

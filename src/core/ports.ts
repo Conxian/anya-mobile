@@ -23,14 +23,11 @@ import {
 export interface WalletService {
   createWallet(passphrase: string): Promise<{ wallet: Wallet; mnemonic: string }>;
   loadWalletFromMnemonic(mnemonic: string, passphrase?: string): Promise<Wallet>;
-  lockWallet(): Promise<void>;
-  unlockWallet(passphrase: string): Promise<void>;
-  getWalletStatus(): Promise<WalletStatus>;
 }
 
 export interface AccountService {
   getAccounts(wallet: Wallet): Promise<Account[]>;
-  createAccount(wallet: Wallet, name: string): Promise<Account>;
+  createAccount(wallet: Wallet, name: string): Promise<{ newAccount: Account; updatedWallet: Wallet }>;
   getAccountBalance(account: Account, asset: Asset): Promise<Balance>;
 }
 
@@ -75,11 +72,15 @@ export interface MessagingService {
 
 // --- Driven Ports ---
 
+import { UTXO } from './domain';
+
 export interface BlockchainClient {
   getBalance(address: Address, asset: Asset): Promise<Balance>;
   getTransaction(transactionID: TransactionID): Promise<Transaction>;
   broadcastTransaction(signedTransaction: Transaction): Promise<TransactionID>;
   getFeeEstimates(): Promise<FeeEstimates>;
+  getUtxos(address: Address): Promise<UTXO[]>;
+  getTransactions(address: Address): Promise<Transaction[]>;
 }
 
 export interface OracleClient {

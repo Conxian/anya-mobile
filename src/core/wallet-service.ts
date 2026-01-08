@@ -32,18 +32,4 @@ export class WalletServiceImpl implements WalletService {
     };
   }
 
-  // The service is now stateless, so lock/unlock/status are managed by the client.
-  // These methods are kept for interface compatibility but should be deprecated.
-  async lockWallet(): Promise<void> {
-    console.warn('WalletService is stateless. Lock is managed by the client.');
-  }
-
-  async unlockWallet(passphrase: string): Promise<void> {
-    console.warn('WalletService is stateless. Unlock is managed by the client.');
-  }
-
-  async getWalletStatus(): Promise<WalletStatus> {
-    console.warn('WalletService is stateless. Status is managed by the client.');
-    return WalletStatus.Unlocked; // Represents an operational, stateless service
-  }
 }

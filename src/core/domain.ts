@@ -20,6 +20,8 @@ export interface Transaction {
   amount: Amount;
   fee: Amount;
   timestamp: number;
+  rawHex?: string;
+  psbtBase64?: string;
 }
 
 export interface Asset {
@@ -36,6 +38,12 @@ export interface Amount {
 export type Address = string;
 export type PrivateKey = string;
 export type TransactionID = string;
+
+export interface UTXO {
+  txid: string;
+  vout: number;
+  value: number;
+}
 
 export interface Balance {
   asset: Asset;

@@ -42,8 +42,11 @@ export class BlockstreamClient implements BlockchainClient {
     };
   }
 
-  async broadcastTransaction(signedTransaction: any): Promise<TransactionID> {
-    const response = await axios.post(`${BASE_URL}/tx`, signedTransaction.toHex());
+  async broadcastTransaction(signedTransaction: Transaction): Promise<TransactionID> {
+    if (!signedTransaction.rawHex) {
+      throw new Error('Transaction is not signed');
+    }
+    const response = await axios.post(`${BASE_URL}/tx`, signedTransaction.rawHex);
     return response.data;
   }
 
@@ -56,5 +59,56 @@ export class BlockstreamClient implements BlockchainClient {
       medium: Math.ceil(fees['3']),
       fast: Math.ceil(fees['1']),
     };
+  }
+
+  async getUtxos(address: Address): Promise<import("../core/domain").UTXO[]> {
+    const response = await axios.get(`${BASE_URL}/address/${address}/utxo`);
+    return response.data.map((utxo: any) => ({
+      txid: utxo.txid,
+      vout: utxo.vout,
+      value: utxo.value,
+    }));
+  }
+
+  async getTransactions(address: Address): Promise<Transaction[]> {
+    const response = await axios.get(`${BASE_URL}/address/${address}/txs`);
+    return response.data.map((tx: any) => {
+      let from = 'unknown';
+      let to = 'unknown';
+      let amount = 0;
+
+      const isSender = tx.vin.some((vin: any) => vin.prevout.scriptpubkey_address === address);
+
+      if (isSender) {
+        from = address;
+        // Find the first output that is not the change address
+        const output = tx.vout.find((vout: any) => vout.scriptpubkey_address !== address);
+        if (output) {
+          to = output.scriptpubkey_address;
+          amount = output.value;
+        }
+      } else {
+        to = address;
+        // Find the first input to determine the sender
+        if (tx.vin.length > 0) {
+          from = tx.vin[0].prevout.scriptpubkey_address;
+        }
+        // Find the output that belongs to the user
+        const output = tx.vout.find((vout: any) => vout.scriptpubkey_address === address);
+        if (output) {
+          amount = output.value;
+        }
+      }
+
+      return {
+        id: tx.txid,
+        from,
+        to,
+        asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 },
+        amount: { asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 }, value: (amount / 1e8).toString() },
+        fee: { asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 }, value: ((tx.fee) / 1e8).toString() },
+        timestamp: tx.status.block_time,
+      };
+    });
   }
 }

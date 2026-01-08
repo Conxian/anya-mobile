@@ -1,41 +1,30 @@
-import { createWallet } from '../core/wallet';
-import { uploadToIPFS, downloadFromIPFS } from '../services/ipfs';
+import { WalletServiceImpl } from '../core/wallet-service';
+import { AccountServiceImpl } from '../services/account-service';
+import { TransactionServiceImpl } from '../services/transaction-service';
+import { BlockstreamClient } from '../adapters/blockstream-client';
+
+const walletService = new WalletServiceImpl();
+const blockchainClient = new BlockstreamClient();
+const accountService = new AccountServiceImpl(blockchainClient);
+const transactionService = new TransactionServiceImpl(blockchainClient);
 
 document.getElementById('createWallet').addEventListener('click', async () => {
-  const wallet = createWallet();
-
-  // Display wallet info first
   const walletInfo = document.getElementById('walletInfo');
-  walletInfo.innerHTML = `
-    <p><strong>Mnemonic:</strong> ${wallet.mnemonic}</p>
-    <p><strong>Private Key:</strong> ${wallet.privateKey}</p>
-    <p><strong>Address:</strong> ${wallet.address}</p>
-    <p><strong>IPFS CID:</strong> Uploading...</p>
-  `;
-
-  // Then, attempt to upload to IPFS
+  walletInfo.innerHTML = '<p>Creating wallet...</p>';
   try {
-    const walletJson = JSON.stringify(wallet);
-    const cid = await uploadToIPFS(walletJson);
-    walletInfo.innerHTML += `<p><strong>IPFS CID:</strong> ${cid.toString()}</p>`;
-  } catch (error) {
-    walletInfo.innerHTML += `<p><strong>IPFS CID:</strong> Upload failed. (No local IPFS node found)</p>`;
-  }
-});
-
-document.getElementById('loadWallet').addEventListener('click', async () => {
-  const cid = (document.getElementById('cidInput') as HTMLInputElement).value;
-  const walletInfo = document.getElementById('walletInfo');
-  try {
-    const walletJson = await downloadFromIPFS(cid);
-    const wallet = JSON.parse(walletJson.toString());
+    console.log('Creating wallet...');
+    const { wallet, mnemonic } = await walletService.createWallet('password');
+    console.log('Wallet created, creating account...');
+    const { newAccount, updatedWallet } = await accountService.createAccount(wallet, 'Account 1');
+    console.log('Account created:', newAccount.address);
 
     walletInfo.innerHTML = `
-      <p><strong>Mnemonic:</strong> ${wallet.mnemonic}</p>
-      <p><strong>Private Key:</strong> ${wallet.privateKey}</p>
-      <p><strong>Address:</strong> ${wallet.address}</p>
+      <p><strong>Mnemonic:</strong> ${mnemonic}</p>
+      <p><strong>Address:</strong> ${newAccount.address}</p>
     `;
+    console.log('Wallet info displayed.');
   } catch (error) {
-    walletInfo.innerHTML = `<p>Failed to load wallet from IPFS. Please check the CID and your connection.</p>`;
+    console.error('Caught error:', error);
+    walletInfo.innerHTML = `<p><strong>Error:</strong> ${error.message}</p>`;
   }
 });

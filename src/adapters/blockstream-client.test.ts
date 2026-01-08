@@ -58,7 +58,16 @@ describe('BlockstreamClient', () => {
   });
 
   it('should broadcast a transaction', async () => {
-    const signedTx = { toHex: () => '01000000...' };
+    const signedTx = {
+      id: 'mock-txid',
+      from: 'address-from-1',
+      to: 'address-to-1',
+      asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 },
+      amount: { asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 }, value: '0.0001' },
+      fee: { asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 }, value: '0.00001' },
+      timestamp: 123456789,
+      rawHex: '01000000...',
+    };
     mockedAxios.post.mockResolvedValue({ data: 'mock-txid' });
     const result = await client.broadcastTransaction(signedTx);
     expect(result).toBe('mock-txid');

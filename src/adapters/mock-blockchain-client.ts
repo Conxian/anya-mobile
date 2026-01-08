@@ -47,4 +47,12 @@ export class MockBlockchainClient implements BlockchainClient {
       fast: 3,
     };
   }
+
+  async getUtxos(address: Address): Promise<import("../core/domain").UTXO[]> {
+    return [];
+  }
+
+  async getTransactions(address: Address): Promise<Transaction[]> {
+    return [];
+  }
 }

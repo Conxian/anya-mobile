@@ -1,4 +1,4 @@
-import { WalletService } from '../core/ports';
+import { AccountService, WalletService } from '../core/ports';
 import { Wallet, WalletStatus } from '../core/domain';
 import * as bip39 from 'bip39';
 import { BIP32Factory } from 'bip32';
@@ -7,6 +7,8 @@ import * as ecc from 'tiny-secp256k1';
 const bip32 = BIP32Factory(ecc);
 
 export class WalletServiceImpl implements WalletService {
+  constructor(private readonly accountService: AccountService) {}
+
   async createWallet(passphrase: string): Promise<{ wallet: Wallet; mnemonic: string }> {
     const mnemonic = bip39.generateMnemonic();
     const seed = await bip39.mnemonicToSeed(mnemonic, passphrase);
@@ -18,6 +20,8 @@ export class WalletServiceImpl implements WalletService {
       accounts: [],
     };
 
+    await this.accountService.createAccount(wallet, 'Default Account');
+
     return { wallet, mnemonic };
   }
 
@@ -25,11 +29,18 @@ export class WalletServiceImpl implements WalletService {
     const seed = await bip39.mnemonicToSeed(mnemonic, passphrase);
     const root = bip32.fromSeed(seed);
 
-    return {
+    const wallet: Wallet = {
       id: 'wallet-1',
       masterPrivateKey: root.toBase58(),
       accounts: [],
     };
+
+    // Create a default account if the wallet is new
+    if (wallet.accounts.length === 0) {
+      await this.accountService.createAccount(wallet, 'Default Account');
+    }
+
+    return wallet;
   }
 
   // The service is now stateless, so lock/unlock/status are managed by the client.

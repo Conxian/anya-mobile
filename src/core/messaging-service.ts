@@ -5,8 +5,8 @@ import {
   DecryptedMessage,
   PublicKey,
 } from './domain';
-import * as secp256k1 from 'secp256k1';
-import { randomBytes, createCipheriv, createDecipheriv } from 'crypto';
+import { getSharedSecret, getPublicKey, utils } from '@noble/secp256k1';
+import { randomBytes, createCipheriv, createDecipheriv, createHash } from 'crypto';
 
 export class MessagingServiceImpl implements MessagingService {
   async sendMessage(
@@ -18,12 +18,13 @@ export class MessagingServiceImpl implements MessagingService {
     const recipientPubKey = Buffer.from(recipientPublicKey, 'hex');
 
     const ephemeralPrivateKey = this.generatePrivateKey();
-    const ephemeralPublicKey = secp256k1.publicKeyCreate(ephemeralPrivateKey);
+    const ephemeralPublicKey = getPublicKey(ephemeralPrivateKey, true);
 
-    const sharedSecret = Buffer.from(secp256k1.ecdh(recipientPubKey, ephemeralPrivateKey));
+    const sharedSecret = getSharedSecret(ephemeralPrivateKey, recipientPubKey, true);
+    const hashedSharedSecret = createHash('sha256').update(sharedSecret.slice(1)).digest();
 
     const iv = randomBytes(16);
-    const ciphertext = this.encrypt(plaintext, sharedSecret, iv);
+    const ciphertext = this.encrypt(plaintext, hashedSharedSecret, iv);
 
     // In a real implementation, the message would be attached to a transaction.
     // Here, we simulate this with a mock transaction ID.
@@ -45,12 +46,13 @@ export class MessagingServiceImpl implements MessagingService {
     const privateKey = Buffer.from(recipientAccount.privateKey, 'hex');
     const senderPublicKey = Buffer.from(message.senderPublicKey, 'hex');
 
-    const sharedSecret = Buffer.from(secp256k1.ecdh(senderPublicKey, privateKey));
+    const sharedSecret = getSharedSecret(privateKey, senderPublicKey, true);
+    const hashedSharedSecret = createHash('sha256').update(sharedSecret.slice(1)).digest();
 
     const [ivHex, ciphertext] = message.ciphertext.split(':');
     const iv = Buffer.from(ivHex, 'hex');
 
-    const plaintext = this.decrypt(ciphertext, sharedSecret, iv);
+    const plaintext = this.decrypt(ciphertext, hashedSharedSecret, iv);
 
     return {
       id: message.id,
@@ -68,11 +70,7 @@ export class MessagingServiceImpl implements MessagingService {
   }
 
   private generatePrivateKey(): Buffer {
-    let privateKey;
-    do {
-      privateKey = randomBytes(32);
-    } while (!secp256k1.privateKeyVerify(privateKey));
-    return privateKey;
+    return Buffer.from(utils.randomPrivateKey());
   }
 
   private encrypt(text: string, key: Buffer, iv: Buffer): string {

@@ -1,20 +1,16 @@
 import { MessagingServiceImpl } from './messaging-service';
 import { Account } from './domain';
-import * as secp256k1 from 'secp256k1';
-import { randomBytes } from 'crypto';
+import { getPublicKey, utils } from '@noble/secp256k1';
 
 const generateTestAccount = (id: string, name: string): Account => {
-  let privateKey;
-  do {
-    privateKey = randomBytes(32);
-  } while (!secp256k1.privateKeyVerify(privateKey));
-  const publicKey = secp256k1.publicKeyCreate(privateKey);
+  const privateKey = utils.randomPrivateKey();
+  const publicKey = getPublicKey(privateKey, true);
 
   return {
     id,
     name,
     address: `${name}-address`,
-    privateKey: privateKey.toString('hex'),
+    privateKey: Buffer.from(privateKey).toString('hex'),
     publicKey: Buffer.from(publicKey).toString('hex'),
   };
 };

@@ -12,12 +12,15 @@
     "buffer": "^6.0.3",
     "ecpair": "^3.0.0",
     "esbuild": "^0.27.0",
-    "secp256k1": "^5.0.1",
-    "tiny-secp256k1": "^2.2.4"
+    "tiny-secp256k1": "^2.2.4",
+    "@noble/secp256k1": "^2.0.0"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.24.7",
+    "@babel/preset-typescript": "^7.24.7",
     "@fleek-platform/cli": "^3.9.4",
     "@types/jest": "^30.0.0",
+    "babel-jest": "^30.2.0",
     "hsd": "^8.0.0",
     "ipfs-http-client": "^60.0.1",
     "jest": "^30.2.0",

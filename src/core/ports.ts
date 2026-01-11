@@ -16,6 +16,7 @@ import {
   Message,
   DecryptedMessage,
   PublicKey,
+  UTXO,
 } from './domain';
 
 // --- Driving Ports ---
@@ -80,6 +81,7 @@ export interface BlockchainClient {
   getTransaction(transactionID: TransactionID): Promise<Transaction>;
   broadcastTransaction(signedTransaction: Transaction): Promise<TransactionID>;
   getFeeEstimates(): Promise<FeeEstimates>;
+  getUTXOs(address: Address): Promise<UTXO[]>;
 }
 
 export interface OracleClient {

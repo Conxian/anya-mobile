@@ -6,6 +6,7 @@ import {
   Balance,
   Transaction,
   FeeEstimates,
+  UTXO,
 } from '../core/domain';
 import axios from 'axios';
 
@@ -56,5 +57,14 @@ export class BlockstreamClient implements BlockchainClient {
       medium: Math.ceil(fees['3']),
       fast: Math.ceil(fees['1']),
     };
+  }
+
+  async getUTXOs(address: Address): Promise<UTXO[]> {
+    const response = await axios.get(`${BASE_URL}/address/${address}/utxo`);
+    return response.data.map((utxo: any) => ({
+      txid: utxo.txid,
+      vout: utxo.vout,
+      value: utxo.value,
+    }));
   }
 }

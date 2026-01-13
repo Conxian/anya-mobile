@@ -95,3 +95,9 @@ export interface DecryptedMessage {
   plaintext: string;
   timestamp: number;
 }
+
+export interface UTXO {
+  txid: string;
+  vout: number;
+  value: number; // in satoshis
+}

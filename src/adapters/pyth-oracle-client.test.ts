@@ -4,7 +4,9 @@ import { Asset } from '../core/domain';
 
 jest.mock('@pythnetwork/hermes-client');
 
-const MockedHermesClient = HermesClient as jest.MockedClass<typeof HermesClient>;
+const MockedHermesClient = HermesClient as jest.MockedClass<
+  typeof HermesClient
+>;
 
 describe('PythOracleClient', () => {
   let client: PythOracleClient;
@@ -22,18 +24,26 @@ describe('PythOracleClient', () => {
       },
     ];
 
-    (MockedHermesClient.prototype.getLatestPriceUpdates as jest.Mock).mockResolvedValue(mockPriceUpdates);
+    (
+      MockedHermesClient.prototype.getLatestPriceUpdates as jest.Mock
+    ).mockResolvedValue(mockPriceUpdates);
 
     const price = await client.getPrice(btc, 'USD');
 
     expect(price.value).toBe('50000');
-    expect(MockedHermesClient.prototype.getLatestPriceUpdates).toHaveBeenCalledWith([
+    expect(
+      MockedHermesClient.prototype.getLatestPriceUpdates
+    ).toHaveBeenCalledWith([
       '0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43',
     ]);
   });
 
   it('should throw an error for an unsupported asset', async () => {
-    const unsupportedAsset: Asset = { symbol: 'XYZ', name: 'Unsupported', decimals: 8 };
+    const unsupportedAsset: Asset = {
+      symbol: 'XYZ',
+      name: 'Unsupported',
+      decimals: 8,
+    };
     await expect(client.getPrice(unsupportedAsset, 'USD')).rejects.toThrow(
       'Price ID not found for XYZ/USD'
     );

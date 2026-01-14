@@ -16,7 +16,8 @@ describe('AccountServiceImpl', () => {
   beforeEach(async () => {
     blockchainClient = mock<BlockchainClient>();
     accountService = new AccountServiceImpl(blockchainClient);
-    const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
+    const mnemonic =
+      'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
     const seed = await bip39.mnemonicToSeed(mnemonic);
     const root = bip32.fromSeed(seed);
     wallet = {
@@ -27,10 +28,15 @@ describe('AccountServiceImpl', () => {
   });
 
   it('should create a new account and derive the correct address', async () => {
-    const newAccount = await accountService.createAccount(wallet, 'New Account');
+    const newAccount = await accountService.createAccount(
+      wallet,
+      'New Account'
+    );
     expect(newAccount.name).toBe('New Account');
     expect(wallet.accounts).toHaveLength(1);
-    expect(newAccount.address).toBe('bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu');
+    expect(newAccount.address).toBe(
+      'bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu'
+    );
   });
 
   it('should return all accounts in a wallet', async () => {
@@ -44,10 +50,19 @@ describe('AccountServiceImpl', () => {
 
   it('should return the balance for an account', async () => {
     const asset: Asset = { symbol: 'BTC', name: 'Bitcoin', decimals: 8 };
-    const newAccount = await accountService.createAccount(wallet, 'New Account');
-    blockchainClient.getBalance.mockResolvedValue({ asset, amount: { asset, value: '1' } });
+    const newAccount = await accountService.createAccount(
+      wallet,
+      'New Account'
+    );
+    blockchainClient.getBalance.mockResolvedValue({
+      asset,
+      amount: { asset, value: '1' },
+    });
     const balance = await accountService.getAccountBalance(newAccount, asset);
     expect(balance.amount.value).toBe('1');
-    expect(blockchainClient.getBalance).toHaveBeenCalledWith(newAccount.address, asset);
+    expect(blockchainClient.getBalance).toHaveBeenCalledWith(
+      newAccount.address,
+      asset
+    );
   });
 });

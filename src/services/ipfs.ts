@@ -28,7 +28,9 @@ export async function uploadToIPFS(data: any) {
 export async function downloadFromIPFS(cid: string): Promise<Buffer> {
   const response = await fetch(`https://ipfs.io/ipfs/${cid}`);
   if (!response.ok) {
-    throw new Error(`Failed to fetch from IPFS gateway: ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch from IPFS gateway: ${response.statusText}`
+    );
   }
   const arrayBuffer = await response.arrayBuffer();
   return Buffer.from(arrayBuffer);

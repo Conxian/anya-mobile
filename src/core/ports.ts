@@ -22,8 +22,13 @@ import {
 // --- Driving Ports ---
 
 export interface WalletService {
-  createWallet(passphrase: string): Promise<{ wallet: Wallet; mnemonic: string }>;
-  loadWalletFromMnemonic(mnemonic: string, passphrase?: string): Promise<Wallet>;
+  createWallet(
+    passphrase: string
+  ): Promise<{ wallet: Wallet; mnemonic: string }>;
+  loadWalletFromMnemonic(
+    mnemonic: string,
+    passphrase?: string
+  ): Promise<Wallet>;
   lockWallet(): Promise<void>;
   unlockWallet(passphrase: string): Promise<void>;
   getWalletStatus(): Promise<WalletStatus>;

@@ -15,13 +15,22 @@ describe('WalletServiceImpl', () => {
     const { wallet, mnemonic } = await walletService.createWallet('password');
     expect(wallet).toBeDefined();
     expect(mnemonic).toBeDefined();
-    expect(accountService.createAccount).toHaveBeenCalledWith(wallet, 'Default Account');
+    expect(accountService.createAccount).toHaveBeenCalledWith(
+      wallet,
+      'Default Account'
+    );
   });
 
   it('should load a wallet from mnemonic', async () => {
     const { mnemonic } = await walletService.createWallet('password');
-    const wallet = await walletService.loadWalletFromMnemonic(mnemonic, 'password');
+    const wallet = await walletService.loadWalletFromMnemonic(
+      mnemonic,
+      'password'
+    );
     expect(wallet).toBeDefined();
-    expect(accountService.createAccount).toHaveBeenCalledWith(wallet, 'Default Account');
+    expect(accountService.createAccount).toHaveBeenCalledWith(
+      wallet,
+      'Default Account'
+    );
   });
 });

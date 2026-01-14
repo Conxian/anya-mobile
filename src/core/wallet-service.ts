@@ -9,7 +9,9 @@ const bip32 = BIP32Factory(ecc);
 export class WalletServiceImpl implements WalletService {
   constructor(private readonly accountService: AccountService) {}
 
-  async createWallet(passphrase: string): Promise<{ wallet: Wallet; mnemonic: string }> {
+  async createWallet(
+    passphrase: string
+  ): Promise<{ wallet: Wallet; mnemonic: string }> {
     const mnemonic = bip39.generateMnemonic();
     const seed = await bip39.mnemonicToSeed(mnemonic, passphrase);
     const root = bip32.fromSeed(seed);
@@ -25,7 +27,10 @@ export class WalletServiceImpl implements WalletService {
     return { wallet, mnemonic };
   }
 
-  async loadWalletFromMnemonic(mnemonic: string, passphrase?: string): Promise<Wallet> {
+  async loadWalletFromMnemonic(
+    mnemonic: string,
+    passphrase?: string
+  ): Promise<Wallet> {
     const seed = await bip39.mnemonicToSeed(mnemonic, passphrase);
     const root = bip32.fromSeed(seed);
 
@@ -50,11 +55,15 @@ export class WalletServiceImpl implements WalletService {
   }
 
   async unlockWallet(passphrase: string): Promise<void> {
-    console.warn('WalletService is stateless. Unlock is managed by the client.');
+    console.warn(
+      'WalletService is stateless. Unlock is managed by the client.'
+    );
   }
 
   async getWalletStatus(): Promise<WalletStatus> {
-    console.warn('WalletService is stateless. Status is managed by the client.');
+    console.warn(
+      'WalletService is stateless. Status is managed by the client.'
+    );
     return WalletStatus.Unlocked; // Represents an operational, stateless service
   }
 }

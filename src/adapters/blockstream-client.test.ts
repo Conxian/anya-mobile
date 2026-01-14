@@ -54,7 +54,7 @@ describe('BlockstreamClient', () => {
     expect(tx.from).toBe('address-from-1');
     expect(tx.to).toBe('address-to-1');
     expect(tx.amount.value).toBe('0.00029'); // 12000 + 17000
-    expect(tx.fee.value).toBe('0.00001');   // 30000 - 29000
+    expect(tx.fee.value).toBe('0.00001'); // 30000 - 29000
   });
 
   it('should broadcast a transaction', async () => {

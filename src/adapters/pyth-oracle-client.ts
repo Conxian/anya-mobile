@@ -13,7 +13,8 @@ export class PythOracleClient implements OracleClient {
 
   async getPrice(asset: Asset, currency: string): Promise<Price> {
     const priceIds = [this.getPythPriceId(asset, currency)];
-    const priceUpdates = await this.hermesClient.getLatestPriceUpdates(priceIds);
+    const priceUpdates =
+      await this.hermesClient.getLatestPriceUpdates(priceIds);
 
     if (!priceUpdates || priceUpdates.length === 0) {
       throw new Error(`Price not found for ${asset.symbol}/${currency}`);
@@ -22,11 +23,15 @@ export class PythOracleClient implements OracleClient {
     const priceUpdate: any = priceUpdates[0];
     const price = priceUpdate.price;
 
-    if (!price || typeof price.price !== 'string' || typeof price.expo !== 'number') {
+    if (
+      !price ||
+      typeof price.price !== 'string' ||
+      typeof price.expo !== 'number'
+    ) {
       throw new Error(`Price data not found for ${asset.symbol}/${currency}`);
     }
 
-    const priceValue = Number(price.price) * (10 ** price.expo);
+    const priceValue = Number(price.price) * 10 ** price.expo;
 
     return {
       asset,
@@ -37,8 +42,10 @@ export class PythOracleClient implements OracleClient {
 
   private getPythPriceId(asset: Asset, currency: string): string {
     const mapping: { [key: string]: string } = {
-      'BTC/USD': '0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43',
-      'ETH/USD': '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace',
+      'BTC/USD':
+        '0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43',
+      'ETH/USD':
+        '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace',
     };
 
     const key = `${asset.symbol.toUpperCase()}/${currency.toUpperCase()}`;

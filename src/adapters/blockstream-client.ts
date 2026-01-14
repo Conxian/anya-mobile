@@ -15,7 +15,9 @@ const BASE_URL = 'https://blockstream.info/api';
 export class BlockstreamClient implements BlockchainClient {
   async getBalance(address: Address, asset: Asset): Promise<Balance> {
     const response = await axios.get(`${BASE_URL}/address/${address}`);
-    const utxos = response.data.chain_stats.funded_txo_sum - response.data.chain_stats.spent_txo_sum;
+    const utxos =
+      response.data.chain_stats.funded_txo_sum -
+      response.data.chain_stats.spent_txo_sum;
     return {
       asset,
       amount: { asset, value: (utxos / 1e8).toString() },
@@ -26,8 +28,14 @@ export class BlockstreamClient implements BlockchainClient {
     const response = await axios.get(`${BASE_URL}/tx/${transactionID}`);
     const tx = response.data;
 
-    const totalInputValue = tx.vin.reduce((sum: number, input: any) => sum + input.prevout.value, 0);
-    const totalOutputValue = tx.vout.reduce((sum: number, output: any) => sum + output.value, 0);
+    const totalInputValue = tx.vin.reduce(
+      (sum: number, input: any) => sum + input.prevout.value,
+      0
+    );
+    const totalOutputValue = tx.vout.reduce(
+      (sum: number, output: any) => sum + output.value,
+      0
+    );
 
     const fromAddress = tx.vin[0]?.prevout.scriptpubkey_address || 'unknown';
     const toAddress = tx.vout[0]?.scriptpubkey_address || 'unknown';
@@ -37,14 +45,23 @@ export class BlockstreamClient implements BlockchainClient {
       from: fromAddress,
       to: toAddress,
       asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 },
-      amount: { asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 }, value: (totalOutputValue / 1e8).toString() },
-      fee: { asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 }, value: ((totalInputValue - totalOutputValue) / 1e8).toString() },
+      amount: {
+        asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 },
+        value: (totalOutputValue / 1e8).toString(),
+      },
+      fee: {
+        asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 },
+        value: ((totalInputValue - totalOutputValue) / 1e8).toString(),
+      },
       timestamp: tx.status.block_time,
     };
   }
 
   async broadcastTransaction(signedTransaction: any): Promise<TransactionID> {
-    const response = await axios.post(`${BASE_URL}/tx`, signedTransaction.toHex());
+    const response = await axios.post(
+      `${BASE_URL}/tx`,
+      signedTransaction.toHex()
+    );
     return response.data;
   }
 

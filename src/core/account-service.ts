@@ -21,7 +21,7 @@ export class AccountServiceImpl implements AccountService {
     const childNode = root.derivePath(derivationPath);
 
     if (!childNode.privateKey) {
-        throw new Error('Could not derive private key');
+      throw new Error('Could not derive private key');
     }
 
     const address = this.getAddress(childNode);
@@ -49,7 +49,7 @@ export class AccountServiceImpl implements AccountService {
     // P2WPKH (native SegWit)
     const { address } = bitcoin.payments.p2wpkh({ pubkey: node.publicKey });
     if (!address) {
-        throw new Error('Could not generate address');
+      throw new Error('Could not generate address');
     }
     return address;
   }

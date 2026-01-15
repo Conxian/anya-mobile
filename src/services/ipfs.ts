@@ -6,6 +6,12 @@ import { Buffer } from 'buffer';
 // to a pinning service like Infura or Pinata with authentication.
 const client = create();
 
+// ⚡ Bolt: In-memory cache for IPFS downloads
+// We use a simple Map to cache downloaded IPFS data by its CID.
+// This avoids redundant network requests for the same content,
+// significantly speeding up repeated access.
+const ipfsCache = new Map<string, Buffer>();
+
 /**
  * Uploads data to IPFS.
  *
@@ -26,6 +32,11 @@ export async function uploadToIPFS(data: any) {
  * @returns The downloaded data as a Buffer.
  */
 export async function downloadFromIPFS(cid: string): Promise<Buffer> {
+  // ⚡ Bolt: Check the cache first to avoid a slow network request.
+  if (ipfsCache.has(cid)) {
+    return ipfsCache.get(cid)!;
+  }
+
   const response = await fetch(`https://ipfs.io/ipfs/${cid}`);
   if (!response.ok) {
     throw new Error(
@@ -33,5 +44,10 @@ export async function downloadFromIPFS(cid: string): Promise<Buffer> {
     );
   }
   const arrayBuffer = await response.arrayBuffer();
-  return Buffer.from(arrayBuffer);
+  const buffer = Buffer.from(arrayBuffer);
+
+  // ⚡ Bolt: Store the downloaded data in the cache for future requests.
+  ipfsCache.set(cid, buffer);
+
+  return buffer;
 }

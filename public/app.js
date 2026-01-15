@@ -34463,7 +34463,7 @@ var CID = class _CID {
   }
   [Symbol.toStringTag] = "CID";
   // Legacy
-  [Symbol.for("nodejs.util.inspect.custom")]() {
+  [/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")]() {
     return `CID(${this.toString()})`;
   }
   /**
@@ -34689,7 +34689,7 @@ function encodeCID(version, code12, multihash) {
   bytes.set(multihash, hashOffset);
   return bytes;
 }
-var cidSymbol = Symbol.for("@ipld/js-cid/CID");
+var cidSymbol = /* @__PURE__ */ Symbol.for("@ipld/js-cid/CID");
 
 // node_modules/@ipld/dag-pb/src/pb-decode.js
 var textDecoder = new TextDecoder();
@@ -36948,8 +36948,8 @@ var Tokeniser = class {
     return token;
   }
 };
-var DONE = Symbol.for("DONE");
-var BREAK = Symbol.for("BREAK");
+var DONE = /* @__PURE__ */ Symbol.for("DONE");
+var BREAK = /* @__PURE__ */ Symbol.for("BREAK");
 function tokenToArray(token, tokeniser, options) {
   const arr = [];
   for (let i = 0; i < token.value; i++) {
@@ -37697,7 +37697,7 @@ var CID2 = class _CID {
   }
   [Symbol.toStringTag] = "CID";
   // Legacy
-  [Symbol.for("nodejs.util.inspect.custom")]() {
+  [/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")]() {
     return `CID(${this.toString()})`;
   }
   /**
@@ -37923,7 +37923,7 @@ function encodeCID2(version, code12, multihash) {
   bytes.set(multihash, hashOffset);
   return bytes;
 }
-var cidSymbol2 = Symbol.for("@ipld/js-cid/CID");
+var cidSymbol2 = /* @__PURE__ */ Symbol.for("@ipld/js-cid/CID");
 
 // node_modules/@ipld/dag-cbor/src/index.js
 var CID_CBOR_TAG = 42;
@@ -39233,7 +39233,7 @@ var CID3 = class _CID {
   }
   [Symbol.toStringTag] = "CID";
   // Legacy
-  [Symbol.for("nodejs.util.inspect.custom")]() {
+  [/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")]() {
     return `CID(${this.toString()})`;
   }
   /**
@@ -39459,7 +39459,7 @@ function encodeCID3(version, code12, multihash) {
   bytes.set(multihash, hashOffset);
   return bytes;
 }
-var cidSymbol3 = Symbol.for("@ipld/js-cid/CID");
+var cidSymbol3 = /* @__PURE__ */ Symbol.for("@ipld/js-cid/CID");
 
 // node_modules/@ipld/dag-json/node_modules/multiformats/dist/src/bases/base64.js
 var base64 = rfc46483({
@@ -40431,7 +40431,7 @@ var CID4 = class _CID {
     return "CID";
   }
   // Legacy
-  [Symbol.for("nodejs.util.inspect.custom")]() {
+  [/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")]() {
     return `CID(${this.toString()})`;
   }
   /**
@@ -40764,7 +40764,7 @@ var encodeCID4 = (version, code12, multihash) => {
   bytes.set(multihash, hashOffset);
   return bytes;
 };
-var cidSymbol4 = Symbol.for("@ipld/js-cid/CID");
+var cidSymbol4 = /* @__PURE__ */ Symbol.for("@ipld/js-cid/CID");
 
 // node_modules/dag-jose/lib/signing.js
 function fromSplit(split2) {
@@ -41949,7 +41949,7 @@ var CID5 = class _CID {
     return "CID";
   }
   // Legacy
-  [Symbol.for("nodejs.util.inspect.custom")]() {
+  [/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")]() {
     return `CID(${this.toString()})`;
   }
   /**
@@ -42282,7 +42282,7 @@ var encodeCID5 = (version, code12, multihash) => {
   bytes.set(multihash, hashOffset);
   return bytes;
 };
-var cidSymbol5 = Symbol.for("@ipld/js-cid/CID");
+var cidSymbol5 = /* @__PURE__ */ Symbol.for("@ipld/js-cid/CID");
 
 // node_modules/ipfs-http-client/node_modules/multiformats/src/basics.js
 var bases = { ...identity_exports2, ...base2_exports, ...base8_exports, ...base10_exports, ...base16_exports, ...base32_exports, ...base36_exports, ...base58_exports, ...base64_exports, ...base256emoji_exports };
@@ -43510,7 +43510,7 @@ var CID6 = class _CID {
     return "CID";
   }
   // Legacy
-  [Symbol.for("nodejs.util.inspect.custom")]() {
+  [/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")]() {
     return `CID(${this.toString()})`;
   }
   /**
@@ -43843,7 +43843,7 @@ var encodeCID6 = (version, code12, multihash) => {
   bytes.set(multihash, hashOffset);
   return bytes;
 };
-var cidSymbol6 = Symbol.for("@ipld/js-cid/CID");
+var cidSymbol6 = /* @__PURE__ */ Symbol.for("@ipld/js-cid/CID");
 
 // node_modules/uint8arrays/node_modules/multiformats/src/basics.js
 var bases2 = { ...identity_exports3, ...base2_exports2, ...base8_exports2, ...base10_exports2, ...base16_exports2, ...base32_exports2, ...base36_exports2, ...base58_exports2, ...base64_exports2, ...base256emoji_exports2 };
@@ -44819,7 +44819,7 @@ var CID7 = class _CID {
     return "CID";
   }
   // Legacy
-  [Symbol.for("nodejs.util.inspect.custom")]() {
+  [/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")]() {
     return `CID(${this.toString()})`;
   }
   /**
@@ -45152,7 +45152,7 @@ var encodeCID7 = (version, code12, multihash) => {
   bytes.set(multihash, hashOffset);
   return bytes;
 };
-var cidSymbol7 = Symbol.for("@ipld/js-cid/CID");
+var cidSymbol7 = /* @__PURE__ */ Symbol.for("@ipld/js-cid/CID");
 
 // node_modules/@multiformats/multiaddr/node_modules/multiformats/src/bases/identity.js
 var identity_exports5 = {};
@@ -45815,7 +45815,7 @@ var _DefaultMultiaddr_string;
 var _DefaultMultiaddr_tuples;
 var _DefaultMultiaddr_stringTuples;
 var _a;
-var inspect = Symbol.for("nodejs.util.inspect.custom");
+var inspect = /* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom");
 var DNS_CODES = [
   getProtocol("dns").code,
   getProtocol("dns4").code,
@@ -45823,7 +45823,7 @@ var DNS_CODES = [
   getProtocol("dnsaddr").code
 ];
 var resolvers = /* @__PURE__ */ new Map();
-var symbol = Symbol.for("@multiformats/js-multiaddr/multiaddr");
+var symbol = /* @__PURE__ */ Symbol.for("@multiformats/js-multiaddr/multiaddr");
 function isMultiaddr(value2) {
   return Boolean(value2?.[symbol]);
 }
@@ -47520,7 +47520,7 @@ var CID8 = class _CID {
   }
   [Symbol.toStringTag] = "CID";
   // Legacy
-  [Symbol.for("nodejs.util.inspect.custom")]() {
+  [/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")]() {
     return `CID(${this.toString()})`;
   }
   /**
@@ -47746,7 +47746,7 @@ function encodeCID8(version, code12, multihash) {
   bytes.set(multihash, hashOffset);
   return bytes;
 }
-var cidSymbol8 = Symbol.for("@ipld/js-cid/CID");
+var cidSymbol8 = /* @__PURE__ */ Symbol.for("@ipld/js-cid/CID");
 
 // node_modules/@multiformats/multiaddr-to-uri/node_modules/multiformats/dist/src/basics.js
 var bases4 = { ...identity_exports7, ...base2_exports4, ...base8_exports4, ...base10_exports4, ...base16_exports4, ...base32_exports4, ...base36_exports4, ...base58_exports4, ...base64_exports4, ...base256emoji_exports4 };
@@ -48672,8 +48672,8 @@ function sizeForAddr2(codec, bytes, offset) {
 }
 
 // node_modules/@multiformats/multiaddr-to-uri/node_modules/@multiformats/multiaddr/dist/src/multiaddr.js
-var inspect2 = Symbol.for("nodejs.util.inspect.custom");
-var symbol2 = Symbol.for("@multiformats/multiaddr");
+var inspect2 = /* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom");
+var symbol2 = /* @__PURE__ */ Symbol.for("@multiformats/multiaddr");
 var DNS_CODES2 = [
   CODE_DNS,
   CODE_DNS4,
@@ -49430,7 +49430,7 @@ var createWantlistForPeer = configure((api) => {
 });
 
 // node_modules/@libp2p/interface-peer-id/dist/src/index.js
-var symbol3 = Symbol.for("@libp2p/peer-id");
+var symbol3 = /* @__PURE__ */ Symbol.for("@libp2p/peer-id");
 
 // node_modules/@libp2p/peer-id/node_modules/multiformats/src/bases/base58.js
 var base58_exports5 = {};
@@ -50419,7 +50419,7 @@ var CID9 = class _CID {
     return "CID";
   }
   // Legacy
-  [Symbol.for("nodejs.util.inspect.custom")]() {
+  [/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")]() {
     return `CID(${this.toString()})`;
   }
   /**
@@ -50752,14 +50752,14 @@ var encodeCID9 = (version, code12, multihash) => {
   bytes.set(multihash, hashOffset);
   return bytes;
 };
-var cidSymbol9 = Symbol.for("@ipld/js-cid/CID");
+var cidSymbol9 = /* @__PURE__ */ Symbol.for("@ipld/js-cid/CID");
 
 // node_modules/@libp2p/peer-id/node_modules/multiformats/src/basics.js
 var bases5 = { ...identity_exports9, ...base2_exports5, ...base8_exports5, ...base10_exports5, ...base16_exports5, ...base32_exports5, ...base36_exports5, ...base58_exports5, ...base64_exports5, ...base256emoji_exports5 };
 var hashes5 = { ...sha2_browser_exports5, ...identity_exports10 };
 
 // node_modules/@libp2p/peer-id/dist/src/index.js
-var inspect3 = Symbol.for("nodejs.util.inspect.custom");
+var inspect3 = /* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom");
 var baseDecoder = Object.values(bases5).map((codec) => codec.decoder).reduce((acc, curr) => acc.or(curr), bases5.identity.decoder);
 var LIBP2P_KEY_CODE = 114;
 var MARSHALLED_ED225519_PUBLIC_KEY_LENGTH = 36;
@@ -53963,7 +53963,7 @@ var CID10 = class _CID {
     return "CID";
   }
   // Legacy
-  [Symbol.for("nodejs.util.inspect.custom")]() {
+  [/* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom")]() {
     return `CID(${this.toString()})`;
   }
   /**
@@ -54296,7 +54296,7 @@ var encodeCID10 = (version, code12, multihash) => {
   bytes.set(multihash, hashOffset);
   return bytes;
 };
-var cidSymbol10 = Symbol.for("@ipld/js-cid/CID");
+var cidSymbol10 = /* @__PURE__ */ Symbol.for("@ipld/js-cid/CID");
 
 // node_modules/ipfs-core-utils/src/pins/normalise-input.js
 function isIterable(thing) {
@@ -55743,21 +55743,32 @@ function create11(options = {}) {
 // src/services/ipfs.ts
 var import_buffer = __toESM(require_buffer());
 var client = create11();
+var ipfsCache = /* @__PURE__ */ new Map();
 async function uploadToIPFS(data) {
   const { cid } = await client.add(data);
   return cid;
 }
 async function downloadFromIPFS(cid) {
+  if (ipfsCache.has(cid)) {
+    return ipfsCache.get(cid);
+  }
   const response = await fetch(`https://ipfs.io/ipfs/${cid}`);
   if (!response.ok) {
-    throw new Error(`Failed to fetch from IPFS gateway: ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch from IPFS gateway: ${response.statusText}`
+    );
   }
   const arrayBuffer = await response.arrayBuffer();
-  return import_buffer.Buffer.from(arrayBuffer);
+  const buffer2 = import_buffer.Buffer.from(arrayBuffer);
+  ipfsCache.set(cid, buffer2);
+  return buffer2;
 }
 
 // src/ui/app.ts
 document.getElementById("createWallet").addEventListener("click", async () => {
+  const createWalletButton = document.getElementById("createWallet");
+  createWalletButton.disabled = true;
+  createWalletButton.innerText = "Creating...";
   const wallet = createWallet();
   const walletInfo = document.getElementById("walletInfo");
   walletInfo.innerHTML = `
@@ -55771,6 +55782,9 @@ document.getElementById("createWallet").addEventListener("click", async () => {
     walletInfo.innerHTML += `<p><strong>IPFS CID:</strong> ${cid.toString()}</p>`;
   } catch (error) {
     walletInfo.innerHTML += `<p><strong>IPFS CID:</strong> Upload failed. (No local IPFS node found)</p>`;
+  } finally {
+    createWalletButton.disabled = false;
+    createWalletButton.innerText = "Create New Wallet";
   }
 });
 document.getElementById("loadWallet").addEventListener("click", async () => {

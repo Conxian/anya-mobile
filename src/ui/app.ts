@@ -2,6 +2,10 @@ import { createWallet } from '../core/wallet';
 import { uploadToIPFS, downloadFromIPFS } from '../services/ipfs';
 
 document.getElementById('createWallet').addEventListener('click', async () => {
+  const createWalletButton = document.getElementById('createWallet') as HTMLButtonElement;
+  createWalletButton.disabled = true;
+  createWalletButton.innerText = 'Creating...';
+
   const wallet = createWallet();
 
   // Display wallet info first
@@ -19,6 +23,9 @@ document.getElementById('createWallet').addEventListener('click', async () => {
     walletInfo.innerHTML += `<p><strong>IPFS CID:</strong> ${cid.toString()}</p>`;
   } catch (error) {
     walletInfo.innerHTML += `<p><strong>IPFS CID:</strong> Upload failed. (No local IPFS node found)</p>`;
+  } finally {
+    createWalletButton.disabled = false;
+    createWalletButton.innerText = 'Create New Wallet';
   }
 });
 

@@ -1,3 +1,9 @@
 # Ignore build output directory
 target/
 node_modules/
+
+# Ignore build artifacts
+public/app.js
+
+# Ignore log files
+server.log

@@ -25,7 +25,7 @@ The project is in the early stages of development. The core logic and basic infr
 
 ### Getting Started
 
-To get started with the project, you will need to have Node.js and npm installed.
+To get started with the project, you will need to have Node.js and pnpm installed.
 
 1.  Clone the repository:
     ```
@@ -33,7 +33,7 @@ To get started with the project, you will need to have Node.js and npm installed
     ```
 2.  Install the dependencies:
     ```
-    npm install
+    pnpm install
     ```
 3.  Build the web app:
     ```

@@ -47824,7 +47824,12 @@ document.getElementById("createWallet").addEventListener("click", async () => {
   }
 });
 document.getElementById("loadWallet").addEventListener("click", async () => {
-  const cid = document.getElementById("cidInput").value;
+  const loadWalletButton = document.getElementById("loadWallet");
+  const cidInput = document.getElementById("cidInput");
+  loadWalletButton.disabled = true;
+  cidInput.disabled = true;
+  loadWalletButton.innerText = "Loading...";
+  const cid = cidInput.value;
   const walletInfo = document.getElementById("walletInfo");
   try {
     const walletJson = await downloadFromIPFS(cid);
@@ -47835,6 +47840,10 @@ document.getElementById("loadWallet").addEventListener("click", async () => {
     `;
   } catch (error) {
     walletInfo.innerHTML = `<p>Failed to load wallet from IPFS. Please check the CID and your connection.</p>`;
+  } finally {
+    loadWalletButton.disabled = false;
+    cidInput.disabled = false;
+    loadWalletButton.innerText = "Load Wallet from IPFS";
   }
 });
 /*! Bundled license information:

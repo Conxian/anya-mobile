@@ -47810,31 +47810,39 @@ document.getElementById("createWallet").addEventListener("click", async () => {
   walletInfo.innerHTML = `
     <p><strong>Mnemonic:</strong> ${wallet.mnemonic}</p>
     <p><strong>Address:</strong> ${wallet.p2wpkhAddress}</p>
-    <p><strong>IPFS CID:</strong> Uploading...</p>
+    <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
   `;
   try {
     const walletJson = JSON.stringify(wallet);
     const cid = await uploadToIPFS(walletJson);
-    walletInfo.innerHTML += `<p><strong>IPFS CID:</strong> ${cid.toString()}</p>`;
+    document.getElementById("ipfs-status").innerHTML = `<strong>IPFS CID:</strong> ${cid.toString()}`;
   } catch (error) {
-    walletInfo.innerHTML += `<p><strong>IPFS CID:</strong> Upload failed. (No local IPFS node found)</p>`;
+    document.getElementById("ipfs-status").innerHTML = `<strong>IPFS CID:</strong> Upload failed. (No local IPFS node found)`;
   } finally {
     createWalletButton.disabled = false;
     createWalletButton.innerText = "Create New Wallet";
   }
 });
 document.getElementById("loadWallet").addEventListener("click", async () => {
+  const loadWalletButton = document.getElementById("loadWallet");
+  loadWalletButton.disabled = true;
+  loadWalletButton.innerText = "Loading...";
   const cid = document.getElementById("cidInput").value;
   const walletInfo = document.getElementById("walletInfo");
+  let walletInfoHTML = "";
   try {
     const walletJson = await downloadFromIPFS(cid);
     const wallet = JSON.parse(walletJson.toString());
-    walletInfo.innerHTML = `
+    walletInfoHTML = `
       <p><strong>Mnemonic:</strong> ${wallet.mnemonic}</p>
       <p><strong>Address:</strong> ${wallet.p2wpkhAddress}</p>
     `;
   } catch (error) {
-    walletInfo.innerHTML = `<p>Failed to load wallet from IPFS. Please check the CID and your connection.</p>`;
+    walletInfoHTML = `<p>Failed to load wallet from IPFS. Please check the CID and your connection.</p>`;
+  } finally {
+    walletInfo.innerHTML = walletInfoHTML;
+    loadWalletButton.disabled = false;
+    loadWalletButton.innerText = "Load Wallet from IPFS";
   }
 });
 /*! Bundled license information:

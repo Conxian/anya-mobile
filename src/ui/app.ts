@@ -41,6 +41,9 @@ document.getElementById('loadWallet').addEventListener('click', async () => {
 
   const cid = (document.getElementById('cidInput') as HTMLInputElement).value;
   const walletInfo = document.getElementById('walletInfo');
+  // 🎨 Palette: Provide immediate feedback that the wallet is loading.
+  // This prevents the user from wondering if their click was registered.
+  walletInfo.innerHTML = '<p>Loading wallet from IPFS...</p>';
   let walletInfoHTML = '';
 
   try {

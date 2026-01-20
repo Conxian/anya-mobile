@@ -36,10 +36,16 @@ document.getElementById('createWallet').addEventListener('click', async () => {
 
 document.getElementById('loadWallet').addEventListener('click', async () => {
   const loadWalletButton = document.getElementById('loadWallet') as HTMLButtonElement;
+  const cidInput = document.getElementById('cidInput') as HTMLInputElement;
+
+  // 🎨 Palette: Disable both button and input field during async operations.
+  // This prevents the user from changing the input while the app is busy,
+  // which provides clearer feedback about the system's state.
   loadWalletButton.disabled = true;
   loadWalletButton.innerText = 'Loading...';
+  cidInput.disabled = true;
 
-  const cid = (document.getElementById('cidInput') as HTMLInputElement).value;
+  const cid = cidInput.value;
   const walletInfo = document.getElementById('walletInfo');
   // 🎨 Palette: Provide immediate feedback that the wallet is loading.
   // This prevents the user from wondering if their click was registered.
@@ -62,5 +68,6 @@ document.getElementById('loadWallet').addEventListener('click', async () => {
     walletInfo.innerHTML = walletInfoHTML;
     loadWalletButton.disabled = false;
     loadWalletButton.innerText = 'Load Wallet from IPFS';
+    cidInput.disabled = false;
   }
 });

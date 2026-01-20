@@ -6,7 +6,7 @@ document.getElementById('createWallet').addEventListener('click', async () => {
   createWalletButton.disabled = true;
   createWalletButton.innerText = 'Creating...';
 
-  const wallet = createWallet();
+  const wallet = await createWallet();
 
   const walletInfo = document.getElementById('walletInfo');
 

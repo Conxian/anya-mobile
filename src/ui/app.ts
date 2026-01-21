@@ -34,12 +34,24 @@ document.getElementById('createWallet').addEventListener('click', async () => {
   }
 });
 
+const loadWalletButton = document.getElementById('loadWallet') as HTMLButtonElement;
+const cidInput = document.getElementById('cidInput') as HTMLInputElement;
+
+// 🎨 Palette: Disable the "Load Wallet" button by default.
+// This prevents the user from clicking it with an empty input.
+loadWalletButton.disabled = true;
+
+// 🎨 Palette: Add an input event listener to enable/disable the button.
+// This provides immediate feedback to the user as they type.
+cidInput.addEventListener('input', () => {
+  loadWalletButton.disabled = cidInput.value.trim() === '';
+});
+
 document.getElementById('loadWallet').addEventListener('click', async () => {
-  const loadWalletButton = document.getElementById('loadWallet') as HTMLButtonElement;
   loadWalletButton.disabled = true;
   loadWalletButton.innerText = 'Loading...';
 
-  const cid = (document.getElementById('cidInput') as HTMLInputElement).value;
+  const cid = cidInput.value;
   const walletInfo = document.getElementById('walletInfo');
   // 🎨 Palette: Provide immediate feedback that the wallet is loading.
   // This prevents the user from wondering if their click was registered.

@@ -47823,12 +47823,18 @@ document.getElementById("createWallet").addEventListener("click", async () => {
     createWalletButton.innerText = "Create New Wallet";
   }
 });
+var loadWalletButton = document.getElementById("loadWallet");
+var cidInput = document.getElementById("cidInput");
+loadWalletButton.disabled = true;
+cidInput.addEventListener("input", () => {
+  loadWalletButton.disabled = cidInput.value.trim() === "";
+});
 document.getElementById("loadWallet").addEventListener("click", async () => {
-  const loadWalletButton = document.getElementById("loadWallet");
   loadWalletButton.disabled = true;
   loadWalletButton.innerText = "Loading...";
-  const cid = document.getElementById("cidInput").value;
+  const cid = cidInput.value;
   const walletInfo = document.getElementById("walletInfo");
+  walletInfo.innerHTML = "<p>Loading wallet from IPFS...</p>";
   let walletInfoHTML = "";
   try {
     const walletJson = await downloadFromIPFS(cid);

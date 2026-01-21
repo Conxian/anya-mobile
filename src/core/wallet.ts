@@ -11,9 +11,11 @@ export interface BitcoinWallet {
   p2wpkhAddress: string;
 }
 
-export function createWallet(): BitcoinWallet {
+export async function createWallet(): Promise<BitcoinWallet> {
   const mnemonic = bip39.generateMnemonic();
-  const seed = bip39.mnemonicToSeedSync(mnemonic);
+  // ⚡ Bolt: Use the async version of mnemonicToSeed to avoid blocking the main thread.
+  // The synchronous version is CPU-intensive and can cause the UI to freeze.
+  const seed = await bip39.mnemonicToSeed(mnemonic);
   const root = bip32.fromSeed(seed);
 
   // Derive the P2WPKH address (SegWit)

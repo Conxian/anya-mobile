@@ -21877,7 +21877,7 @@ var require_src = __commonJS({
     function salt(password) {
       return "mnemonic" + (password || "");
     }
-    function mnemonicToSeedSync2(mnemonic, password) {
+    function mnemonicToSeedSync(mnemonic, password) {
       const mnemonicBuffer = Uint8Array.from(Buffer.from(normalize(mnemonic), "utf8"));
       const saltBuffer = Uint8Array.from(Buffer.from(salt(normalize(password)), "utf8"));
       const res = pbkdf2_1.pbkdf2(sha512_1.sha512, mnemonicBuffer, saltBuffer, {
@@ -21886,8 +21886,8 @@ var require_src = __commonJS({
       });
       return Buffer.from(res);
     }
-    exports2.mnemonicToSeedSync = mnemonicToSeedSync2;
-    function mnemonicToSeed(mnemonic, password) {
+    exports2.mnemonicToSeedSync = mnemonicToSeedSync;
+    function mnemonicToSeed2(mnemonic, password) {
       const mnemonicBuffer = Uint8Array.from(Buffer.from(normalize(mnemonic), "utf8"));
       const saltBuffer = Uint8Array.from(Buffer.from(salt(normalize(password)), "utf8"));
       return pbkdf2_1.pbkdf2Async(sha512_1.sha512, mnemonicBuffer, saltBuffer, {
@@ -21895,7 +21895,7 @@ var require_src = __commonJS({
         dkLen: 64
       }).then((res) => Buffer.from(res));
     }
-    exports2.mnemonicToSeed = mnemonicToSeed;
+    exports2.mnemonicToSeed = mnemonicToSeed2;
     function mnemonicToEntropy(mnemonic, wordlist) {
       wordlist = wordlist || DEFAULT_WORDLIST;
       if (!wordlist) {
@@ -33562,9 +33562,9 @@ var checkWitnessScript = scriptCheckerFactory(
 
 // src/core/wallet.ts
 var bip32 = BIP32Factory(lib_exports);
-function createWallet() {
+async function createWallet() {
   const mnemonic = bip39.generateMnemonic();
-  const seed = bip39.mnemonicToSeedSync(mnemonic);
+  const seed = await bip39.mnemonicToSeed(mnemonic);
   const root = bip32.fromSeed(seed);
   const path = "m/84'/0'/0'/0/0";
   const child = root.derivePath(path);
@@ -47805,7 +47805,7 @@ document.getElementById("createWallet").addEventListener("click", async () => {
   const createWalletButton = document.getElementById("createWallet");
   createWalletButton.disabled = true;
   createWalletButton.innerText = "Creating...";
-  const wallet = createWallet();
+  const wallet = await createWallet();
   const walletInfo = document.getElementById("walletInfo");
   walletInfo.innerHTML = `
     <p><strong>Mnemonic:</strong> ${wallet.mnemonic}</p>

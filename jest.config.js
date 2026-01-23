@@ -5,9 +5,10 @@ module.exports = {
   },
   transformIgnorePatterns: [
     // The default transformIgnorePatterns ignores node_modules.
-    // We make an exception for @noble/secp256k1 which is an ES module
-    // and needs to be transformed. The '.*' is added to handle pnpm's
-    // nested node_modules structure.
-    'node_modules/(?!.*@noble/secp256k1)',
+    // We make an exception for @noble/secp256k1, @scure/bip39, and its
+    // dependencies @noble/hashes and @scure/base which are ES modules and
+    // need to be transformed. The '.*' is added to handle pnpm's nested
+    // node_modules structure.
+    'node_modules/(?!.*@noble/secp256k1|.*@scure/bip39|.*@noble/hashes|.*@scure/base)',
   ],
 };

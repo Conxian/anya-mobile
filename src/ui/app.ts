@@ -34,10 +34,17 @@ document.getElementById('createWallet').addEventListener('click', async () => {
   }
 });
 
-document.getElementById('loadWallet').addEventListener('click', async () => {
-  const loadWalletButton = document.getElementById('loadWallet') as HTMLButtonElement;
-  const cidInput = document.getElementById('cidInput') as HTMLInputElement;
+// 🎨 Palette: Enable the 'Load Wallet' button only when the input field is not empty.
+// This provides a clear visual cue to the user about the required action
+// and prevents them from clicking a button that would do nothing.
+const cidInput = document.getElementById('cidInput') as HTMLInputElement;
+const loadWalletButton = document.getElementById('loadWallet') as HTMLButtonElement;
 
+cidInput.addEventListener('input', () => {
+  loadWalletButton.disabled = cidInput.value.trim() === '';
+});
+
+document.getElementById('loadWallet').addEventListener('click', async () => {
   // 🎨 Palette: Disable both button and input field during async operations.
   // This prevents the user from changing the input while the app is busy,
   // which provides clearer feedback about the system's state.

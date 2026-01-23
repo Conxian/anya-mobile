@@ -1,4 +1,5 @@
-import * as bip39 from 'bip39';
+import { generateMnemonic, mnemonicToSeed } from '@scure/bip39';
+import { wordlist } from '@scure/bip39/wordlists/english.js';
 import { BIP32Factory } from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 import * as bitcoin from 'bitcoinjs-lib';
@@ -12,10 +13,10 @@ export interface BitcoinWallet {
 }
 
 export async function createWallet(): Promise<BitcoinWallet> {
-  const mnemonic = bip39.generateMnemonic();
-  // ⚡ Bolt: Use the async version of mnemonicToSeed to avoid blocking the main thread.
-  // The synchronous version is CPU-intensive and can cause the UI to freeze.
-  const seed = await bip39.mnemonicToSeed(mnemonic);
+  const mnemonic = generateMnemonic(wordlist);
+  // ⚡ Bolt: Replace deprecated `bip39` with audited `@scure/bip39` library.
+  // This improves security and maintainability.
+  const seed = await mnemonicToSeed(mnemonic);
   const root = bip32.fromSeed(seed);
 
   // Derive the P2WPKH address (SegWit)

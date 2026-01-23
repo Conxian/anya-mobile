@@ -47823,9 +47823,12 @@ document.getElementById("createWallet").addEventListener("click", async () => {
     createWalletButton.innerText = "Create New Wallet";
   }
 });
+var cidInput = document.getElementById("cidInput");
+var loadWalletButton = document.getElementById("loadWallet");
+cidInput.addEventListener("input", () => {
+  loadWalletButton.disabled = cidInput.value.trim() === "";
+});
 document.getElementById("loadWallet").addEventListener("click", async () => {
-  const loadWalletButton = document.getElementById("loadWallet");
-  const cidInput = document.getElementById("cidInput");
   loadWalletButton.disabled = true;
   loadWalletButton.innerText = "Loading...";
   cidInput.disabled = true;

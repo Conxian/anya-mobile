@@ -1,8 +1,7 @@
-# Bolt's Journal ⚡
+# Bolt's Journal
 
-This journal is for CRITICAL learnings only.
+This journal contains critical, non-routine performance learnings.
 
-Format:
-`## YYYY-MM-DD - [Title]`
-`**Learning:** [Insight]`
-`**Action:** [How to apply next time]`
+## YYYY-MM-DD - [Title]
+**Learning:** [Insight]
+**Action:** [How to apply next time]

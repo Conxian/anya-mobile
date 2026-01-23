@@ -1,6 +1,7 @@
 import { AccountService, WalletService } from '../core/ports';
 import { Wallet, WalletStatus } from '../core/domain';
-import * as bip39 from 'bip39';
+import { generateMnemonic, mnemonicToSeed } from '@scure/bip39';
+import { wordlist } from '@scure/bip39/wordlists/english.js';
 import { BIP32Factory } from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 
@@ -12,8 +13,8 @@ export class WalletServiceImpl implements WalletService {
   async createWallet(
     passphrase: string
   ): Promise<{ wallet: Wallet; mnemonic: string }> {
-    const mnemonic = bip39.generateMnemonic();
-    const seed = await bip39.mnemonicToSeed(mnemonic, passphrase);
+    const mnemonic = generateMnemonic(wordlist);
+    const seed = await mnemonicToSeed(mnemonic, passphrase);
     const root = bip32.fromSeed(seed);
 
     const wallet: Wallet = {
@@ -31,7 +32,7 @@ export class WalletServiceImpl implements WalletService {
     mnemonic: string,
     passphrase?: string
   ): Promise<Wallet> {
-    const seed = await bip39.mnemonicToSeed(mnemonic, passphrase);
+    const seed = await mnemonicToSeed(mnemonic, passphrase);
     const root = bip32.fromSeed(seed);
 
     const wallet: Wallet = {

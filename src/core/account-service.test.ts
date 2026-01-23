@@ -2,7 +2,7 @@ import { AccountServiceImpl } from './account-service';
 import { Wallet, Account, Asset } from './domain';
 import { BlockchainClient } from './ports';
 import { mock, MockProxy } from 'jest-mock-extended';
-import * as bip39 from 'bip39';
+import { mnemonicToSeed } from '@scure/bip39';
 import { BIP32Factory } from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 
@@ -18,7 +18,7 @@ describe('AccountServiceImpl', () => {
     accountService = new AccountServiceImpl(blockchainClient);
     const mnemonic =
       'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
-    const seed = await bip39.mnemonicToSeed(mnemonic);
+    const seed = await mnemonicToSeed(mnemonic);
     const root = bip32.fromSeed(seed);
     wallet = {
       id: 'wallet-1',

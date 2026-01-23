@@ -4,6 +4,8 @@ node_modules/
 
 # Ignore build artifacts
 public/app.js
+public/core/
+public/ui/
 
 # Ignore log files
 server.log

@@ -1,8 +1,7 @@
 import { AccountService, BlockchainClient } from './ports';
 import { Wallet, Account, Asset, Balance, Address } from './domain';
-import { BIP32Factory, BIP32Interface } from 'bip32';
+import { BIP32Factory } from 'bip32';
 import * as ecc from 'tiny-secp256k1';
-import * as bitcoin from 'bitcoinjs-lib';
 
 const bip32 = BIP32Factory(ecc);
 
@@ -24,15 +23,15 @@ export class AccountServiceImpl implements AccountService {
       throw new Error('Could not derive private key');
     }
 
-    const address = this.getAddress(childNode);
-
-    const newAccount: Account = {
-      id: `account-${accountIndex}`,
+    // Performance optimization:
+    // Account creation is now instantaneous. The expensive derivation work
+    // is deferred and executed lazily only when the account properties
+    // (address, privateKey, publicKey) are accessed for the first time.
+    const newAccount = new Account(
+      `account-${accountIndex}`,
       name,
-      address,
-      privateKey: childNode.toWIF(),
-      publicKey: Buffer.from(childNode.publicKey).toString('hex'),
-    };
+      childNode
+    );
 
     wallet.accounts.push(newAccount);
     // Note: This implementation modifies the wallet object directly.
@@ -43,14 +42,5 @@ export class AccountServiceImpl implements AccountService {
 
   async getAccountBalance(account: Account, asset: Asset): Promise<Balance> {
     return this.blockchainClient.getBalance(account.address, asset);
-  }
-
-  private getAddress(node: BIP32Interface): Address {
-    // P2WPKH (native SegWit)
-    const { address } = bitcoin.payments.p2wpkh({ pubkey: node.publicKey });
-    if (!address) {
-      throw new Error('Could not generate address');
-    }
-    return address;
   }
 }

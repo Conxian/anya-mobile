@@ -1,8 +1,16 @@
 import { createWallet } from '../core/wallet';
 import { uploadToIPFS, downloadFromIPFS } from '../services/ipfs';
 
-document.getElementById('createWallet').addEventListener('click', async () => {
-  const createWalletButton = document.getElementById('createWallet') as HTMLButtonElement;
+const createWalletButton = document.getElementById('createWallet') as HTMLButtonElement;
+const walletInfo = document.getElementById('walletInfo');
+const mnemonicContainer = document.getElementById('mnemonic-container') as HTMLDivElement;
+const mnemonicPhrase = document.getElementById('mnemonic-phrase') as HTMLSpanElement;
+const toggleMnemonicVisibilityButton = document.getElementById('toggle-mnemonic-visibility') as HTMLButtonElement;
+const cidInput = document.getElementById('cidInput') as HTMLInputElement;
+const loadWalletButton = document.getElementById('loadWallet') as HTMLButtonElement;
+
+
+createWalletButton.addEventListener('click', async () => {
   createWalletButton.disabled = true;
   createWalletButton.innerText = 'Creating...';
 
@@ -14,10 +22,14 @@ document.getElementById('createWallet').addEventListener('click', async () => {
   // This avoids a long wait where the UI shows no new information.
   // We also give the IPFS status element a unique ID for targeted updates.
   walletInfo.innerHTML = `
-    <p><strong>Mnemonic:</strong> ${wallet.mnemonic}</p>
     <p><strong>Address:</strong> ${wallet.p2wpkhAddress}</p>
     <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
   `;
+
+  mnemonicPhrase.innerText = wallet.mnemonic;
+  mnemonicContainer.style.display = 'block';
+  mnemonicPhrase.classList.add('hidden');
+  toggleMnemonicVisibilityButton.innerText = 'Show';
 
   // Then, attempt to upload to IPFS in the background
   try {
@@ -37,8 +49,16 @@ document.getElementById('createWallet').addEventListener('click', async () => {
 // 🎨 Palette: Enable the 'Load Wallet' button only when the input field is not empty.
 // This provides a clear visual cue to the user about the required action
 // and prevents them from clicking a button that would do nothing.
-const cidInput = document.getElementById('cidInput') as HTMLInputElement;
-const loadWalletButton = document.getElementById('loadWallet') as HTMLButtonElement;
+toggleMnemonicVisibilityButton.addEventListener('click', () => {
+    const isHidden = mnemonicPhrase.classList.toggle('hidden');
+    if (isHidden) {
+        toggleMnemonicVisibilityButton.innerText = 'Show';
+        toggleMnemonicVisibilityButton.setAttribute('aria-expanded', 'false');
+    } else {
+        toggleMnemonicVisibilityButton.innerText = 'Hide';
+        toggleMnemonicVisibilityButton.setAttribute('aria-expanded', 'true');
+    }
+});
 
 cidInput.addEventListener('input', () => {
   loadWalletButton.disabled = cidInput.value.trim() === '';

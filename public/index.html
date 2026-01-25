@@ -24,6 +24,14 @@
   <h2>Wallet Information</h2>
   <div id="walletInfo" role="status" aria-live="polite"></div>
 
+  <div id="mnemonic-container" style="display: none;">
+    <p>
+      <strong>Mnemonic:</strong>
+      <span id="mnemonic-phrase" class="hidden"></span>
+      <button id="toggle-mnemonic-visibility" aria-controls="mnemonic-phrase" aria-expanded="false">Show</button>
+    </p>
+  </div>
+
   <script src="app.js" type="module"></script>
 </body>
 </html>

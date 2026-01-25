@@ -1,4 +1,4 @@
-import { createWallet } from '../core/wallet';
+import { createWallet, BitcoinWallet } from '../core/wallet';
 import { uploadToIPFS, downloadFromIPFS } from '../services/ipfs';
 
 document.getElementById('createWallet').addEventListener('click', async () => {
@@ -15,13 +15,19 @@ document.getElementById('createWallet').addEventListener('click', async () => {
   // We also give the IPFS status element a unique ID for targeted updates.
   walletInfo.innerHTML = `
     <p><strong>Mnemonic:</strong> ${wallet.mnemonic}</p>
-    <p><strong>Address:</strong> ${wallet.p2wpkhAddress}</p>
+    <p><strong>Address:</strong> ${await wallet.getP2wpkhAddress()}</p>
     <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
   `;
 
   // Then, attempt to upload to IPFS in the background
   try {
-    const walletJson = JSON.stringify(wallet);
+    // We need to resolve all async properties before serialization
+    const walletData = {
+      mnemonic: wallet.mnemonic,
+      masterPrivateKey: await wallet.getMasterPrivateKey(),
+      p2wpkhAddress: await wallet.getP2wpkhAddress(),
+    };
+    const walletJson = JSON.stringify(walletData);
     const cid = await uploadToIPFS(walletJson);
     // ⚡ Bolt: Perform a targeted DOM update.
     // This is more efficient than re-writing the entire walletInfo block.
@@ -61,12 +67,13 @@ document.getElementById('loadWallet').addEventListener('click', async () => {
 
   try {
     const walletJson = await downloadFromIPFS(cid);
-    const wallet = JSON.parse(walletJson.toString());
+    const walletData = JSON.parse(walletJson.toString());
+    const wallet = new BitcoinWallet(walletData.mnemonic);
 
     // ⚡ Bolt: Build the complete HTML string in a variable before updating the DOM.
     walletInfoHTML = `
       <p><strong>Mnemonic:</strong> ${wallet.mnemonic}</p>
-      <p><strong>Address:</strong> ${wallet.p2wpkhAddress}</p>
+      <p><strong>Address:</strong> ${await wallet.getP2wpkhAddress()}</p>
     `;
   } catch (error) {
     walletInfoHTML = `<p>Failed to load wallet from IPFS. Please check the CID and your connection.</p>`;

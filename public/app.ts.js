@@ -28983,14 +28983,19 @@ document.getElementById("createWallet").addEventListener("click", async () => {
   const createWalletButton = document.getElementById("createWallet");
   createWalletButton.disabled = true;
   createWalletButton.innerText = "Creating...";
-  const wallet = await createWallet();
   const walletInfo = document.getElementById("walletInfo");
-  walletInfo.innerHTML = `
-    <p><strong>Mnemonic:</strong> ${wallet.mnemonic}</p>
-    <p><strong>Address:</strong> ${await wallet.getP2wpkhAddress()}</p>
-    <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
-  `;
   try {
+    console.log("Creating wallet...");
+    const wallet = await createWallet();
+    console.log("Wallet created:", wallet);
+    console.log("Updating wallet info...");
+    walletInfo.innerHTML = `
+      <p><strong>Mnemonic:</strong> ${wallet.mnemonic}</p>
+      <p><strong>Address:</strong> ${await wallet.getP2wpkhAddress()}</p>
+      <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
+    `;
+    console.log("Wallet info updated.");
+    console.log("Uploading to IPFS...");
     const walletData = {
       mnemonic: wallet.mnemonic,
       masterPrivateKey: await wallet.getMasterPrivateKey(),
@@ -28998,9 +29003,14 @@ document.getElementById("createWallet").addEventListener("click", async () => {
     };
     const walletJson = JSON.stringify(walletData);
     const cid = await uploadToIPFS(walletJson);
+    console.log("Uploaded to IPFS with CID:", cid);
     document.getElementById("ipfs-status").innerHTML = `<strong>IPFS CID:</strong> ${cid.toString()}`;
   } catch (error) {
-    document.getElementById("ipfs-status").innerHTML = `<strong>IPFS CID:</strong> Upload failed. (No local IPFS node found)`;
+    console.error("An error occurred:", error);
+    walletInfo.innerHTML = `<p>An error occurred during wallet creation. Check the console for details.</p>`;
+    if (error instanceof Error) {
+      console.error(error.stack);
+    }
   } finally {
     createWalletButton.disabled = false;
     createWalletButton.innerText = "Create New Wallet";

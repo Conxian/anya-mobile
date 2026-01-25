@@ -64,3 +64,9 @@ hr {
     border: 1px solid #E0E0E0;
     margin: 20px 0;
 }
+
+button:focus-visible,
+input[type="text"]:focus-visible {
+  outline: 2px solid #D4A017;
+  outline-offset: 2px;
+}

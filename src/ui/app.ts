@@ -19,6 +19,9 @@ document.getElementById('createWallet').addEventListener('click', async () => {
     <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
   `;
 
+  // 🎨 Palette: Provide more specific feedback to the user during the IPFS upload.
+  createWalletButton.innerText = 'Uploading...';
+
   // Then, attempt to upload to IPFS in the background
   try {
     // We need to resolve all async properties before serialization

@@ -7,20 +7,66 @@ export interface Wallet {
 }
 
 export class Account {
-  constructor(
-    public readonly id: string,
-    public readonly name: string,
-    public readonly address: Address
-  ) {}
+  id: string;
+  name: string;
+  private node: BIP32Interface;
+
+  // Caching fields for lazy derivation
+  private _address?: Address;
+  private _privateKey?: PrivateKey;
+  private _publicKey?: PublicKey;
+
+  constructor(id: string, name: string, node: BIP32Interface) {
+    this.id = id;
+    this.name = name;
+    this.node = node;
+  }
+
+  get address(): Address {
+    if (!this._address) {
+      // P2WPKH (native SegWit)
+      const { address } = bitcoin.payments.p2wpkh({ pubkey: this.node.publicKey });
+      if (!address) {
+        throw new Error('Could not generate address');
+      }
+      this._address = address;
+    }
+    return this._address;
+  }
+
+  get privateKey(): PrivateKey {
+    if (!this._privateKey) {
+      if (!this.node.privateKey) {
+        throw new Error('Could not derive private key');
+      }
+      this._privateKey = this.node.toWIF();
+    }
+    return this._privateKey;
+  }
+
+  get publicKey(): PublicKey {
+    if (!this._publicKey) {
+      this._publicKey = this.node.publicKey.toString('hex');
+    }
+    return this._publicKey;
+  }
+
+  getSigner(): BIP32Interface {
+    return this.node;
+  }
 }
 
-export interface Transaction {
-  id: TransactionID;
+export interface DraftTransaction {
   from: Address;
   to: Address;
   asset: Asset;
   amount: Amount;
   fee: Amount;
+  psbt: string;
+}
+
+export interface Transaction extends DraftTransaction {
+  id: TransactionID;
   timestamp: number;
 }
 
@@ -101,5 +147,5 @@ export interface DecryptedMessage {
 export interface UTXO {
   txid: string;
   vout: number;
-  value: number; // in satoshis
+  value: bigint; // in satoshis
 }

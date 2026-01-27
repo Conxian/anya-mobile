@@ -148,13 +148,13 @@ var require_dist = __commonJS({
         if (str !== lowered && str !== uppered)
           return "Mixed-case string " + str;
         str = lowered;
-        const split3 = str.lastIndexOf("1");
-        if (split3 === -1)
+        const split2 = str.lastIndexOf("1");
+        if (split2 === -1)
           return "No separator character for " + str;
-        if (split3 === 0)
+        if (split2 === 0)
           return "Missing prefix for " + str;
-        const prefix = str.slice(0, split3);
-        const wordChars = str.slice(split3 + 1);
+        const prefix = str.slice(0, split2);
+        const wordChars = str.slice(split2 + 1);
         if (wordChars.length < 6)
           return "Data too short";
         let chk = prefixChk(prefix);
@@ -596,8 +596,8 @@ var require_common = __commonJS({
         createDebug.namespaces = namespaces;
         createDebug.names = [];
         createDebug.skips = [];
-        const split3 = (typeof namespaces === "string" ? namespaces : "").trim().replace(/\s+/g, ",").split(",").filter(Boolean);
-        for (const ns of split3) {
+        const split2 = (typeof namespaces === "string" ? namespaces : "").trim().replace(/\s+/g, ",").split(",").filter(Boolean);
+        for (const ns of split2) {
           if (ns[0] === "-") {
             createDebug.skips.push(ns.slice(1));
           } else {
@@ -3584,7 +3584,7 @@ var require_buffer = __commonJS({
             return len;
           case "utf8":
           case "utf-8":
-            return utf8ToBytes4(string5).length;
+            return utf8ToBytes3(string5).length;
           case "ucs2":
           case "ucs-2":
           case "utf16le":
@@ -3596,7 +3596,7 @@ var require_buffer = __commonJS({
             return base64ToBytes(string5).length;
           default:
             if (loweredCase) {
-              return mustMatch ? -1 : utf8ToBytes4(string5).length;
+              return mustMatch ? -1 : utf8ToBytes3(string5).length;
             }
             encoding = ("" + encoding).toLowerCase();
             loweredCase = true;
@@ -3892,7 +3892,7 @@ var require_buffer = __commonJS({
       return i;
     }
     function utf8Write(buf2, string5, offset, length6) {
-      return blitBuffer(utf8ToBytes4(string5, buf2.length - offset), buf2, offset, length6);
+      return blitBuffer(utf8ToBytes3(string5, buf2.length - offset), buf2, offset, length6);
     }
     function asciiWrite(buf2, string5, offset, length6) {
       return blitBuffer(asciiToBytes(string5), buf2, offset, length6);
@@ -4738,7 +4738,7 @@ var require_buffer = __commonJS({
       }
       return str;
     }
-    function utf8ToBytes4(string5, units) {
+    function utf8ToBytes3(string5, units) {
       units = units || Infinity;
       let codePoint;
       const length6 = string5.length;
@@ -4877,12 +4877,6 @@ function abytes(value2, length6, title = "") {
   }
   return value2;
 }
-function ahash(h2) {
-  if (typeof h2 !== "function" || typeof h2.create !== "function")
-    throw new Error("Hash must wrapped by utils.createHasher");
-  anumber(h2.outputLen);
-  anumber(h2.blockLen);
-}
 function aexists(instance3, checkFinished = true) {
   if (instance3.destroyed)
     throw new Error("Hash instance has been destroyed");
@@ -4907,35 +4901,6 @@ function createView(arr) {
 function rotr(word, shift) {
   return word << 32 - shift | word >>> shift;
 }
-var nextTick = async () => {
-};
-async function asyncLoop(iters, tick, cb) {
-  let ts = Date.now();
-  for (let i = 0; i < iters; i++) {
-    cb(i);
-    const diff = Date.now() - ts;
-    if (diff >= 0 && diff < tick)
-      continue;
-    await nextTick();
-    ts += diff;
-  }
-}
-function utf8ToBytes(str) {
-  if (typeof str !== "string")
-    throw new Error("string expected");
-  return new Uint8Array(new TextEncoder().encode(str));
-}
-function kdfInputToBytes(data, errorTitle = "") {
-  if (typeof data === "string")
-    return utf8ToBytes(data);
-  return abytes(data, void 0, errorTitle);
-}
-function checkOpts(defaults, opts) {
-  if (opts !== void 0 && {}.toString.call(opts) !== "[object Object]")
-    throw new Error("options must be object or undefined");
-  const merged = Object.assign(defaults, opts);
-  return merged;
-}
 function createHasher(hashCons, info = {}) {
   const hashC = (msg, opts) => hashCons(opts).update(msg).digest();
   const tmp = hashCons(void 0);
@@ -4954,122 +4919,6 @@ function randomBytes(bytesLength = 32) {
 var oidNist = (suffix) => ({
   oid: Uint8Array.from([6, 9, 96, 134, 72, 1, 101, 3, 4, 2, suffix])
 });
-
-// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/hmac.js
-var _HMAC = class {
-  oHash;
-  iHash;
-  blockLen;
-  outputLen;
-  finished = false;
-  destroyed = false;
-  constructor(hash, key) {
-    ahash(hash);
-    abytes(key, void 0, "key");
-    this.iHash = hash.create();
-    if (typeof this.iHash.update !== "function")
-      throw new Error("Expected instance of class which extends utils.Hash");
-    this.blockLen = this.iHash.blockLen;
-    this.outputLen = this.iHash.outputLen;
-    const blockLen = this.blockLen;
-    const pad = new Uint8Array(blockLen);
-    pad.set(key.length > blockLen ? hash.create().update(key).digest() : key);
-    for (let i = 0; i < pad.length; i++)
-      pad[i] ^= 54;
-    this.iHash.update(pad);
-    this.oHash = hash.create();
-    for (let i = 0; i < pad.length; i++)
-      pad[i] ^= 54 ^ 92;
-    this.oHash.update(pad);
-    clean(pad);
-  }
-  update(buf2) {
-    aexists(this);
-    this.iHash.update(buf2);
-    return this;
-  }
-  digestInto(out) {
-    aexists(this);
-    abytes(out, this.outputLen, "output");
-    this.finished = true;
-    this.iHash.digestInto(out);
-    this.oHash.update(out);
-    this.oHash.digestInto(out);
-    this.destroy();
-  }
-  digest() {
-    const out = new Uint8Array(this.oHash.outputLen);
-    this.digestInto(out);
-    return out;
-  }
-  _cloneInto(to) {
-    to ||= Object.create(Object.getPrototypeOf(this), {});
-    const { oHash, iHash, finished, destroyed, blockLen, outputLen } = this;
-    to = to;
-    to.finished = finished;
-    to.destroyed = destroyed;
-    to.blockLen = blockLen;
-    to.outputLen = outputLen;
-    to.oHash = oHash._cloneInto(to.oHash);
-    to.iHash = iHash._cloneInto(to.iHash);
-    return to;
-  }
-  clone() {
-    return this._cloneInto();
-  }
-  destroy() {
-    this.destroyed = true;
-    this.oHash.destroy();
-    this.iHash.destroy();
-  }
-};
-var hmac = (hash, key, message) => new _HMAC(hash, key).update(message).digest();
-hmac.create = (hash, key) => new _HMAC(hash, key);
-
-// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/pbkdf2.js
-function pbkdf2Init(hash, _password, _salt, _opts) {
-  ahash(hash);
-  const opts = checkOpts({ dkLen: 32, asyncTick: 10 }, _opts);
-  const { c, dkLen, asyncTick } = opts;
-  anumber(c, "c");
-  anumber(dkLen, "dkLen");
-  anumber(asyncTick, "asyncTick");
-  if (c < 1)
-    throw new Error("iterations (c) must be >= 1");
-  const password = kdfInputToBytes(_password, "password");
-  const salt = kdfInputToBytes(_salt, "salt");
-  const DK = new Uint8Array(dkLen);
-  const PRF = hmac.create(hash, password);
-  const PRFSalt = PRF._cloneInto().update(salt);
-  return { c, dkLen, asyncTick, DK, PRF, PRFSalt };
-}
-function pbkdf2Output(PRF, PRFSalt, DK, prfW, u) {
-  PRF.destroy();
-  PRFSalt.destroy();
-  if (prfW)
-    prfW.destroy();
-  clean(u);
-  return DK;
-}
-async function pbkdf2Async(hash, password, salt, opts) {
-  const { c, dkLen, asyncTick, DK, PRF, PRFSalt } = pbkdf2Init(hash, password, salt, opts);
-  let prfW;
-  const arr = new Uint8Array(4);
-  const view = createView(arr);
-  const u = new Uint8Array(PRF.outputLen);
-  for (let ti = 1, pos = 0; pos < dkLen; ti++, pos += PRF.outputLen) {
-    const Ti = DK.subarray(pos, pos + PRF.outputLen);
-    view.setInt32(0, ti, false);
-    (prfW = PRFSalt._cloneInto(prfW)).update(arr).digestInto(u);
-    Ti.set(u.subarray(0, Ti.length));
-    await asyncLoop(c - 1, asyncTick, () => {
-      PRF._cloneInto(prfW).update(u).digestInto(u);
-      for (let i = 0; i < Ti.length; i++)
-        Ti[i] ^= u[i];
-    });
-  }
-  return pbkdf2Output(PRF, PRFSalt, DK, prfW, u);
-}
 
 // node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/_md.js
 function Chi(a, b, c) {
@@ -5183,59 +5032,6 @@ var SHA256_IV = /* @__PURE__ */ Uint32Array.from([
   528734635,
   1541459225
 ]);
-var SHA512_IV = /* @__PURE__ */ Uint32Array.from([
-  1779033703,
-  4089235720,
-  3144134277,
-  2227873595,
-  1013904242,
-  4271175723,
-  2773480762,
-  1595750129,
-  1359893119,
-  2917565137,
-  2600822924,
-  725511199,
-  528734635,
-  4215389547,
-  1541459225,
-  327033209
-]);
-
-// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/_u64.js
-var U32_MASK64 = /* @__PURE__ */ BigInt(2 ** 32 - 1);
-var _32n = /* @__PURE__ */ BigInt(32);
-function fromBig(n, le = false) {
-  if (le)
-    return { h: Number(n & U32_MASK64), l: Number(n >> _32n & U32_MASK64) };
-  return { h: Number(n >> _32n & U32_MASK64) | 0, l: Number(n & U32_MASK64) | 0 };
-}
-function split(lst, le = false) {
-  const len = lst.length;
-  let Ah = new Uint32Array(len);
-  let Al = new Uint32Array(len);
-  for (let i = 0; i < len; i++) {
-    const { h: h2, l } = fromBig(lst[i], le);
-    [Ah[i], Al[i]] = [h2, l];
-  }
-  return [Ah, Al];
-}
-var shrSH = (h2, _l, s) => h2 >>> s;
-var shrSL = (h2, l, s) => h2 << 32 - s | l >>> s;
-var rotrSH = (h2, l, s) => h2 >>> s | l << 32 - s;
-var rotrSL = (h2, l, s) => h2 << 32 - s | l >>> s;
-var rotrBH = (h2, l, s) => h2 << 64 - s | l >>> s - 32;
-var rotrBL = (h2, l, s) => h2 >>> s - 32 | l << 64 - s;
-function add(Ah, Al, Bh, Bl2) {
-  const l = (Al >>> 0) + (Bl2 >>> 0);
-  return { h: Ah + Bh + (l / 2 ** 32 | 0) | 0, l: l | 0 };
-}
-var add3L = (Al, Bl2, Cl) => (Al >>> 0) + (Bl2 >>> 0) + (Cl >>> 0);
-var add3H = (low, Ah, Bh, Ch) => Ah + Bh + Ch + (low / 2 ** 32 | 0) | 0;
-var add4L = (Al, Bl2, Cl, Dl) => (Al >>> 0) + (Bl2 >>> 0) + (Cl >>> 0) + (Dl >>> 0);
-var add4H = (low, Ah, Bh, Ch, Dh) => Ah + Bh + Ch + Dh + (low / 2 ** 32 | 0) | 0;
-var add5L = (Al, Bl2, Cl, Dl, El) => (Al >>> 0) + (Bl2 >>> 0) + (Cl >>> 0) + (Dl >>> 0) + (El >>> 0);
-var add5H = (low, Ah, Bh, Ch, Dh, Eh) => Ah + Bh + Ch + Dh + Eh + (low / 2 ** 32 | 0) | 0;
 
 // node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/sha2.js
 var SHA256_K = /* @__PURE__ */ Uint32Array.from([
@@ -5382,215 +5178,9 @@ var _SHA256 = class extends SHA2_32B {
     super(32);
   }
 };
-var K512 = /* @__PURE__ */ (() => split([
-  "0x428a2f98d728ae22",
-  "0x7137449123ef65cd",
-  "0xb5c0fbcfec4d3b2f",
-  "0xe9b5dba58189dbbc",
-  "0x3956c25bf348b538",
-  "0x59f111f1b605d019",
-  "0x923f82a4af194f9b",
-  "0xab1c5ed5da6d8118",
-  "0xd807aa98a3030242",
-  "0x12835b0145706fbe",
-  "0x243185be4ee4b28c",
-  "0x550c7dc3d5ffb4e2",
-  "0x72be5d74f27b896f",
-  "0x80deb1fe3b1696b1",
-  "0x9bdc06a725c71235",
-  "0xc19bf174cf692694",
-  "0xe49b69c19ef14ad2",
-  "0xefbe4786384f25e3",
-  "0x0fc19dc68b8cd5b5",
-  "0x240ca1cc77ac9c65",
-  "0x2de92c6f592b0275",
-  "0x4a7484aa6ea6e483",
-  "0x5cb0a9dcbd41fbd4",
-  "0x76f988da831153b5",
-  "0x983e5152ee66dfab",
-  "0xa831c66d2db43210",
-  "0xb00327c898fb213f",
-  "0xbf597fc7beef0ee4",
-  "0xc6e00bf33da88fc2",
-  "0xd5a79147930aa725",
-  "0x06ca6351e003826f",
-  "0x142929670a0e6e70",
-  "0x27b70a8546d22ffc",
-  "0x2e1b21385c26c926",
-  "0x4d2c6dfc5ac42aed",
-  "0x53380d139d95b3df",
-  "0x650a73548baf63de",
-  "0x766a0abb3c77b2a8",
-  "0x81c2c92e47edaee6",
-  "0x92722c851482353b",
-  "0xa2bfe8a14cf10364",
-  "0xa81a664bbc423001",
-  "0xc24b8b70d0f89791",
-  "0xc76c51a30654be30",
-  "0xd192e819d6ef5218",
-  "0xd69906245565a910",
-  "0xf40e35855771202a",
-  "0x106aa07032bbd1b8",
-  "0x19a4c116b8d2d0c8",
-  "0x1e376c085141ab53",
-  "0x2748774cdf8eeb99",
-  "0x34b0bcb5e19b48a8",
-  "0x391c0cb3c5c95a63",
-  "0x4ed8aa4ae3418acb",
-  "0x5b9cca4f7763e373",
-  "0x682e6ff3d6b2b8a3",
-  "0x748f82ee5defb2fc",
-  "0x78a5636f43172f60",
-  "0x84c87814a1f0ab72",
-  "0x8cc702081a6439ec",
-  "0x90befffa23631e28",
-  "0xa4506cebde82bde9",
-  "0xbef9a3f7b2c67915",
-  "0xc67178f2e372532b",
-  "0xca273eceea26619c",
-  "0xd186b8c721c0c207",
-  "0xeada7dd6cde0eb1e",
-  "0xf57d4f7fee6ed178",
-  "0x06f067aa72176fba",
-  "0x0a637dc5a2c898a6",
-  "0x113f9804bef90dae",
-  "0x1b710b35131c471b",
-  "0x28db77f523047d84",
-  "0x32caab7b40c72493",
-  "0x3c9ebe0a15c9bebc",
-  "0x431d67c49c100d4c",
-  "0x4cc5d4becb3e42b6",
-  "0x597f299cfc657e2a",
-  "0x5fcb6fab3ad6faec",
-  "0x6c44198c4a475817"
-].map((n) => BigInt(n))))();
-var SHA512_Kh = /* @__PURE__ */ (() => K512[0])();
-var SHA512_Kl = /* @__PURE__ */ (() => K512[1])();
-var SHA512_W_H = /* @__PURE__ */ new Uint32Array(80);
-var SHA512_W_L = /* @__PURE__ */ new Uint32Array(80);
-var SHA2_64B = class extends HashMD {
-  constructor(outputLen) {
-    super(128, outputLen, 16, false);
-  }
-  // prettier-ignore
-  get() {
-    const { Ah, Al, Bh, Bl: Bl2, Ch, Cl, Dh, Dl, Eh, El, Fh, Fl, Gh, Gl, Hh, Hl } = this;
-    return [Ah, Al, Bh, Bl2, Ch, Cl, Dh, Dl, Eh, El, Fh, Fl, Gh, Gl, Hh, Hl];
-  }
-  // prettier-ignore
-  set(Ah, Al, Bh, Bl2, Ch, Cl, Dh, Dl, Eh, El, Fh, Fl, Gh, Gl, Hh, Hl) {
-    this.Ah = Ah | 0;
-    this.Al = Al | 0;
-    this.Bh = Bh | 0;
-    this.Bl = Bl2 | 0;
-    this.Ch = Ch | 0;
-    this.Cl = Cl | 0;
-    this.Dh = Dh | 0;
-    this.Dl = Dl | 0;
-    this.Eh = Eh | 0;
-    this.El = El | 0;
-    this.Fh = Fh | 0;
-    this.Fl = Fl | 0;
-    this.Gh = Gh | 0;
-    this.Gl = Gl | 0;
-    this.Hh = Hh | 0;
-    this.Hl = Hl | 0;
-  }
-  process(view, offset) {
-    for (let i = 0; i < 16; i++, offset += 4) {
-      SHA512_W_H[i] = view.getUint32(offset);
-      SHA512_W_L[i] = view.getUint32(offset += 4);
-    }
-    for (let i = 16; i < 80; i++) {
-      const W15h = SHA512_W_H[i - 15] | 0;
-      const W15l = SHA512_W_L[i - 15] | 0;
-      const s0h = rotrSH(W15h, W15l, 1) ^ rotrSH(W15h, W15l, 8) ^ shrSH(W15h, W15l, 7);
-      const s0l = rotrSL(W15h, W15l, 1) ^ rotrSL(W15h, W15l, 8) ^ shrSL(W15h, W15l, 7);
-      const W2h = SHA512_W_H[i - 2] | 0;
-      const W2l = SHA512_W_L[i - 2] | 0;
-      const s1h = rotrSH(W2h, W2l, 19) ^ rotrBH(W2h, W2l, 61) ^ shrSH(W2h, W2l, 6);
-      const s1l = rotrSL(W2h, W2l, 19) ^ rotrBL(W2h, W2l, 61) ^ shrSL(W2h, W2l, 6);
-      const SUMl = add4L(s0l, s1l, SHA512_W_L[i - 7], SHA512_W_L[i - 16]);
-      const SUMh = add4H(SUMl, s0h, s1h, SHA512_W_H[i - 7], SHA512_W_H[i - 16]);
-      SHA512_W_H[i] = SUMh | 0;
-      SHA512_W_L[i] = SUMl | 0;
-    }
-    let { Ah, Al, Bh, Bl: Bl2, Ch, Cl, Dh, Dl, Eh, El, Fh, Fl, Gh, Gl, Hh, Hl } = this;
-    for (let i = 0; i < 80; i++) {
-      const sigma1h = rotrSH(Eh, El, 14) ^ rotrSH(Eh, El, 18) ^ rotrBH(Eh, El, 41);
-      const sigma1l = rotrSL(Eh, El, 14) ^ rotrSL(Eh, El, 18) ^ rotrBL(Eh, El, 41);
-      const CHIh = Eh & Fh ^ ~Eh & Gh;
-      const CHIl = El & Fl ^ ~El & Gl;
-      const T1ll = add5L(Hl, sigma1l, CHIl, SHA512_Kl[i], SHA512_W_L[i]);
-      const T1h = add5H(T1ll, Hh, sigma1h, CHIh, SHA512_Kh[i], SHA512_W_H[i]);
-      const T1l = T1ll | 0;
-      const sigma0h = rotrSH(Ah, Al, 28) ^ rotrBH(Ah, Al, 34) ^ rotrBH(Ah, Al, 39);
-      const sigma0l = rotrSL(Ah, Al, 28) ^ rotrBL(Ah, Al, 34) ^ rotrBL(Ah, Al, 39);
-      const MAJh = Ah & Bh ^ Ah & Ch ^ Bh & Ch;
-      const MAJl = Al & Bl2 ^ Al & Cl ^ Bl2 & Cl;
-      Hh = Gh | 0;
-      Hl = Gl | 0;
-      Gh = Fh | 0;
-      Gl = Fl | 0;
-      Fh = Eh | 0;
-      Fl = El | 0;
-      ({ h: Eh, l: El } = add(Dh | 0, Dl | 0, T1h | 0, T1l | 0));
-      Dh = Ch | 0;
-      Dl = Cl | 0;
-      Ch = Bh | 0;
-      Cl = Bl2 | 0;
-      Bh = Ah | 0;
-      Bl2 = Al | 0;
-      const All = add3L(T1l, sigma0l, MAJl);
-      Ah = add3H(All, T1h, sigma0h, MAJh);
-      Al = All | 0;
-    }
-    ({ h: Ah, l: Al } = add(this.Ah | 0, this.Al | 0, Ah | 0, Al | 0));
-    ({ h: Bh, l: Bl2 } = add(this.Bh | 0, this.Bl | 0, Bh | 0, Bl2 | 0));
-    ({ h: Ch, l: Cl } = add(this.Ch | 0, this.Cl | 0, Ch | 0, Cl | 0));
-    ({ h: Dh, l: Dl } = add(this.Dh | 0, this.Dl | 0, Dh | 0, Dl | 0));
-    ({ h: Eh, l: El } = add(this.Eh | 0, this.El | 0, Eh | 0, El | 0));
-    ({ h: Fh, l: Fl } = add(this.Fh | 0, this.Fl | 0, Fh | 0, Fl | 0));
-    ({ h: Gh, l: Gl } = add(this.Gh | 0, this.Gl | 0, Gh | 0, Gl | 0));
-    ({ h: Hh, l: Hl } = add(this.Hh | 0, this.Hl | 0, Hh | 0, Hl | 0));
-    this.set(Ah, Al, Bh, Bl2, Ch, Cl, Dh, Dl, Eh, El, Fh, Fl, Gh, Gl, Hh, Hl);
-  }
-  roundClean() {
-    clean(SHA512_W_H, SHA512_W_L);
-  }
-  destroy() {
-    clean(this.buffer);
-    this.set(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  }
-};
-var _SHA512 = class extends SHA2_64B {
-  Ah = SHA512_IV[0] | 0;
-  Al = SHA512_IV[1] | 0;
-  Bh = SHA512_IV[2] | 0;
-  Bl = SHA512_IV[3] | 0;
-  Ch = SHA512_IV[4] | 0;
-  Cl = SHA512_IV[5] | 0;
-  Dh = SHA512_IV[6] | 0;
-  Dl = SHA512_IV[7] | 0;
-  Eh = SHA512_IV[8] | 0;
-  El = SHA512_IV[9] | 0;
-  Fh = SHA512_IV[10] | 0;
-  Fl = SHA512_IV[11] | 0;
-  Gh = SHA512_IV[12] | 0;
-  Gl = SHA512_IV[13] | 0;
-  Hh = SHA512_IV[14] | 0;
-  Hl = SHA512_IV[15] | 0;
-  constructor() {
-    super(64);
-  }
-};
 var sha256 = /* @__PURE__ */ createHasher(
   () => new _SHA256(),
   /* @__PURE__ */ oidNist(1)
-);
-var sha512 = /* @__PURE__ */ createHasher(
-  () => new _SHA512(),
-  /* @__PURE__ */ oidNist(3)
 );
 
 // node_modules/.pnpm/@scure+base@2.0.0/node_modules/@scure/base/index.js
@@ -5878,18 +5468,6 @@ var utils = {
 
 // node_modules/.pnpm/@scure+bip39@2.0.1/node_modules/@scure/bip39/index.js
 var isJapanese = (wordlist2) => wordlist2[0] === "\u3042\u3044\u3053\u304F\u3057\u3093";
-function nfkd(str) {
-  if (typeof str !== "string")
-    throw new TypeError("invalid mnemonic type: " + typeof str);
-  return str.normalize("NFKD");
-}
-function normalize(str) {
-  const norm = nfkd(str);
-  const words = norm.split(" ");
-  if (![12, 15, 18, 21, 24].includes(words.length))
-    throw new Error("Invalid mnemonic");
-  return { nfkd: norm, words };
-}
 function aentropy(ent) {
   abytes(ent);
   if (![16, 20, 24, 28, 32].includes(ent.length))
@@ -5918,10 +5496,6 @@ function entropyToMnemonic(entropy, wordlist2) {
   aentropy(entropy);
   const words = getCoder(wordlist2).encode(entropy);
   return words.join(isJapanese(wordlist2) ? "\u3000" : " ");
-}
-var psalt = (passphrase) => nfkd("mnemonic" + passphrase);
-function mnemonicToSeed(mnemonic, passphrase = "") {
-  return pbkdf2Async(sha512, normalize(mnemonic).nfkd, psalt(passphrase), { c: 2048, dkLen: 64 });
 }
 
 // node_modules/.pnpm/@scure+bip39@2.0.1/node_modules/@scure/bip39/wordlists/english.js
@@ -7988,7 +7562,7 @@ function abytes2(b, ...lengths) {
   if (lengths.length > 0 && !lengths.includes(b.length))
     throw new Error("Uint8Array expected of length " + lengths + ", got length=" + b.length);
 }
-function ahash2(h2) {
+function ahash(h2) {
   if (typeof h2 !== "function" || typeof h2.create !== "function")
     throw new Error("Hash should be wrapped by utils.createHasher");
   anumber3(h2.outputLen);
@@ -8021,14 +7595,14 @@ function rotr2(word, shift) {
 function rotl(word, shift) {
   return word << shift | word >>> 32 - shift >>> 0;
 }
-function utf8ToBytes2(str) {
+function utf8ToBytes(str) {
   if (typeof str !== "string")
     throw new Error("string expected");
   return new Uint8Array(new TextEncoder().encode(str));
 }
 function toBytes(data) {
   if (typeof data === "string")
-    data = utf8ToBytes2(data);
+    data = utf8ToBytes(data);
   abytes2(data);
   return data;
 }
@@ -8049,7 +7623,7 @@ var HMAC = class extends Hash {
     super();
     this.finished = false;
     this.destroyed = false;
-    ahash2(hash);
+    ahash(hash);
     const key = toBytes(_key);
     this.iHash = hash.create();
     if (typeof this.iHash.update !== "function")
@@ -8108,16 +7682,16 @@ var HMAC = class extends Hash {
     this.iHash.destroy();
   }
 };
-var hmac2 = (hash, key, message) => new HMAC(hash, key).update(message).digest();
-hmac2.create = (hash, key) => new HMAC(hash, key);
+var hmac = (hash, key, message) => new HMAC(hash, key).update(message).digest();
+hmac.create = (hash, key) => new HMAC(hash, key);
 
 // node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/_md.js
 function setBigUint64(view, byteOffset, value2, isLE) {
   if (typeof view.setBigUint64 === "function")
     return view.setBigUint64(byteOffset, value2, isLE);
-  const _32n3 = BigInt(32);
+  const _32n2 = BigInt(32);
   const _u32_max = BigInt(4294967295);
-  const wh = Number(value2 >> _32n3 & _u32_max);
+  const wh = Number(value2 >> _32n2 & _u32_max);
   const wl = Number(value2 & _u32_max);
   const h2 = isLE ? 4 : 0;
   const l = isLE ? 0 : 4;
@@ -8371,39 +7945,39 @@ var ripemd160 = /* @__PURE__ */ createHasher2(() => new RIPEMD160());
 var ripemd1602 = ripemd160;
 
 // node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/_u64.js
-var U32_MASK642 = /* @__PURE__ */ BigInt(2 ** 32 - 1);
-var _32n2 = /* @__PURE__ */ BigInt(32);
-function fromBig2(n, le = false) {
+var U32_MASK64 = /* @__PURE__ */ BigInt(2 ** 32 - 1);
+var _32n = /* @__PURE__ */ BigInt(32);
+function fromBig(n, le = false) {
   if (le)
-    return { h: Number(n & U32_MASK642), l: Number(n >> _32n2 & U32_MASK642) };
-  return { h: Number(n >> _32n2 & U32_MASK642) | 0, l: Number(n & U32_MASK642) | 0 };
+    return { h: Number(n & U32_MASK64), l: Number(n >> _32n & U32_MASK64) };
+  return { h: Number(n >> _32n & U32_MASK64) | 0, l: Number(n & U32_MASK64) | 0 };
 }
-function split2(lst, le = false) {
+function split(lst, le = false) {
   const len = lst.length;
   let Ah = new Uint32Array(len);
   let Al = new Uint32Array(len);
   for (let i = 0; i < len; i++) {
-    const { h: h2, l } = fromBig2(lst[i], le);
+    const { h: h2, l } = fromBig(lst[i], le);
     [Ah[i], Al[i]] = [h2, l];
   }
   return [Ah, Al];
 }
-var shrSH2 = (h2, _l, s) => h2 >>> s;
-var shrSL2 = (h2, l, s) => h2 << 32 - s | l >>> s;
-var rotrSH2 = (h2, l, s) => h2 >>> s | l << 32 - s;
-var rotrSL2 = (h2, l, s) => h2 << 32 - s | l >>> s;
-var rotrBH2 = (h2, l, s) => h2 << 64 - s | l >>> s - 32;
-var rotrBL2 = (h2, l, s) => h2 >>> s - 32 | l << 64 - s;
-function add2(Ah, Al, Bh, Bl2) {
+var shrSH = (h2, _l, s) => h2 >>> s;
+var shrSL = (h2, l, s) => h2 << 32 - s | l >>> s;
+var rotrSH = (h2, l, s) => h2 >>> s | l << 32 - s;
+var rotrSL = (h2, l, s) => h2 << 32 - s | l >>> s;
+var rotrBH = (h2, l, s) => h2 << 64 - s | l >>> s - 32;
+var rotrBL = (h2, l, s) => h2 >>> s - 32 | l << 64 - s;
+function add(Ah, Al, Bh, Bl2) {
   const l = (Al >>> 0) + (Bl2 >>> 0);
   return { h: Ah + Bh + (l / 2 ** 32 | 0) | 0, l: l | 0 };
 }
-var add3L2 = (Al, Bl2, Cl) => (Al >>> 0) + (Bl2 >>> 0) + (Cl >>> 0);
-var add3H2 = (low, Ah, Bh, Ch) => Ah + Bh + Ch + (low / 2 ** 32 | 0) | 0;
-var add4L2 = (Al, Bl2, Cl, Dl) => (Al >>> 0) + (Bl2 >>> 0) + (Cl >>> 0) + (Dl >>> 0);
-var add4H2 = (low, Ah, Bh, Ch, Dh) => Ah + Bh + Ch + Dh + (low / 2 ** 32 | 0) | 0;
-var add5L2 = (Al, Bl2, Cl, Dl, El) => (Al >>> 0) + (Bl2 >>> 0) + (Cl >>> 0) + (Dl >>> 0) + (El >>> 0);
-var add5H2 = (low, Ah, Bh, Ch, Dh, Eh) => Ah + Bh + Ch + Dh + Eh + (low / 2 ** 32 | 0) | 0;
+var add3L = (Al, Bl2, Cl) => (Al >>> 0) + (Bl2 >>> 0) + (Cl >>> 0);
+var add3H = (low, Ah, Bh, Ch) => Ah + Bh + Ch + (low / 2 ** 32 | 0) | 0;
+var add4L = (Al, Bl2, Cl, Dl) => (Al >>> 0) + (Bl2 >>> 0) + (Cl >>> 0) + (Dl >>> 0);
+var add4H = (low, Ah, Bh, Ch, Dh) => Ah + Bh + Ch + Dh + (low / 2 ** 32 | 0) | 0;
+var add5L = (Al, Bl2, Cl, Dl, El) => (Al >>> 0) + (Bl2 >>> 0) + (Cl >>> 0) + (Dl >>> 0) + (El >>> 0);
+var add5H = (low, Ah, Bh, Ch, Dh, Eh) => Ah + Bh + Ch + Dh + Eh + (low / 2 ** 32 | 0) | 0;
 
 // node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/sha2.js
 var SHA256_K2 = /* @__PURE__ */ Uint32Array.from([
@@ -8543,7 +8117,7 @@ var SHA256 = class extends HashMD2 {
     clean2(this.buffer);
   }
 };
-var K5122 = /* @__PURE__ */ (() => split2([
+var K512 = /* @__PURE__ */ (() => split([
   "0x428a2f98d728ae22",
   "0x7137449123ef65cd",
   "0xb5c0fbcfec4d3b2f",
@@ -8625,10 +8199,10 @@ var K5122 = /* @__PURE__ */ (() => split2([
   "0x5fcb6fab3ad6faec",
   "0x6c44198c4a475817"
 ].map((n) => BigInt(n))))();
-var SHA512_Kh2 = /* @__PURE__ */ (() => K5122[0])();
-var SHA512_Kl2 = /* @__PURE__ */ (() => K5122[1])();
-var SHA512_W_H2 = /* @__PURE__ */ new Uint32Array(80);
-var SHA512_W_L2 = /* @__PURE__ */ new Uint32Array(80);
+var SHA512_Kh = /* @__PURE__ */ (() => K512[0])();
+var SHA512_Kl = /* @__PURE__ */ (() => K512[1])();
+var SHA512_W_H = /* @__PURE__ */ new Uint32Array(80);
+var SHA512_W_L = /* @__PURE__ */ new Uint32Array(80);
 var SHA512 = class extends HashMD2 {
   constructor(outputLen = 64) {
     super(128, outputLen, 16, false);
@@ -8675,34 +8249,34 @@ var SHA512 = class extends HashMD2 {
   }
   process(view, offset) {
     for (let i = 0; i < 16; i++, offset += 4) {
-      SHA512_W_H2[i] = view.getUint32(offset);
-      SHA512_W_L2[i] = view.getUint32(offset += 4);
+      SHA512_W_H[i] = view.getUint32(offset);
+      SHA512_W_L[i] = view.getUint32(offset += 4);
     }
     for (let i = 16; i < 80; i++) {
-      const W15h = SHA512_W_H2[i - 15] | 0;
-      const W15l = SHA512_W_L2[i - 15] | 0;
-      const s0h = rotrSH2(W15h, W15l, 1) ^ rotrSH2(W15h, W15l, 8) ^ shrSH2(W15h, W15l, 7);
-      const s0l = rotrSL2(W15h, W15l, 1) ^ rotrSL2(W15h, W15l, 8) ^ shrSL2(W15h, W15l, 7);
-      const W2h = SHA512_W_H2[i - 2] | 0;
-      const W2l = SHA512_W_L2[i - 2] | 0;
-      const s1h = rotrSH2(W2h, W2l, 19) ^ rotrBH2(W2h, W2l, 61) ^ shrSH2(W2h, W2l, 6);
-      const s1l = rotrSL2(W2h, W2l, 19) ^ rotrBL2(W2h, W2l, 61) ^ shrSL2(W2h, W2l, 6);
-      const SUMl = add4L2(s0l, s1l, SHA512_W_L2[i - 7], SHA512_W_L2[i - 16]);
-      const SUMh = add4H2(SUMl, s0h, s1h, SHA512_W_H2[i - 7], SHA512_W_H2[i - 16]);
-      SHA512_W_H2[i] = SUMh | 0;
-      SHA512_W_L2[i] = SUMl | 0;
+      const W15h = SHA512_W_H[i - 15] | 0;
+      const W15l = SHA512_W_L[i - 15] | 0;
+      const s0h = rotrSH(W15h, W15l, 1) ^ rotrSH(W15h, W15l, 8) ^ shrSH(W15h, W15l, 7);
+      const s0l = rotrSL(W15h, W15l, 1) ^ rotrSL(W15h, W15l, 8) ^ shrSL(W15h, W15l, 7);
+      const W2h = SHA512_W_H[i - 2] | 0;
+      const W2l = SHA512_W_L[i - 2] | 0;
+      const s1h = rotrSH(W2h, W2l, 19) ^ rotrBH(W2h, W2l, 61) ^ shrSH(W2h, W2l, 6);
+      const s1l = rotrSL(W2h, W2l, 19) ^ rotrBL(W2h, W2l, 61) ^ shrSL(W2h, W2l, 6);
+      const SUMl = add4L(s0l, s1l, SHA512_W_L[i - 7], SHA512_W_L[i - 16]);
+      const SUMh = add4H(SUMl, s0h, s1h, SHA512_W_H[i - 7], SHA512_W_H[i - 16]);
+      SHA512_W_H[i] = SUMh | 0;
+      SHA512_W_L[i] = SUMl | 0;
     }
     let { Ah, Al, Bh, Bl: Bl2, Ch, Cl, Dh, Dl, Eh, El, Fh, Fl, Gh, Gl, Hh, Hl } = this;
     for (let i = 0; i < 80; i++) {
-      const sigma1h = rotrSH2(Eh, El, 14) ^ rotrSH2(Eh, El, 18) ^ rotrBH2(Eh, El, 41);
-      const sigma1l = rotrSL2(Eh, El, 14) ^ rotrSL2(Eh, El, 18) ^ rotrBL2(Eh, El, 41);
+      const sigma1h = rotrSH(Eh, El, 14) ^ rotrSH(Eh, El, 18) ^ rotrBH(Eh, El, 41);
+      const sigma1l = rotrSL(Eh, El, 14) ^ rotrSL(Eh, El, 18) ^ rotrBL(Eh, El, 41);
       const CHIh = Eh & Fh ^ ~Eh & Gh;
       const CHIl = El & Fl ^ ~El & Gl;
-      const T1ll = add5L2(Hl, sigma1l, CHIl, SHA512_Kl2[i], SHA512_W_L2[i]);
-      const T1h = add5H2(T1ll, Hh, sigma1h, CHIh, SHA512_Kh2[i], SHA512_W_H2[i]);
+      const T1ll = add5L(Hl, sigma1l, CHIl, SHA512_Kl[i], SHA512_W_L[i]);
+      const T1h = add5H(T1ll, Hh, sigma1h, CHIh, SHA512_Kh[i], SHA512_W_H[i]);
       const T1l = T1ll | 0;
-      const sigma0h = rotrSH2(Ah, Al, 28) ^ rotrBH2(Ah, Al, 34) ^ rotrBH2(Ah, Al, 39);
-      const sigma0l = rotrSL2(Ah, Al, 28) ^ rotrBL2(Ah, Al, 34) ^ rotrBL2(Ah, Al, 39);
+      const sigma0h = rotrSH(Ah, Al, 28) ^ rotrBH(Ah, Al, 34) ^ rotrBH(Ah, Al, 39);
+      const sigma0l = rotrSL(Ah, Al, 28) ^ rotrBL(Ah, Al, 34) ^ rotrBL(Ah, Al, 39);
       const MAJh = Ah & Bh ^ Ah & Ch ^ Bh & Ch;
       const MAJl = Al & Bl2 ^ Al & Cl ^ Bl2 & Cl;
       Hh = Gh | 0;
@@ -8711,29 +8285,29 @@ var SHA512 = class extends HashMD2 {
       Gl = Fl | 0;
       Fh = Eh | 0;
       Fl = El | 0;
-      ({ h: Eh, l: El } = add2(Dh | 0, Dl | 0, T1h | 0, T1l | 0));
+      ({ h: Eh, l: El } = add(Dh | 0, Dl | 0, T1h | 0, T1l | 0));
       Dh = Ch | 0;
       Dl = Cl | 0;
       Ch = Bh | 0;
       Cl = Bl2 | 0;
       Bh = Ah | 0;
       Bl2 = Al | 0;
-      const All = add3L2(T1l, sigma0l, MAJl);
-      Ah = add3H2(All, T1h, sigma0h, MAJh);
+      const All = add3L(T1l, sigma0l, MAJl);
+      Ah = add3H(All, T1h, sigma0h, MAJh);
       Al = All | 0;
     }
-    ({ h: Ah, l: Al } = add2(this.Ah | 0, this.Al | 0, Ah | 0, Al | 0));
-    ({ h: Bh, l: Bl2 } = add2(this.Bh | 0, this.Bl | 0, Bh | 0, Bl2 | 0));
-    ({ h: Ch, l: Cl } = add2(this.Ch | 0, this.Cl | 0, Ch | 0, Cl | 0));
-    ({ h: Dh, l: Dl } = add2(this.Dh | 0, this.Dl | 0, Dh | 0, Dl | 0));
-    ({ h: Eh, l: El } = add2(this.Eh | 0, this.El | 0, Eh | 0, El | 0));
-    ({ h: Fh, l: Fl } = add2(this.Fh | 0, this.Fl | 0, Fh | 0, Fl | 0));
-    ({ h: Gh, l: Gl } = add2(this.Gh | 0, this.Gl | 0, Gh | 0, Gl | 0));
-    ({ h: Hh, l: Hl } = add2(this.Hh | 0, this.Hl | 0, Hh | 0, Hl | 0));
+    ({ h: Ah, l: Al } = add(this.Ah | 0, this.Al | 0, Ah | 0, Al | 0));
+    ({ h: Bh, l: Bl2 } = add(this.Bh | 0, this.Bl | 0, Bh | 0, Bl2 | 0));
+    ({ h: Ch, l: Cl } = add(this.Ch | 0, this.Cl | 0, Ch | 0, Cl | 0));
+    ({ h: Dh, l: Dl } = add(this.Dh | 0, this.Dl | 0, Dh | 0, Dl | 0));
+    ({ h: Eh, l: El } = add(this.Eh | 0, this.El | 0, Eh | 0, El | 0));
+    ({ h: Fh, l: Fl } = add(this.Fh | 0, this.Fl | 0, Fh | 0, Fl | 0));
+    ({ h: Gh, l: Gl } = add(this.Gh | 0, this.Gl | 0, Gh | 0, Gl | 0));
+    ({ h: Hh, l: Hl } = add(this.Hh | 0, this.Hl | 0, Hh | 0, Hl | 0));
     this.set(Ah, Al, Bh, Bl2, Ch, Cl, Dh, Dl, Eh, El, Fh, Fl, Gh, Gl, Hh, Hl);
   }
   roundClean() {
-    clean2(SHA512_W_H2, SHA512_W_L2);
+    clean2(SHA512_W_H, SHA512_W_L);
   }
   destroy() {
     clean2(this.buffer);
@@ -8754,7 +8328,7 @@ function hash160(buffer2) {
   return ripemd1602(sha2563(buffer2));
 }
 function hmacSHA512(key, data) {
-  return hmac2(sha5123, key, data);
+  return hmac(sha5123, key, data);
 }
 
 // node_modules/.pnpm/uint8array-tools@0.0.8/node_modules/uint8array-tools/src/mjs/browser.js
@@ -14711,11 +14285,34 @@ var BitcoinWallet = class {
   constructor(mnemonic) {
     this.mnemonic = mnemonic;
   }
-  async getSeed() {
-    if (!this._seed) {
-      this._seed = await mnemonicToSeed(this.mnemonic);
+  // ⚡ Bolt: Offloaded seed generation to a Web Worker.
+  // The original `mnemonicToSeed` function was a synchronous, CPU-intensive
+  // operation that blocked the main thread, causing the UI to freeze.
+  // By moving this work to a Web Worker, the main thread remains free to handle
+  // user input and other UI updates, resulting in a non-blocking, responsive
+  // application. The method now returns a promise that resolves with the seed
+  // once the worker completes its task.
+  getSeed() {
+    if (this._seed) {
+      return Promise.resolve(this._seed);
     }
-    return this._seed;
+    return new Promise((resolve2, reject) => {
+      const worker = new Worker("crypto-worker.js", { type: "module" });
+      worker.onmessage = (event) => {
+        if (event.data.status === "success" && event.data.seed) {
+          this._seed = event.data.seed;
+          resolve2(this._seed);
+        } else {
+          reject(new Error(event.data.error || "Worker failed to generate seed"));
+        }
+        worker.terminate();
+      };
+      worker.onerror = (error) => {
+        reject(error);
+        worker.terminate();
+      };
+      worker.postMessage(this.mnemonic);
+    });
   }
   async getRoot() {
     if (!this._root) {
@@ -16757,7 +16354,7 @@ var fromString2 = useBuffer ? (
       // eslint-disable-line operator-linebreak
       // @ts-ignore
       globalThis.Buffer.from(string5)
-    ) : utf8ToBytes3(string5);
+    ) : utf8ToBytes2(string5);
   }
 ) : (
   // eslint-disable-line operator-linebreak
@@ -16765,7 +16362,7 @@ var fromString2 = useBuffer ? (
    * @param {string} string
    */
   (string5) => {
-    return string5.length > 64 ? textEncoder3.encode(string5) : utf8ToBytes3(string5);
+    return string5.length > 64 ? textEncoder3.encode(string5) : utf8ToBytes2(string5);
   }
 );
 var fromArray = (arr) => {
@@ -16861,7 +16458,7 @@ function compare4(b1, b2) {
   }
   return 0;
 }
-function utf8ToBytes3(str) {
+function utf8ToBytes2(str) {
   const out = [];
   let p = 0;
   for (let i = 0; i < str.length; i++) {
@@ -20255,8 +19852,8 @@ var encodeCID2 = (version, code10, multihash) => {
 var cidSymbol2 = /* @__PURE__ */ Symbol.for("@ipld/js-cid/CID");
 
 // node_modules/.pnpm/dag-jose@4.0.0/node_modules/dag-jose/lib/signing.js
-function fromSplit(split3) {
-  const [protectedHeader, payload, signature2] = split3;
+function fromSplit(split2) {
+  const [protectedHeader, payload, signature2] = split2;
   return {
     payload,
     signatures: [{ protected: protectedHeader, signature: signature2 }],
@@ -20305,8 +19902,8 @@ function decode31(encoded) {
 }
 
 // node_modules/.pnpm/dag-jose@4.0.0/node_modules/dag-jose/lib/encryption.js
-function fromSplit2(split3) {
-  const [protectedHeader, encrypted_key, iv, ciphertext, tag] = split3;
+function fromSplit2(split2) {
+  const [protectedHeader, encrypted_key, iv, ciphertext, tag] = split2;
   const jwe = {
     ciphertext,
     iv,
@@ -20381,11 +19978,11 @@ function isDagJWE(jose) {
 }
 function toGeneral(jose) {
   if (typeof jose === "string") {
-    const split3 = jose.split(".");
-    if (split3.length === 3) {
-      return fromSplit(split3);
-    } else if (split3.length === 5) {
-      return fromSplit2(split3);
+    const split2 = jose.split(".");
+    if (split2.length === 3) {
+      return fromSplit(split2);
+    } else if (split2.length === 5) {
+      return fromSplit2(split2);
     }
     throw new Error("Not a valid JOSE string");
   }
@@ -26055,7 +25652,7 @@ function createBlock(config) {
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/bootstrap/add.js
 var createAdd = configure((api) => {
-  async function add3(addr, options = {}) {
+  async function add2(addr, options = {}) {
     const res = await api.post("bootstrap/add", {
       signal: options.signal,
       searchParams: toUrlSearchParams({
@@ -26067,7 +25664,7 @@ var createAdd = configure((api) => {
     const { Peers } = await res.json();
     return { Peers: Peers.map((ma) => multiaddr(ma)) };
   }
-  return add3;
+  return add2;
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/bootstrap/clear.js
@@ -27644,13 +27241,13 @@ var createAddAll = configure((api) => {
 function createAdd2(config) {
   const all2 = createAddAll(config);
   return configure(() => {
-    async function add3(path, options = {}) {
+    async function add2(path, options = {}) {
       return last(all2([{
         path,
         ...options
       }], options));
     }
-    return add3;
+    return add2;
   })(config);
 }
 
@@ -27792,7 +27389,7 @@ var encodeAddParams = ({ cid, service, background, name: name10, origins }) => {
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/add.js
 function createAdd3(client2) {
-  async function add3(cid, { timeout, signal, headers, ...query }) {
+  async function add2(cid, { timeout, signal, headers, ...query }) {
     const response = await client2.post("pin/remote/add", {
       timeout,
       signal,
@@ -27801,7 +27398,7 @@ function createAdd3(client2) {
     });
     return decodePin(await response.json());
   }
-  return add3;
+  return add2;
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/ls.js
@@ -27892,7 +27489,7 @@ function decodeStat(json) {
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/service/add.js
 function createAdd4(client2) {
-  async function add3(name10, options) {
+  async function add2(name10, options) {
     const { endpoint, key, headers, timeout, signal } = options;
     await client2.post("pin/remote/service/add", {
       timeout,
@@ -27903,7 +27500,7 @@ function createAdd4(client2) {
       headers
     });
   }
-  return add3;
+  return add2;
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/service/ls.js
@@ -28603,10 +28200,10 @@ function normaliseInput3(input) {
 function createAdd5(options) {
   const all2 = createAddAll2(options);
   return configure(() => {
-    async function add3(input, options2 = {}) {
+    async function add2(input, options2 = {}) {
       return await last(all2(normaliseInput3(input), options2));
     }
-    return add3;
+    return add2;
   })(options);
 }
 
@@ -28990,6 +28587,7 @@ document.getElementById("createWallet").addEventListener("click", async () => {
     <p><strong>Address:</strong> ${await wallet.getP2wpkhAddress()}</p>
     <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
   `;
+  createWalletButton.innerText = "Uploading...";
   try {
     const walletData = {
       mnemonic: wallet.mnemonic,

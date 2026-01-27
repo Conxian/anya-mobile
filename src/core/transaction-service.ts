@@ -11,12 +11,17 @@ import {
 } from './domain';
 import * as bitcoin from 'bitcoinjs-lib';
 import { BIP32Factory } from 'bip32';
+import { ECPairFactory } from 'ecpair';
 import * as ecc from 'tiny-secp256k1';
 
 const bip32 = BIP32Factory(ecc);
+const ECPair = ECPairFactory(ecc);
 
 export class TransactionServiceImpl implements TransactionService {
-  constructor(private readonly blockchainClient: BlockchainClient) {}
+  constructor(
+    private readonly blockchainClient: BlockchainClient,
+    private readonly network: bitcoin.Network
+  ) {}
 
   async createTransaction(
     sourceAccount: Account,
@@ -24,34 +29,41 @@ export class TransactionServiceImpl implements TransactionService {
     asset: Asset,
     amount: Amount,
     feeRate: number // in sat/vB
-  ): Promise<Transaction> {
+  ): Promise<DraftTransaction> {
     const utxos = await this.blockchainClient.getUTXOs(sourceAccount.address);
     const { inputs, fee } = this.selectUTXOs(
       utxos,
-      parseInt(amount.value, 10),
+      BigInt(amount.value),
       feeRate
     );
 
-    const psbt = new bitcoin.Psbt();
+    const psbt = new bitcoin.Psbt({ network: this.network });
+    const { output } = bitcoin.payments.p2wpkh({
+      pubkey: sourceAccount.getSigner().publicKey,
+      network: this.network,
+    });
     for (const input of inputs) {
       psbt.addInput({
         hash: input.txid,
         index: input.vout,
-        nonWitnessUtxo: Buffer.from(input.nonWitnessUtxo as string, 'hex'),
+        witnessUtxo: {
+          script: output!,
+          value: input.value,
+        },
       });
     }
 
     psbt.addOutput({
       address: destinationAddress,
-      value: parseInt(amount.value, 10),
+      value: BigInt(amount.value),
     });
 
-    const totalInputValue = inputs.reduce((sum, i) => sum + i.value, 0);
-    const change = totalInputValue - parseInt(amount.value, 10) - fee;
+    const totalInputValue = inputs.reduce((sum, i) => sum + i.value, 0n);
+    const change = totalInputValue - BigInt(amount.value) - BigInt(fee);
     if (change > 0) {
       psbt.addOutput({
         address: sourceAccount.address,
-        value: change,
+        value: BigInt(change),
       });
     }
 
@@ -61,33 +73,41 @@ export class TransactionServiceImpl implements TransactionService {
       to: destinationAddress,
       asset,
       amount,
+      fee: {
+        value: fee.toString(),
+        asset,
+      },
     };
   }
 
   private selectUTXOs(
     utxos: UTXO[],
-    targetAmount: number,
+    targetAmount: bigint,
     feeRate: number
   ): { inputs: UTXO[]; fee: number } {
-    // Basic coin selection: use the smallest UTXOs that can cover the amount + fee.
-    // WARNING: This is a naive implementation and not suitable for production.
-    const sortedUtxos = [...utxos].sort((a, b) => a.value - b.value);
+    // Naive coin selection: use the largest UTXOs available to cover the target amount.
+    // WARNING: This is not a robust coin selection algorithm and is not suitable for production.
+    const sortedUtxos = [...utxos].sort((a, b) => (a.value > b.value ? -1 : 1));
     const selectedInputs: UTXO[] = [];
-    let totalValue = 0;
+    let totalValue = 0n;
     let estimatedFee = 0;
 
     for (const utxo of sortedUtxos) {
-      if (totalValue >= targetAmount + estimatedFee) {
+      if (totalValue >= targetAmount + BigInt(estimatedFee)) {
         break;
       }
       selectedInputs.push(utxo);
       totalValue += utxo.value;
-      // Estimate the fee based on the number of inputs and outputs.
-      // 1 input, 2 outputs is a common transaction structure.
-      estimatedFee = (148 * selectedInputs.length + 34 * 2) * feeRate;
+      // Estimate the fee based on the number of inputs and outputs for a P2WPKH transaction.
+      const baseTxVsize = 11; // ~11 vbytes for version, locktime, input/output counts
+      const inputVsize = 68; // ~68 vbytes for a P2WPKH input
+      const outputVsize = 31; // ~31 vbytes for a P2WPKH output
+      const estimatedVsize =
+        baseTxVsize + selectedInputs.length * inputVsize + 2 * outputVsize;
+      estimatedFee = estimatedVsize * feeRate;
     }
 
-    if (totalValue < targetAmount + estimatedFee) {
+    if (totalValue < targetAmount + BigInt(estimatedFee)) {
       throw new Error('Insufficient funds');
     }
 
@@ -95,28 +115,25 @@ export class TransactionServiceImpl implements TransactionService {
   }
 
   async signTransaction(
-    transaction: Transaction,
-    privateKey: PrivateKey
-  ): Promise<Transaction> {
-    if (!transaction.psbt) {
-      throw new Error('PSBT not found in transaction');
-    }
-
-    const psbt = bitcoin.Psbt.fromBase64(transaction.psbt);
-    const keyPair = bip32.fromWIF(privateKey);
-    psbt.signAllInputs(keyPair);
+    transaction: DraftTransaction,
+    account: Account
+  ): Promise<DraftTransaction> {
+    const psbt = bitcoin.Psbt.fromBase64(transaction.psbt, {
+      network: this.network,
+    });
+    const signer = account.getSigner();
+    psbt.signAllInputs(signer);
 
     return { ...transaction, psbt: psbt.toBase64() };
   }
 
   async broadcastTransaction(
-    signedTransaction: Transaction
+    signedTransaction: DraftTransaction
   ): Promise<TransactionID> {
-    if (!signedTransaction.psbt) {
-      throw new Error('PSBT not found in transaction');
-    }
 
-    const psbt = bitcoin.Psbt.fromBase64(signedTransaction.psbt);
+    const psbt = bitcoin.Psbt.fromBase64(signedTransaction.psbt, {
+      network: this.network,
+    });
     psbt.finalizeAllInputs();
 
     const tx = psbt.extractTransaction();

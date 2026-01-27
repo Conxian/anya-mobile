@@ -1,17 +1,11 @@
+import { BitcoinWallet } from './wallet';
+
 export interface Wallet {
   id: string;
-  masterPrivateKey: string;
+  bitcoinWallet: BitcoinWallet;
   accounts: Account[];
 }
 
-import { BIP32Interface } from 'bip32';
-import * as bitcoin from 'bitcoinjs-lib';
-
-// Performance optimization:
-// The Account class implements lazy derivation for cryptographic properties.
-// Properties like address, privateKey, and publicKey are derived from the
-// BIP32 node only when they are first accessed. This makes initial account
-// creation significantly faster by deferring expensive crypto operations.
 export class Account {
   id: string;
   name: string;

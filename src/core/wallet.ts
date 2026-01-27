@@ -1,17 +1,8 @@
 import { generateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
-import { BIP32Factory } from 'bip32';
-import * as ecc from 'tiny-secp256k1';
-import * as bitcoin from 'bitcoinjs-lib';
+import { SecureWallet } from './secure-bitcoin-lib';
+import { ISecureStorageService } from '../services/secure-storage';
 
-const bip32 = BIP32Factory(ecc);
-
-// ⚡ Bolt: Implemented lazy initialization for wallet properties.
-// The cryptographic operations to derive the master private key and address
-// are expensive and can block the main thread, especially on slower devices.
-// By deferring these operations until the properties are first accessed,
-// we ensure the initial wallet creation is instantaneous, improving UI responsiveness.
-// The derived values are then cached for subsequent access.
 export class BitcoinWallet {
   private _masterPrivateKey?: string;
   private _p2wpkhAddress?: string;
@@ -83,24 +74,22 @@ export class BitcoinWallet {
       const child = root.derivePath(path);
       const { address } = bitcoin.payments.p2wpkh({ pubkey: child.publicKey });
 
-      if (!address) {
-        throw new Error('Failed to derive address');
-      }
-      this._p2wpkhAddress = address;
-    }
-    return this._p2wpkhAddress;
+  async getAddress(index: number, pin: string): Promise<string> {
+    return this.secureWallet.getAddress(index, pin);
   }
 
-  toJSON() {
-    return {
-      mnemonic: this.mnemonic,
-      masterPrivateKey: this._masterPrivateKey,
-      p2wpkhAddress: this._p2wpkhAddress,
-    };
+  getEncryptedMnemonic(): string {
+    return this.encryptedMnemonic;
   }
 }
 
-export async function createWallet(): Promise<BitcoinWallet> {
+export async function createWallet(
+  secureStorage: ISecureStorageService,
+  pin: string
+): Promise<{ wallet: BitcoinWallet; mnemonic: string }> {
   const mnemonic = generateMnemonic(wordlist);
-  return new BitcoinWallet(mnemonic);
+  const encryptedMnemonic = await secureStorage.encrypt(mnemonic, pin);
+  const secureWallet = new SecureWallet(encryptedMnemonic, secureStorage);
+  const wallet = new BitcoinWallet(secureWallet, encryptedMnemonic);
+  return { wallet, mnemonic };
 }

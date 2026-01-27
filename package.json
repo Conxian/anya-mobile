@@ -25,6 +25,7 @@
     "@babel/preset-env": "^7.24.7",
     "@babel/preset-typescript": "^7.24.7",
     "@fleek-platform/cli": "^3.9.4",
+    "@peculiar/webcrypto": "^1.5.0",
     "@types/jest": "^30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.53.0",
     "@typescript-eslint/parser": "^8.53.0",

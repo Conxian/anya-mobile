@@ -1,4 +1,4 @@
-import { generateMnemonic, mnemonicToSeed } from '@scure/bip39';
+import { generateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
 import { BIP32Factory } from 'bip32';
 import * as ecc from 'tiny-secp256k1';
@@ -20,11 +20,44 @@ export class BitcoinWallet {
 
   constructor(public readonly mnemonic: string) {}
 
-  private async getSeed(): Promise<Uint8Array> {
-    if (!this._seed) {
-      this._seed = await mnemonicToSeed(this.mnemonic);
+  // ⚡ Bolt: Offloaded seed generation to a Web Worker.
+  // The original `mnemonicToSeed` function was a synchronous, CPU-intensive
+  // operation that blocked the main thread, causing the UI to freeze.
+  // By moving this work to a Web Worker, the main thread remains free to handle
+  // user input and other UI updates, resulting in a non-blocking, responsive
+  // application. The method now returns a promise that resolves with the seed
+  // once the worker completes its task.
+  private getSeed(): Promise<Uint8Array> {
+    if (this._seed) {
+      return Promise.resolve(this._seed);
     }
-    return this._seed;
+
+    return new Promise((resolve, reject) => {
+      // ⚡ Bolt: Use `type: 'module'` for ES module support in workers.
+      // This is crucial for leveraging modern JavaScript features and imports
+      // within the worker script, aligning it with the main application's
+      // architecture and simplifying dependency management.
+      const worker = new Worker('crypto-worker.js', { type: 'module' });
+
+      worker.onmessage = (
+        event: MessageEvent<{ status: string; seed?: Uint8Array; error?: string }>
+      ) => {
+        if (event.data.status === 'success' && event.data.seed) {
+          this._seed = event.data.seed;
+          resolve(this._seed);
+        } else {
+          reject(new Error(event.data.error || 'Worker failed to generate seed'));
+        }
+        worker.terminate();
+      };
+
+      worker.onerror = (error) => {
+        reject(error);
+        worker.terminate();
+      };
+
+      worker.postMessage(this.mnemonic);
+    });
   }
 
   private async getRoot() {

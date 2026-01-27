@@ -1,9 +1,12 @@
 const esbuild = require('esbuild');
 
-esbuild.build({
-  entryPoints: ['src/ui/app.ts'],
+// ⚡ Bolt: Centralized esbuild configuration.
+// To support multiple build targets (the main app and the crypto worker),
+// we define a shared configuration object. This promotes consistency and
+// simplifies maintenance by ensuring both bundles receive the same essential
+// settings, such as the Buffer polyfill.
+const sharedConfig = {
   bundle: true,
-  outfile: 'public/app.js',
   format: 'esm',
   platform: 'browser',
   loader: { '.wasm': 'binary' },
@@ -17,5 +20,23 @@ esbuild.build({
   define: {
     'global.Buffer': 'buffer.Buffer',
   },
-  // No external modules, so they will be bundled
-}).catch(() => process.exit(1));
+};
+
+// ⚡ Bolt: Parallel builds for efficiency.
+// Using Promise.all allows esbuild to run the application and worker builds
+// concurrently, which can speed up the overall build process, especially
+// as the number of build targets grows.
+Promise.all([
+  // Build the main application
+  esbuild.build({
+    ...sharedConfig,
+    entryPoints: ['src/ui/app.ts'],
+    outfile: 'public/app.js',
+  }),
+  // Build the crypto worker
+  esbuild.build({
+    ...sharedConfig,
+    entryPoints: ['src/core/crypto-worker.ts'],
+    outfile: 'public/crypto-worker.js',
+  }),
+]).catch(() => process.exit(1));

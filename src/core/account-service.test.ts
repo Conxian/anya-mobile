@@ -2,28 +2,34 @@ import { AccountServiceImpl } from './account-service';
 import { Wallet, Account, Asset } from './domain';
 import { BlockchainClient } from './ports';
 import { mock, MockProxy } from 'jest-mock-extended';
-import { mnemonicToSeed } from '@scure/bip39';
-import { wordlist } from '@scure/bip39/wordlists/english.js';
-import { BIP32Factory } from 'bip32';
-import * as ecc from 'tiny-secp256k1';
+import { SecureStorageService } from '../services/secure-storage';
+import { BitcoinWallet } from './wallet';
+import { Crypto } from '@peculiar/webcrypto';
+import { SecureWallet } from './secure-bitcoin-lib';
 
-const bip32 = BIP32Factory(ecc);
+// Set up webcrypto environment
+global.crypto = new Crypto();
 
 describe('AccountServiceImpl', () => {
   let accountService: AccountServiceImpl;
   let blockchainClient: MockProxy<BlockchainClient>;
   let wallet: Wallet;
+  let secureStorageService: SecureStorageService;
+  const pin = '1234';
 
   beforeEach(async () => {
     blockchainClient = mock<BlockchainClient>();
+    secureStorageService = new SecureStorageService();
     accountService = new AccountServiceImpl(blockchainClient);
+
     const mnemonic =
       'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
-    const seed = await mnemonicToSeed(mnemonic);
-    const root = bip32.fromSeed(seed);
+    const encryptedMnemonic = await secureStorageService.encrypt(mnemonic, pin);
+    const secureWallet = new SecureWallet(encryptedMnemonic, secureStorageService);
+
     wallet = {
       id: 'wallet-1',
-      masterPrivateKey: root.toBase58(),
+      bitcoinWallet: new BitcoinWallet(secureWallet, encryptedMnemonic),
       accounts: [],
     };
   });
@@ -31,7 +37,8 @@ describe('AccountServiceImpl', () => {
   it('should create a new account and derive the correct address', async () => {
     const newAccount = await accountService.createAccount(
       wallet,
-      'New Account'
+      'New Account',
+      pin
     );
     expect(newAccount.name).toBe('New Account');
     expect(wallet.accounts).toHaveLength(1);
@@ -41,8 +48,8 @@ describe('AccountServiceImpl', () => {
   });
 
   it('should return all accounts in a wallet', async () => {
-    await accountService.createAccount(wallet, 'Account 1');
-    await accountService.createAccount(wallet, 'Account 2');
+    await accountService.createAccount(wallet, 'Account 1', pin);
+    await accountService.createAccount(wallet, 'Account 2', pin);
     const accounts = await accountService.getAccounts(wallet);
     expect(accounts).toHaveLength(2);
     expect(accounts[0].name).toBe('Account 1');
@@ -53,7 +60,8 @@ describe('AccountServiceImpl', () => {
     const asset: Asset = { symbol: 'BTC', name: 'Bitcoin', decimals: 8 };
     const newAccount = await accountService.createAccount(
       wallet,
-      'New Account'
+      'New Account',
+      pin
     );
     blockchainClient.getBalance.mockResolvedValue({
       asset,

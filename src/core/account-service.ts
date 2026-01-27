@@ -1,9 +1,5 @@
 import { AccountService, BlockchainClient } from './ports';
-import { Wallet, Account, Asset, Balance, Address } from './domain';
-import { BIP32Factory } from 'bip32';
-import * as ecc from 'tiny-secp256k1';
-
-const bip32 = BIP32Factory(ecc);
+import { Wallet, Account, Asset, Balance } from './domain';
 
 export class AccountServiceImpl implements AccountService {
   constructor(private readonly blockchainClient: BlockchainClient) {}
@@ -12,31 +8,17 @@ export class AccountServiceImpl implements AccountService {
     return wallet.accounts;
   }
 
-  async createAccount(wallet: Wallet, name: string): Promise<Account> {
-    const root = bip32.fromBase58(wallet.masterPrivateKey);
+  async createAccount(
+    wallet: Wallet,
+    name: string,
+    pin: string
+  ): Promise<Account> {
     const accountIndex = wallet.accounts.length;
-    // Using BIP84 derivation path for native SegWit (P2WPKH)
-    const derivationPath = `m/84'/0'/${accountIndex}'/0/0`;
-    const childNode = root.derivePath(derivationPath);
+    const address = await wallet.bitcoinWallet.getAddress(accountIndex, pin);
 
-    if (!childNode.privateKey) {
-      throw new Error('Could not derive private key');
-    }
-
-    // Performance optimization:
-    // Account creation is now instantaneous. The expensive derivation work
-    // is deferred and executed lazily only when the account properties
-    // (address, privateKey, publicKey) are accessed for the first time.
-    const newAccount = new Account(
-      `account-${accountIndex}`,
-      name,
-      childNode
-    );
+    const newAccount = new Account(`account-${accountIndex}`, name, address);
 
     wallet.accounts.push(newAccount);
-    // Note: This implementation modifies the wallet object directly.
-    // In a real application, we might want to return a new wallet object
-    // to maintain immutability.
     return newAccount;
   }
 

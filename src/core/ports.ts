@@ -36,7 +36,7 @@ export interface WalletService {
 
 export interface AccountService {
   getAccounts(wallet: Wallet): Promise<Account[]>;
-  createAccount(wallet: Wallet, name: string): Promise<Account>;
+  createAccount(wallet: Wallet, name: string, pin: string): Promise<Account>;
   getAccountBalance(account: Account, asset: Asset): Promise<Balance>;
 }
 

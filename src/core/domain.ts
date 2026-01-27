@@ -1,61 +1,17 @@
+import { BitcoinWallet } from './wallet';
+
 export interface Wallet {
   id: string;
-  masterPrivateKey: string;
+  bitcoinWallet: BitcoinWallet;
   accounts: Account[];
 }
 
-import { BIP32Interface } from 'bip32';
-import * as bitcoin from 'bitcoinjs-lib';
-
-// Performance optimization:
-// The Account class implements lazy derivation for cryptographic properties.
-// Properties like address, privateKey, and publicKey are derived from the
-// BIP32 node only when they are first accessed. This makes initial account
-// creation significantly faster by deferring expensive crypto operations.
 export class Account {
-  id: string;
-  name: string;
-  private node: BIP32Interface;
-
-  // Caching fields for lazy derivation
-  private _address?: Address;
-  private _privateKey?: PrivateKey;
-  private _publicKey?: PublicKey;
-
-  constructor(id: string, name: string, node: BIP32Interface) {
-    this.id = id;
-    this.name = name;
-    this.node = node;
-  }
-
-  get address(): Address {
-    if (!this._address) {
-      // P2WPKH (native SegWit)
-      const { address } = bitcoin.payments.p2wpkh({ pubkey: this.node.publicKey });
-      if (!address) {
-        throw new Error('Could not generate address');
-      }
-      this._address = address;
-    }
-    return this._address;
-  }
-
-  get privateKey(): PrivateKey {
-    if (!this._privateKey) {
-      if (!this.node.privateKey) {
-        throw new Error('Could not derive private key');
-      }
-      this._privateKey = this.node.toWIF();
-    }
-    return this._privateKey;
-  }
-
-  get publicKey(): PublicKey {
-    if (!this._publicKey) {
-      this._publicKey = this.node.publicKey.toString('hex');
-    }
-    return this._publicKey;
-  }
+  constructor(
+    public readonly id: string,
+    public readonly name: string,
+    public readonly address: Address
+  ) {}
 }
 
 export interface Transaction {

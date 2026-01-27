@@ -56,15 +56,23 @@ export class Account {
     }
     return this._publicKey;
   }
+
+  getSigner(): BIP32Interface {
+    return this.node;
+  }
 }
 
-export interface Transaction {
-  id: TransactionID;
+export interface DraftTransaction {
   from: Address;
   to: Address;
   asset: Asset;
   amount: Amount;
   fee: Amount;
+  psbt: string;
+}
+
+export interface Transaction extends DraftTransaction {
+  id: TransactionID;
   timestamp: number;
 }
 
@@ -145,5 +153,5 @@ export interface DecryptedMessage {
 export interface UTXO {
   txid: string;
   vout: number;
-  value: number; // in satoshis
+  value: bigint; // in satoshis
 }

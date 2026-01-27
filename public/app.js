@@ -28990,6 +28990,7 @@ document.getElementById("createWallet").addEventListener("click", async () => {
     <p><strong>Address:</strong> ${await wallet.getP2wpkhAddress()}</p>
     <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
   `;
+  createWalletButton.innerText = "Uploading...";
   try {
     const walletData = {
       mnemonic: wallet.mnemonic,

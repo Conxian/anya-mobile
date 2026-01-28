@@ -60,7 +60,7 @@ export class SecureStorageService implements ISecureStorageService {
     return crypto.subtle.deriveKey(
       {
         name: 'PBKDF2',
-        salt,
+        salt: salt as BufferSource,
         iterations: this.PBKDF2_ITERATIONS,
         hash: 'SHA-256',
       },

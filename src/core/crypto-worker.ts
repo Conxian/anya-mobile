@@ -1,21 +1,100 @@
-// ⚡ Bolt: This worker offloads the expensive, CPU-intensive `mnemonicToSeed`
-// operation from the main UI thread. By performing this cryptographic work in the
-// background, we prevent the UI from freezing during wallet creation or loading,
-// ensuring a smooth and responsive user experience.
+// ⚡ Bolt: This worker offloads expensive, CPU-intensive cryptographic operations
+// from the main UI thread. It now handles both `mnemonicToSeed` for wallet
+// creation and the entire `getAddress` flow, including decryption, seed
+// generation, and key derivation. This ensures the UI remains responsive.
 
-import { mnemonicToSeed } from '@scure/bip39';
+import { mnemonicToSeed, mnemonicToSeedSync } from '@scure/bip39';
+import * as bitcoin from 'bitcoinjs-lib';
+import { BIP32Factory } from 'bip32';
+import * as ecc from 'tiny-secp256k1';
 
-self.onmessage = async (event: MessageEvent<string>) => {
-  const mnemonic = event.data;
+const bip32 = BIP32Factory(ecc);
+
+// --- Inlined SecureStorageService Logic ---
+const SALT_LENGTH = 16;
+const IV_LENGTH = 12;
+const KEY_LENGTH = 256;
+const PBKDF2_ITERATIONS = 100000;
+
+async function deriveKey(pin: string, salt: Uint8Array): Promise<CryptoKey> {
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(pin),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveKey']
+  );
+
+  return crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: salt as BufferSource,
+      iterations: PBKDF2_ITERATIONS,
+      hash: 'SHA-256',
+    },
+    keyMaterial,
+    { name: 'AES-GCM', length: KEY_LENGTH },
+    true,
+    ['encrypt', 'decrypt']
+  );
+}
+
+async function decrypt(encryptedHexString: string, pin: string): Promise<string> {
+  const encryptedDataBytes = Buffer.from(encryptedHexString, 'hex');
+  const salt = encryptedDataBytes.slice(0, SALT_LENGTH);
+  const iv = encryptedDataBytes.slice(SALT_LENGTH, SALT_LENGTH + IV_LENGTH);
+  const data = encryptedDataBytes.slice(SALT_LENGTH + IV_LENGTH);
+  const key = await deriveKey(pin, salt);
+  const decryptedData = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    data
+  );
+  return new TextDecoder().decode(decryptedData);
+}
+
+// --- Message Handling ---
+
+interface DerivationPayload {
+  encryptedMnemonic: string;
+  pin: string;
+  index: number;
+}
+
+self.onmessage = async (event: MessageEvent<string | { type: string; payload: any }>) => {
   try {
-    const seed = await mnemonicToSeed(mnemonic);
-    // Post the Uint8Array seed back to the main thread.
-    // The second argument, [seed.buffer], is a Transferable object, which
-    // transfers ownership of the underlying ArrayBuffer to the main thread
-    // near-instantaneously, avoiding the overhead of copying.
-    self.postMessage({ status: 'success', seed }, [seed.buffer]);
+    if (typeof event.data === 'string') {
+      // --- Original mnemonicToSeed logic ---
+      const mnemonic = event.data;
+      const seed = await mnemonicToSeed(mnemonic);
+      self.postMessage({ status: 'success', seed }, [seed.buffer]);
+    } else {
+      const { type, payload } = event.data;
+      const { encryptedMnemonic, pin, index } = payload as DerivationPayload;
+      const mnemonic = await decrypt(encryptedMnemonic, pin);
+      const seed = mnemonicToSeedSync(mnemonic);
+      const root = bip32.fromSeed(seed);
+      const path = `m/84'/0'/0'/0/${index}`;
+      const child = root.derivePath(path);
+
+      if (type === 'getAddress') {
+        const { address } = bitcoin.payments.p2wpkh({ pubkey: child.publicKey });
+        self.postMessage({ status: 'success', address });
+      } else if (type === 'getNode') {
+        if (!child.privateKey) {
+          throw new Error('Could not derive private key');
+        }
+        self.postMessage({
+          status: 'success',
+          node: {
+            publicKey: child.publicKey.buffer,
+            privateKey: child.privateKey.buffer,
+            chainCode: child.chainCode.buffer,
+          },
+        });
+      }
+    }
   } catch (error) {
-    // If an error occurs, post an error message back.
-    self.postMessage({ status: 'error', error: error.message });
+    self.postMessage({ status: 'error', error: (error as Error).message });
   }
 };

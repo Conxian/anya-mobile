@@ -1,4 +1,6 @@
 import { BitcoinWallet } from './wallet';
+import * as bitcoin from 'bitcoinjs-lib';
+import { BIP32Interface } from 'bip32';
 
 export interface Wallet {
   id: string;
@@ -46,7 +48,7 @@ export class Account {
 
   get publicKey(): PublicKey {
     if (!this._publicKey) {
-      this._publicKey = this.node.publicKey.toString('hex');
+      this._publicKey = Buffer.from(this.node.publicKey).toString('hex');
     }
     return this._publicKey;
   }

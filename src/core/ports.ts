@@ -45,13 +45,14 @@ export interface TransactionService {
     sourceAccount: Account,
     destinationAddress: Address,
     asset: Asset,
-    amount: Amount
-  ): Promise<Transaction>;
+    amount: Amount,
+    feeRate: number
+  ): Promise<DraftTransaction>;
   signTransaction(
-    transaction: Transaction,
-    privateKey: PrivateKey
-  ): Promise<Transaction>;
-  broadcastTransaction(signedTransaction: Transaction): Promise<TransactionID>;
+    transaction: DraftTransaction,
+    account: Account
+  ): Promise<DraftTransaction>;
+  broadcastTransaction(signedTransaction: DraftTransaction): Promise<TransactionID>;
   getTransactionHistory(account: Account): Promise<Transaction[]>;
 }
 

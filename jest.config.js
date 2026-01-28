@@ -1,7 +1,8 @@
 module.exports = {
   testEnvironment: 'node',
   transform: {
-    '^.+\\.(ts|tsx|js|jsx)$': 'babel-jest',
+    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(js|jsx)$': 'babel-jest',
   },
   transformIgnorePatterns: [
     // The default transformIgnorePatterns ignores node_modules.

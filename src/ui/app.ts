@@ -14,10 +14,30 @@ document.getElementById('createWallet').addEventListener('click', async () => {
   // This avoids a long wait where the UI shows no new information.
   // We also give the IPFS status element a unique ID for targeted updates.
   walletInfo.innerHTML = `
-    <p><strong>Mnemonic:</strong> ${wallet.mnemonic}</p>
+    <p><strong>Mnemonic:</strong> ${wallet.mnemonic} <button id="copyMnemonic" title="Copy mnemonic to clipboard">Copy</button></p>
     <p><strong>Address:</strong> ${await wallet.getP2wpkhAddress()}</p>
     <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
   `;
+
+  // 🎨 Palette: Add copy-to-clipboard functionality for the mnemonic.
+  // This is a common UX pattern that makes it easier and safer for users
+  // to back up their sensitive information.
+  const copyMnemonicButton = document.getElementById('copyMnemonic') as HTMLButtonElement;
+  if (copyMnemonicButton) {
+    copyMnemonicButton.addEventListener('click', () => {
+      navigator.clipboard.writeText(wallet.mnemonic).then(() => {
+        copyMnemonicButton.innerText = 'Copied!';
+        setTimeout(() => {
+          copyMnemonicButton.innerText = 'Copy';
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy mnemonic: ', err);
+        // 🎨 Palette: Let the user know if the copy action failed.
+        copyMnemonicButton.innerText = 'Error!';
+        copyMnemonicButton.disabled = true;
+      });
+    });
+  }
 
   // 🎨 Palette: Provide more specific feedback to the user during the IPFS upload.
   createWalletButton.innerText = 'Uploading...';

@@ -1,18 +1,29 @@
 import { MessagingServiceImpl } from './messaging-service';
 import { Account } from './domain';
 import { getPublicKey, utils } from '@noble/secp256k1';
+import { mock, MockProxy } from 'jest-mock-extended';
+import { BIP32Interface } from 'bip32';
 
 const generateTestAccount = (id: string, name: string): Account => {
   const privateKey = utils.randomPrivateKey();
-  const publicKey = getPublicKey(privateKey, true);
+  const publicKey = Buffer.from(getPublicKey(privateKey, true));
 
-  return {
-    id,
-    name,
-    address: `${name}-address`,
-    privateKey: Buffer.from(privateKey).toString('hex'),
-    publicKey: Buffer.from(publicKey).toString('hex'),
-  };
+  const mockNode = mock<BIP32Interface>();
+  mockNode.privateKey = Buffer.from(privateKey);
+  mockNode.publicKey = publicKey;
+
+  const account = new Account(id, name, mockNode);
+
+  // Manually override getters to return mock data for this test,
+  // as the real getters would involve bitcoinjs-lib.
+  Object.defineProperty(account, 'privateKey', {
+    get: jest.fn(() => Buffer.from(privateKey).toString('hex')),
+  });
+  Object.defineProperty(account, 'publicKey', {
+    get: jest.fn(() => Buffer.from(publicKey).toString('hex')),
+  });
+
+  return account;
 };
 
 describe('MessagingServiceImpl', () => {

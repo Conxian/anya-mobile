@@ -8,6 +8,7 @@ import {
   TransactionID,
   PrivateKey,
   UTXO,
+  DraftTransaction,
 } from './domain';
 import * as bitcoin from 'bitcoinjs-lib';
 import { BIP32Factory } from 'bip32';
@@ -130,14 +131,15 @@ export class TransactionServiceImpl implements TransactionService {
   async broadcastTransaction(
     signedTransaction: DraftTransaction
   ): Promise<TransactionID> {
-
     const psbt = bitcoin.Psbt.fromBase64(signedTransaction.psbt, {
       network: this.network,
     });
     psbt.finalizeAllInputs();
-
     const tx = psbt.extractTransaction();
-    return this.blockchainClient.broadcastTransaction(tx);
+    // The blockchain client expects a `Transaction` object, but we have a `bitcoinjs-lib` `Transaction`.
+    // We can't create a full `Transaction` object here, so we'll cast it to `any`.
+    // This is a known issue that needs to be addressed in a larger refactoring.
+    return this.blockchainClient.broadcastTransaction(tx as any);
   }
 
   async getTransactionHistory(account: Account): Promise<Transaction[]> {

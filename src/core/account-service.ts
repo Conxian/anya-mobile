@@ -14,9 +14,12 @@ export class AccountServiceImpl implements AccountService {
     pin: string
   ): Promise<Account> {
     const accountIndex = wallet.accounts.length;
-    const address = await wallet.bitcoinWallet.getAddress(accountIndex, pin);
+    const node = await wallet.bitcoinWallet.secureWallet.getNode(
+      accountIndex,
+      pin
+    );
 
-    const newAccount = new Account(`account-${accountIndex}`, name, address);
+    const newAccount = new Account(`account-${accountIndex}`, name, node);
 
     wallet.accounts.push(newAccount);
     return newAccount;

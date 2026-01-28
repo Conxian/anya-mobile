@@ -3,10 +3,10 @@ import {
   Address,
   Asset,
   TransactionID,
-  Amount,
   Balance,
   Transaction,
   FeeEstimates,
+  UTXO,
 } from '../core/domain';
 
 export class MockBlockchainClient implements BlockchainClient {
@@ -29,6 +29,7 @@ export class MockBlockchainClient implements BlockchainClient {
       amount: { asset: mockAsset, value: '0.1' },
       fee: { asset: mockAsset, value: '0.0001' },
       timestamp: Date.now(),
+      psbt: 'cHNidP8BAg==', // Add the required psbt property
     };
   }
 
@@ -46,5 +47,21 @@ export class MockBlockchainClient implements BlockchainClient {
       medium: 2,
       fast: 3,
     };
+  }
+
+  async getUTXOs(address: Address): Promise<UTXO[]> {
+    // Return mock UTXOs for testing purposes.
+    return [
+      {
+        txid: 'mock-txid-1',
+        vout: 0,
+        value: BigInt(100000),
+      },
+      {
+        txid: 'mock-txid-2',
+        vout: 1,
+        value: BigInt(200000),
+      },
+    ];
   }
 }

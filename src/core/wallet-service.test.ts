@@ -17,7 +17,8 @@ describe('WalletServiceImpl', () => {
     expect(mnemonic).toBeDefined();
     expect(accountService.createAccount).toHaveBeenCalledWith(
       wallet,
-      'Default Account'
+      'Default Account',
+      '1234'
     );
   });
 
@@ -30,7 +31,8 @@ describe('WalletServiceImpl', () => {
     expect(wallet).toBeDefined();
     expect(accountService.createAccount).toHaveBeenCalledWith(
       wallet,
-      'Default Account'
+      'Default Account',
+      '1234'
     );
   });
 });

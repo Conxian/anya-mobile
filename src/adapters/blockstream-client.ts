@@ -54,6 +54,7 @@ export class BlockstreamClient implements BlockchainClient {
         value: ((totalInputValue - totalOutputValue) / 1e8).toString(),
       },
       timestamp: tx.status.block_time,
+      psbt: '', // This client does not provide PSBTs.
     };
   }
 

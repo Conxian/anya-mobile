@@ -19,6 +19,7 @@ describe('TransactionServiceImpl', () => {
       broadcastTransaction: jest.fn(),
       getTransaction: jest.fn(),
       getFeeEstimates: jest.fn(),
+      getBalance: jest.fn(),
     };
     transactionService = new TransactionServiceImpl(
       blockchainClient,

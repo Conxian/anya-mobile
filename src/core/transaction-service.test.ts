@@ -1,6 +1,6 @@
 import { TransactionServiceImpl } from './transaction-service';
-import { BlockchainClient } from './ports';
-import { Account, Transaction, DraftTransaction } from './domain';
+import { BlockchainClient, FeeRate } from './ports';
+import { Account, Transaction, DraftTransaction, FeeEstimates } from './domain';
 import { mock, MockProxy } from 'jest-mock-extended';
 import * as bitcoin from 'bitcoinjs-lib';
 import { BIP32Factory } from 'bip32';
@@ -91,12 +91,14 @@ describe('TransactionServiceImpl', () => {
         { txid: 'a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1', vout: 0, value: 100000n },
         { txid: 'b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1', vout: 1, value: 200000n },
       ];
+      const feeEstimates: FeeEstimates = { slow: 5, medium: 10, fast: 15 };
       blockchainClient.getUTXOs.mockResolvedValue(utxos);
+      blockchainClient.getFeeEstimates.mockResolvedValue(feeEstimates);
 
       const destinationAddress =
         'tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7';
       const amount = { value: '150000', asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 } };
-      const feeRate = 10;
+      const feeRate: FeeRate = 'medium';
 
       const draftTx = await transactionService.createTransaction(
         account,
@@ -118,12 +120,14 @@ describe('TransactionServiceImpl', () => {
 
     it('should throw an error when there are insufficient funds', async () => {
         const utxos = [{ txid: 'tx1', vout: 0, value: 50000n }];
+        const feeEstimates: FeeEstimates = { slow: 5, medium: 10, fast: 15 };
         blockchainClient.getUTXOs.mockResolvedValue(utxos);
+        blockchainClient.getFeeEstimates.mockResolvedValue(feeEstimates);
 
         const destinationAddress =
           'tb1q9pv3k5x3z3q2x7x7y2x7x7y2x7x7y2x7x7y2x7x7y2x7x7y2x7x7y2x7x7';
         const amount = { value: '100000', asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 } };
-        const feeRate = 10;
+        const feeRate: FeeRate = 'medium';
 
         await expect(
           transactionService.createTransaction(
@@ -230,4 +234,43 @@ describe('TransactionServiceImpl', () => {
           expect(blockchainClient.broadcastTransaction).toHaveBeenCalled();
         });
       });
+
+  describe('end-to-end transaction flow', () => {
+    it('should create, sign, and broadcast a transaction successfully', async () => {
+      // 1. Setup mocks
+      const utxos = [
+        { txid: 'c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1', vout: 0, value: 300000n },
+      ];
+      const feeEstimates: FeeEstimates = { slow: 5, medium: 10, fast: 15 };
+      const destinationAddress = 'tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7';
+      const amount = { value: '250000', asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 } };
+      const feeRate: FeeRate = 'fast';
+      const expectedTxId = 'final-tx-id';
+
+      blockchainClient.getUTXOs.mockResolvedValue(utxos);
+      blockchainClient.getFeeEstimates.mockResolvedValue(feeEstimates);
+      blockchainClient.broadcastTransaction.mockResolvedValue(expectedTxId);
+
+      // 2. Create transaction
+      const draftTx = await transactionService.createTransaction(
+        account,
+        destinationAddress,
+        amount.asset,
+        amount,
+        feeRate
+      );
+
+      // 3. Sign transaction
+      const signedDraftTx = await transactionService.signTransaction(draftTx, account);
+
+      // 4. Broadcast transaction
+      const txId = await transactionService.broadcastTransaction(signedDraftTx);
+
+      // 5. Assertions
+      expect(txId).toEqual(expectedTxId);
+      expect(blockchainClient.getUTXOs).toHaveBeenCalledWith(account.address);
+      expect(blockchainClient.getFeeEstimates).toHaveBeenCalled();
+      expect(blockchainClient.broadcastTransaction).toHaveBeenCalled();
+    });
+  });
 });

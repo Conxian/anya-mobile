@@ -40,13 +40,15 @@ export interface AccountService {
   getAccountBalance(account: Account, asset: Asset): Promise<Balance>;
 }
 
+export type FeeRate = 'slow' | 'medium' | 'fast';
+
 export interface TransactionService {
   createTransaction(
     sourceAccount: Account,
     destinationAddress: Address,
     asset: Asset,
     amount: Amount,
-    feeRate: number
+    feeRate: FeeRate
   ): Promise<DraftTransaction>;
   signTransaction(
     transaction: DraftTransaction,

@@ -1,4 +1,4 @@
-import { TransactionService, BlockchainClient } from './ports';
+import { TransactionService, BlockchainClient, FeeRate } from './ports';
 import {
   Account,
   Address,
@@ -29,13 +29,18 @@ export class TransactionServiceImpl implements TransactionService {
     destinationAddress: Address,
     asset: Asset,
     amount: Amount,
-    feeRate: number // in sat/vB
+    feeRate: FeeRate
   ): Promise<DraftTransaction> {
-    const utxos = await this.blockchainClient.getUTXOs(sourceAccount.address);
+    const [utxos, feeEstimates] = await Promise.all([
+      this.blockchainClient.getUTXOs(sourceAccount.address),
+      this.blockchainClient.getFeeEstimates(),
+    ]);
+    const satoshiFeeRate = feeEstimates[feeRate];
+
     const { inputs, fee } = this.selectUTXOs(
       utxos,
       BigInt(amount.value),
-      feeRate
+      satoshiFeeRate
     );
 
     const psbt = new bitcoin.Psbt({ network: this.network });

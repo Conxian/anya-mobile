@@ -1,6 +1,27 @@
 import { WalletServiceImpl } from './wallet-service';
 import { AccountService } from './ports';
 import { mock, MockProxy } from 'jest-mock-extended';
+import { mnemonicToSeedSync } from '@scure/bip39';
+
+// ⚡ Bolt: Mock the Web Worker for the Jest environment.
+// The `Worker` class is a browser API and does not exist in the Node.js
+// environment where Jest runs its tests. This mock simulates the behavior of
+// the crypto worker by intercepting the `postMessage` call and immediately
+// returning a valid seed using the synchronous `mnemonicToSeedSync` function.
+// This allows the `WalletServiceImpl` to be tested without modification.
+const mockWorker = {
+  onmessage: (data: any) => {},
+  postMessage: jest.fn(
+    (message: { payload: { mnemonic: string; passphrase?: string } }) => {
+      const { mnemonic, passphrase } = message.payload;
+      const seed = mnemonicToSeedSync(mnemonic, passphrase);
+      // Directly invoke onmessage to simulate the worker's response
+      mockWorker.onmessage({ data: { status: 'success', seed } });
+    }
+  ),
+  terminate: jest.fn(),
+};
+global.Worker = jest.fn(() => mockWorker) as any;
 
 describe('WalletServiceImpl', () => {
   let walletService: WalletServiceImpl;
@@ -9,6 +30,10 @@ describe('WalletServiceImpl', () => {
   beforeEach(() => {
     accountService = mock<AccountService>();
     walletService = new WalletServiceImpl(accountService);
+    // Clear mocks before each test to ensure isolation
+    (global.Worker as jest.Mock).mockClear();
+    mockWorker.postMessage.mockClear();
+    mockWorker.terminate.mockClear();
   });
 
   it('should create a new wallet', async () => {

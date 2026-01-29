@@ -61,15 +61,23 @@ interface DerivationPayload {
   index: number;
 }
 
-self.onmessage = async (event: MessageEvent<string | { type: string; payload: any }>) => {
+// ⚡ Bolt: Standardized worker communication. All messages now use a
+// { type, payload } structure for consistency and clarity. This change
+// also allows passing a passphrase for seed generation.
+interface MnemonicToSeedPayload {
+  mnemonic: string;
+  passphrase?: string;
+}
+
+self.onmessage = async (event: MessageEvent<{ type: string; payload: any }>) => {
   try {
-    if (typeof event.data === 'string') {
-      // --- Original mnemonicToSeed logic ---
-      const mnemonic = event.data;
-      const seed = await mnemonicToSeed(mnemonic);
+    const { type, payload } = event.data;
+
+    if (type === 'mnemonicToSeed') {
+      const { mnemonic, passphrase } = payload as MnemonicToSeedPayload;
+      const seed = await mnemonicToSeed(mnemonic, passphrase);
       self.postMessage({ status: 'success', seed }, [seed.buffer]);
-    } else {
-      const { type, payload } = event.data;
+    } else if (type === 'getAddress' || type === 'getNode') {
       const { encryptedMnemonic, pin, index } = payload as DerivationPayload;
       const mnemonic = await decrypt(encryptedMnemonic, pin);
       const seed = mnemonicToSeedSync(mnemonic);
@@ -78,7 +86,9 @@ self.onmessage = async (event: MessageEvent<string | { type: string; payload: an
       const child = root.derivePath(path);
 
       if (type === 'getAddress') {
-        const { address } = bitcoin.payments.p2wpkh({ pubkey: child.publicKey });
+        const { address } = bitcoin.payments.p2wpkh({
+          pubkey: child.publicKey,
+        });
         self.postMessage({ status: 'success', address });
       } else if (type === 'getNode') {
         if (!child.privateKey) {

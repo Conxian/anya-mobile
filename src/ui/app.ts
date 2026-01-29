@@ -14,7 +14,7 @@ document.getElementById('createWallet').addEventListener('click', async () => {
   // This avoids a long wait where the UI shows no new information.
   // We also give the IPFS status element a unique ID for targeted updates.
   walletInfo.innerHTML = `
-    <p><strong>Mnemonic:</strong> ${wallet.mnemonic} <button id="copyMnemonic" title="Copy mnemonic to clipboard">Copy</button></p>
+    <p><strong>Mnemonic:</strong> ${wallet.mnemonic} <button id="copyMnemonic" title="Copy mnemonic to clipboard" aria-label="Copy mnemonic to clipboard">📋</button></p>
     <p><strong>Address:</strong> ${await wallet.getP2wpkhAddress()}</p>
     <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
   `;
@@ -26,9 +26,9 @@ document.getElementById('createWallet').addEventListener('click', async () => {
   if (copyMnemonicButton) {
     copyMnemonicButton.addEventListener('click', () => {
       navigator.clipboard.writeText(wallet.mnemonic).then(() => {
-        copyMnemonicButton.innerText = 'Copied!';
+        copyMnemonicButton.innerText = '✅';
         setTimeout(() => {
-          copyMnemonicButton.innerText = 'Copy';
+          copyMnemonicButton.innerText = '📋';
         }, 2000);
       }).catch(err => {
         console.error('Failed to copy mnemonic: ', err);

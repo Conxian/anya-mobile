@@ -1,0 +1,3 @@
+## 2024-08-16 - Icon-Only Buttons Require ARIA Labels
+**Learning:** Replacing a button's descriptive text with an icon is a common UX enhancement, but it creates a critical accessibility regression if not handled correctly. Screen readers lose the context of the button's function. The `title` attribute is insufficient as its screen reader support is inconsistent.
+**Action:** Whenever converting a text-based button to an icon-only button, I must add a descriptive `aria-label` attribute to the `<button>` element to ensure its function is clearly announced to screen reader users. This maintains accessibility while improving the visual design.

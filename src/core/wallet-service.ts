@@ -16,7 +16,7 @@ export class WalletServiceImpl implements WalletService {
     passphrase: string
   ): Promise<{ wallet: Wallet; mnemonic: string }> {
     const mnemonic = generateMnemonic(wordlist);
-    const seed = await mnemonicToSeed(mnemonic, passphrase);
+    const seed = await this.runMnemonicToSeedInWorker(mnemonic, passphrase);
     bip32.fromSeed(seed);
 
     const wallet: Wallet = {
@@ -35,7 +35,7 @@ export class WalletServiceImpl implements WalletService {
     mnemonic: string,
     passphrase?: string
   ): Promise<Wallet> {
-    const seed = await mnemonicToSeed(mnemonic, passphrase);
+    const seed = await this.runMnemonicToSeedInWorker(mnemonic, passphrase);
     bip32.fromSeed(seed);
 
     const wallet: Wallet = {
@@ -70,5 +70,39 @@ export class WalletServiceImpl implements WalletService {
       'WalletService is stateless. Status is managed by the client.'
     );
     return WalletStatus.Unlocked; // Represents an operational, stateless service
+  }
+
+  // ⚡ Bolt: DRY up worker logic.
+  // This private helper encapsulates the logic for running the CPU-intensive
+  // mnemonicToSeed function in a Web Worker, avoiding code duplication
+  // in createWallet and loadWalletFromMnemonic.
+  private async runMnemonicToSeedInWorker(
+    mnemonic: string,
+    passphrase?: string
+  ): Promise<Uint8Array> {
+    return new Promise<Uint8Array>((resolve, reject) => {
+      // The worker script is bundled by esbuild into the public directory.
+      // This path must match the 'outfile' in build.js.
+      const worker = new Worker('./crypto-worker.js');
+
+      worker.onmessage = (event) => {
+        if (event.data.status === 'success') {
+          resolve(event.data.seed);
+        } else {
+          reject(new Error(event.data.error));
+        }
+        worker.terminate();
+      };
+
+      worker.onerror = (error) => {
+        reject(error);
+        worker.terminate();
+      };
+
+      worker.postMessage({
+        type: 'mnemonicToSeed',
+        payload: { mnemonic, passphrase },
+      });
+    });
   }
 }

@@ -88,6 +88,7 @@ export interface BlockchainClient {
   broadcastTransaction(signedTransaction: Transaction): Promise<TransactionID>;
   getFeeEstimates(): Promise<FeeEstimates>;
   getUTXOs(address: Address): Promise<UTXO[]>;
+  getTransactionHistory(address: Address): Promise<Transaction[]>;
 }
 
 export interface OracleClient {

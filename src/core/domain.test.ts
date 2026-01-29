@@ -2,6 +2,7 @@ import { Wallet, Account, Transaction, Asset, Amount } from './domain';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { BIP32Interface } from 'bip32';
 import { BitcoinWallet } from './wallet';
+import * as bitcoin from 'bitcoinjs-lib';
 
 describe('Domain Objects', () => {
   let mockNode: MockProxy<BIP32Interface>;
@@ -44,5 +45,17 @@ describe('Domain Objects', () => {
     };
     expect(transaction.id).toBe('tx_1');
     expect(transaction.amount.value).toBe('0.5');
+  });
+
+  it('should generate a native SegWit (P2WPKH) address for the specified network', () => {
+    const mainnetAccount = new Account('acc_1', 'My Bitcoin Account', mockNode, bitcoin.networks.bitcoin);
+    expect(mainnetAccount.address).toBe(
+      'bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4'
+    );
+
+    const testnetAccount = new Account('acc_2', 'My Testnet Account', mockNode, bitcoin.networks.testnet);
+    expect(testnetAccount.address).toBe(
+      'tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx'
+    );
   });
 });

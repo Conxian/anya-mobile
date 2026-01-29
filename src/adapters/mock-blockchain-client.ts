@@ -64,4 +64,31 @@ export class MockBlockchainClient implements BlockchainClient {
       },
     ];
   }
+
+  async getTransactionHistory(address: Address): Promise<Transaction[]> {
+    // Return a mock transaction history for testing purposes.
+    const mockAsset: Asset = { symbol: 'BTC', name: 'Bitcoin', decimals: 8 };
+    return [
+      {
+        id: 'mock-txid-1',
+        from: 'mock-from-address-1',
+        to: 'mock-to-address-1',
+        asset: mockAsset,
+        amount: { asset: mockAsset, value: '0.1' },
+        fee: { asset: mockAsset, value: '0.0001' },
+        timestamp: Date.now(),
+        psbt: 'cHNidP8BAg==',
+      },
+      {
+        id: 'mock-txid-2',
+        from: 'mock-from-address-2',
+        to: 'mock-to-address-2',
+        asset: mockAsset,
+        amount: { asset: mockAsset, value: '0.2' },
+        fee: { asset: mockAsset, value: '0.0002' },
+        timestamp: Date.now(),
+        psbt: 'cHNidP8BAg==',
+      },
+    ];
+  }
 }

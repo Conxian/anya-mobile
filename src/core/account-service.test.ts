@@ -8,6 +8,7 @@ import { Crypto } from '@peculiar/webcrypto';
 import { SecureWallet } from './secure-bitcoin-lib';
 import { BIP32Factory } from 'bip32';
 import * as ecc from 'tiny-secp256k1';
+import * as bitcoin from 'bitcoinjs-lib';
 
 const bip32 = BIP32Factory(ecc);
 
@@ -50,7 +51,7 @@ describe('AccountServiceImpl', () => {
   beforeEach(async () => {
     blockchainClient = mock<BlockchainClient>();
     secureStorageService = new SecureStorageService();
-    accountService = new AccountServiceImpl(blockchainClient);
+    accountService = new AccountServiceImpl(blockchainClient, bitcoin.networks.testnet);
 
     const mnemonic =
       'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
@@ -81,7 +82,7 @@ describe('AccountServiceImpl', () => {
     expect(newAccount.name).toBe('New Account');
     expect(wallet.accounts).toHaveLength(1);
     expect(newAccount.address).toBe(
-      'bc1qe0g7q5f92pqjy3jfaana4qyzs5y9d2vrdx64ff'
+      'tb1qe0g7q5f92pqjy3jfaana4qyzs5y9d2vr8qpxj6'
     );
   });
 

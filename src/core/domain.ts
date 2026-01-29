@@ -12,22 +12,32 @@ export class Account {
   id: string;
   name: string;
   private node: BIP32Interface;
+  private network: bitcoin.Network;
 
   // Caching fields for lazy derivation
   private _address?: Address;
   private _privateKey?: PrivateKey;
   private _publicKey?: PublicKey;
 
-  constructor(id: string, name: string, node: BIP32Interface) {
+  constructor(
+    id: string,
+    name: string,
+    node: BIP32Interface,
+    network: bitcoin.Network = bitcoin.networks.bitcoin
+  ) {
     this.id = id;
     this.name = name;
     this.node = node;
+    this.network = network;
   }
 
   get address(): Address {
     if (!this._address) {
       // P2WPKH (native SegWit)
-      const { address } = bitcoin.payments.p2wpkh({ pubkey: this.node.publicKey });
+      const { address } = bitcoin.payments.p2wpkh({
+        pubkey: this.node.publicKey,
+        network: this.network,
+      });
       if (!address) {
         throw new Error('Could not generate address');
       }

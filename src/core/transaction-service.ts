@@ -86,33 +86,37 @@ export class TransactionServiceImpl implements TransactionService {
     targetAmount: bigint,
     feeRate: number
   ): { inputs: UTXO[]; fee: number } {
-    // Naive coin selection: use the largest UTXOs available to cover the target amount.
-    // WARNING: This is not a robust coin selection algorithm and is not suitable for production.
-    const sortedUtxos = [...utxos].sort((a, b) => (a.value > b.value ? -1 : 1));
+    // "Largest-First" coin selection: Prioritize larger UTXOs to minimize the number of inputs.
+    // This is a simple and effective strategy, but may not be optimal for privacy or minimizing chain fees in all cases.
+    const sortedUtxos = [...utxos].sort((a, b) => (b.value > a.value ? 1 : -1));
+
     const selectedInputs: UTXO[] = [];
     let totalValue = 0n;
-    let estimatedFee = 0;
+    const baseTxVsize = 11; // Base transaction virtual size
+    const outputVsize = 31; // P2WPKH output virtual size
+    const inputVsize = 68;  // P2WPKH input virtual size
 
     for (const utxo of sortedUtxos) {
-      if (totalValue >= targetAmount + BigInt(estimatedFee)) {
-        break;
-      }
       selectedInputs.push(utxo);
       totalValue += utxo.value;
-      // Estimate the fee based on the number of inputs and outputs for a P2WPKH transaction.
-      const baseTxVsize = 11; // ~11 vbytes for version, locktime, input/output counts
-      const inputVsize = 68; // ~68 vbytes for a P2WPKH input
-      const outputVsize = 31; // ~31 vbytes for a P2WPKH output
-      const estimatedVsize =
-        baseTxVsize + selectedInputs.length * inputVsize + 2 * outputVsize;
-      estimatedFee = estimatedVsize * feeRate;
+
+      const estimatedVsize = baseTxVsize + (selectedInputs.length * inputVsize) + (2 * outputVsize); // 2 outputs: payment and change
+      const estimatedFee = BigInt(Math.ceil(estimatedVsize * feeRate));
+
+      if (totalValue >= targetAmount + estimatedFee) {
+        // We have enough to cover the amount and the fee
+        return { inputs: selectedInputs, fee: Number(estimatedFee) };
+      }
     }
 
-    if (totalValue < targetAmount + BigInt(estimatedFee)) {
-      throw new Error('Insufficient funds');
+    // If we get here, we don't have enough funds
+    const finalEstimatedVsize = baseTxVsize + (selectedInputs.length * inputVsize) + (2 * outputVsize);
+    const finalEstimatedFee = BigInt(Math.ceil(finalEstimatedVsize * feeRate));
+    if (totalValue < targetAmount + finalEstimatedFee) {
+        throw new Error('Insufficient funds to cover the transaction amount and network fee.');
     }
 
-    return { inputs: selectedInputs, fee: Math.ceil(estimatedFee) };
+    return { inputs: selectedInputs, fee: Number(finalEstimatedFee) };
   }
 
   async signTransaction(
@@ -143,6 +147,6 @@ export class TransactionServiceImpl implements TransactionService {
   }
 
   async getTransactionHistory(account: Account): Promise<Transaction[]> {
-    throw new Error('Method not implemented.');
+    return this.blockchainClient.getTransactionHistory(account.address);
   }
 }

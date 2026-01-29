@@ -3,6 +3,7 @@ import { Account } from './domain';
 import { getPublicKey, utils } from '@noble/secp256k1';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { BIP32Interface } from 'bip32';
+import * as bitcoin from 'bitcoinjs-lib';
 
 const generateTestAccount = (id: string, name: string): Account => {
   const privateKey = utils.randomPrivateKey();
@@ -12,7 +13,7 @@ const generateTestAccount = (id: string, name: string): Account => {
   mockNode.privateKey = Buffer.from(privateKey);
   mockNode.publicKey = publicKey;
 
-  const account = new Account(id, name, mockNode);
+  const account = new Account(id, name, mockNode, bitcoin.networks.testnet);
 
   // Manually override getters to return mock data for this test,
   // as the real getters would involve bitcoinjs-lib.

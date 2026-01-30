@@ -4836,12 +4836,12 @@ var require_buffer = __commonJS({
       return obj !== obj;
     }
     var hexSliceLookupTable = (function() {
-      const alphabet6 = "0123456789abcdef";
+      const alphabet5 = "0123456789abcdef";
       const table2 = new Array(256);
       for (let i = 0; i < 16; ++i) {
         const i16 = i * 16;
         for (let j = 0; j < 16; ++j) {
-          table2[i16 + j] = alphabet6[i] + alphabet6[j];
+          table2[i16 + j] = alphabet5[i] + alphabet5[j];
         }
       }
       return table2;
@@ -4854,2699 +4854,6 @@ var require_buffer = __commonJS({
     }
   }
 });
-
-// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/utils.js
-function isBytes(a) {
-  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
-}
-function anumber(n, title = "") {
-  if (!Number.isSafeInteger(n) || n < 0) {
-    const prefix = title && `"${title}" `;
-    throw new Error(`${prefix}expected integer >= 0, got ${n}`);
-  }
-}
-function abytes(value2, length6, title = "") {
-  const bytes = isBytes(value2);
-  const len = value2?.length;
-  const needsLen = length6 !== void 0;
-  if (!bytes || needsLen && len !== length6) {
-    const prefix = title && `"${title}" `;
-    const ofLen = needsLen ? ` of length ${length6}` : "";
-    const got = bytes ? `length=${len}` : `type=${typeof value2}`;
-    throw new Error(prefix + "expected Uint8Array" + ofLen + ", got " + got);
-  }
-  return value2;
-}
-function aexists(instance3, checkFinished = true) {
-  if (instance3.destroyed)
-    throw new Error("Hash instance has been destroyed");
-  if (checkFinished && instance3.finished)
-    throw new Error("Hash#digest() has already been called");
-}
-function aoutput(out, instance3) {
-  abytes(out, void 0, "digestInto() output");
-  const min = instance3.outputLen;
-  if (out.length < min) {
-    throw new Error('"digestInto() output" expected to be of length >=' + min);
-  }
-}
-function clean(...arrays) {
-  for (let i = 0; i < arrays.length; i++) {
-    arrays[i].fill(0);
-  }
-}
-function createView(arr) {
-  return new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
-}
-function rotr(word, shift) {
-  return word << 32 - shift | word >>> shift;
-}
-function createHasher(hashCons, info = {}) {
-  const hashC = (msg, opts) => hashCons(opts).update(msg).digest();
-  const tmp = hashCons(void 0);
-  hashC.outputLen = tmp.outputLen;
-  hashC.blockLen = tmp.blockLen;
-  hashC.create = (opts) => hashCons(opts);
-  Object.assign(hashC, info);
-  return Object.freeze(hashC);
-}
-function randomBytes(bytesLength = 32) {
-  const cr = typeof globalThis === "object" ? globalThis.crypto : null;
-  if (typeof cr?.getRandomValues !== "function")
-    throw new Error("crypto.getRandomValues must be defined");
-  return cr.getRandomValues(new Uint8Array(bytesLength));
-}
-var oidNist = (suffix) => ({
-  oid: Uint8Array.from([6, 9, 96, 134, 72, 1, 101, 3, 4, 2, suffix])
-});
-
-// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/_md.js
-function Chi(a, b, c) {
-  return a & b ^ ~a & c;
-}
-function Maj(a, b, c) {
-  return a & b ^ a & c ^ b & c;
-}
-var HashMD = class {
-  blockLen;
-  outputLen;
-  padOffset;
-  isLE;
-  // For partial updates less than block size
-  buffer;
-  view;
-  finished = false;
-  length = 0;
-  pos = 0;
-  destroyed = false;
-  constructor(blockLen, outputLen, padOffset, isLE) {
-    this.blockLen = blockLen;
-    this.outputLen = outputLen;
-    this.padOffset = padOffset;
-    this.isLE = isLE;
-    this.buffer = new Uint8Array(blockLen);
-    this.view = createView(this.buffer);
-  }
-  update(data) {
-    aexists(this);
-    abytes(data);
-    const { view, buffer: buffer2, blockLen } = this;
-    const len = data.length;
-    for (let pos = 0; pos < len; ) {
-      const take = Math.min(blockLen - this.pos, len - pos);
-      if (take === blockLen) {
-        const dataView2 = createView(data);
-        for (; blockLen <= len - pos; pos += blockLen)
-          this.process(dataView2, pos);
-        continue;
-      }
-      buffer2.set(data.subarray(pos, pos + take), this.pos);
-      this.pos += take;
-      pos += take;
-      if (this.pos === blockLen) {
-        this.process(view, 0);
-        this.pos = 0;
-      }
-    }
-    this.length += data.length;
-    this.roundClean();
-    return this;
-  }
-  digestInto(out) {
-    aexists(this);
-    aoutput(out, this);
-    this.finished = true;
-    const { buffer: buffer2, view, blockLen, isLE } = this;
-    let { pos } = this;
-    buffer2[pos++] = 128;
-    clean(this.buffer.subarray(pos));
-    if (this.padOffset > blockLen - pos) {
-      this.process(view, 0);
-      pos = 0;
-    }
-    for (let i = pos; i < blockLen; i++)
-      buffer2[i] = 0;
-    view.setBigUint64(blockLen - 8, BigInt(this.length * 8), isLE);
-    this.process(view, 0);
-    const oview = createView(out);
-    const len = this.outputLen;
-    if (len % 4)
-      throw new Error("_sha2: outputLen must be aligned to 32bit");
-    const outLen = len / 4;
-    const state = this.get();
-    if (outLen > state.length)
-      throw new Error("_sha2: outputLen bigger than state");
-    for (let i = 0; i < outLen; i++)
-      oview.setUint32(4 * i, state[i], isLE);
-  }
-  digest() {
-    const { buffer: buffer2, outputLen } = this;
-    this.digestInto(buffer2);
-    const res = buffer2.slice(0, outputLen);
-    this.destroy();
-    return res;
-  }
-  _cloneInto(to) {
-    to ||= new this.constructor();
-    to.set(...this.get());
-    const { blockLen, buffer: buffer2, length: length6, finished, destroyed, pos } = this;
-    to.destroyed = destroyed;
-    to.finished = finished;
-    to.length = length6;
-    to.pos = pos;
-    if (length6 % blockLen)
-      to.buffer.set(buffer2);
-    return to;
-  }
-  clone() {
-    return this._cloneInto();
-  }
-};
-var SHA256_IV = /* @__PURE__ */ Uint32Array.from([
-  1779033703,
-  3144134277,
-  1013904242,
-  2773480762,
-  1359893119,
-  2600822924,
-  528734635,
-  1541459225
-]);
-
-// node_modules/.pnpm/@noble+hashes@2.0.1/node_modules/@noble/hashes/sha2.js
-var SHA256_K = /* @__PURE__ */ Uint32Array.from([
-  1116352408,
-  1899447441,
-  3049323471,
-  3921009573,
-  961987163,
-  1508970993,
-  2453635748,
-  2870763221,
-  3624381080,
-  310598401,
-  607225278,
-  1426881987,
-  1925078388,
-  2162078206,
-  2614888103,
-  3248222580,
-  3835390401,
-  4022224774,
-  264347078,
-  604807628,
-  770255983,
-  1249150122,
-  1555081692,
-  1996064986,
-  2554220882,
-  2821834349,
-  2952996808,
-  3210313671,
-  3336571891,
-  3584528711,
-  113926993,
-  338241895,
-  666307205,
-  773529912,
-  1294757372,
-  1396182291,
-  1695183700,
-  1986661051,
-  2177026350,
-  2456956037,
-  2730485921,
-  2820302411,
-  3259730800,
-  3345764771,
-  3516065817,
-  3600352804,
-  4094571909,
-  275423344,
-  430227734,
-  506948616,
-  659060556,
-  883997877,
-  958139571,
-  1322822218,
-  1537002063,
-  1747873779,
-  1955562222,
-  2024104815,
-  2227730452,
-  2361852424,
-  2428436474,
-  2756734187,
-  3204031479,
-  3329325298
-]);
-var SHA256_W = /* @__PURE__ */ new Uint32Array(64);
-var SHA2_32B = class extends HashMD {
-  constructor(outputLen) {
-    super(64, outputLen, 8, false);
-  }
-  get() {
-    const { A, B, C, D, E, F, G, H } = this;
-    return [A, B, C, D, E, F, G, H];
-  }
-  // prettier-ignore
-  set(A, B, C, D, E, F, G, H) {
-    this.A = A | 0;
-    this.B = B | 0;
-    this.C = C | 0;
-    this.D = D | 0;
-    this.E = E | 0;
-    this.F = F | 0;
-    this.G = G | 0;
-    this.H = H | 0;
-  }
-  process(view, offset) {
-    for (let i = 0; i < 16; i++, offset += 4)
-      SHA256_W[i] = view.getUint32(offset, false);
-    for (let i = 16; i < 64; i++) {
-      const W15 = SHA256_W[i - 15];
-      const W2 = SHA256_W[i - 2];
-      const s0 = rotr(W15, 7) ^ rotr(W15, 18) ^ W15 >>> 3;
-      const s1 = rotr(W2, 17) ^ rotr(W2, 19) ^ W2 >>> 10;
-      SHA256_W[i] = s1 + SHA256_W[i - 7] + s0 + SHA256_W[i - 16] | 0;
-    }
-    let { A, B, C, D, E, F, G, H } = this;
-    for (let i = 0; i < 64; i++) {
-      const sigma1 = rotr(E, 6) ^ rotr(E, 11) ^ rotr(E, 25);
-      const T1 = H + sigma1 + Chi(E, F, G) + SHA256_K[i] + SHA256_W[i] | 0;
-      const sigma0 = rotr(A, 2) ^ rotr(A, 13) ^ rotr(A, 22);
-      const T2 = sigma0 + Maj(A, B, C) | 0;
-      H = G;
-      G = F;
-      F = E;
-      E = D + T1 | 0;
-      D = C;
-      C = B;
-      B = A;
-      A = T1 + T2 | 0;
-    }
-    A = A + this.A | 0;
-    B = B + this.B | 0;
-    C = C + this.C | 0;
-    D = D + this.D | 0;
-    E = E + this.E | 0;
-    F = F + this.F | 0;
-    G = G + this.G | 0;
-    H = H + this.H | 0;
-    this.set(A, B, C, D, E, F, G, H);
-  }
-  roundClean() {
-    clean(SHA256_W);
-  }
-  destroy() {
-    this.set(0, 0, 0, 0, 0, 0, 0, 0);
-    clean(this.buffer);
-  }
-};
-var _SHA256 = class extends SHA2_32B {
-  // We cannot use array here since array allows indexing by variable
-  // which means optimizer/compiler cannot use registers.
-  A = SHA256_IV[0] | 0;
-  B = SHA256_IV[1] | 0;
-  C = SHA256_IV[2] | 0;
-  D = SHA256_IV[3] | 0;
-  E = SHA256_IV[4] | 0;
-  F = SHA256_IV[5] | 0;
-  G = SHA256_IV[6] | 0;
-  H = SHA256_IV[7] | 0;
-  constructor() {
-    super(32);
-  }
-};
-var sha256 = /* @__PURE__ */ createHasher(
-  () => new _SHA256(),
-  /* @__PURE__ */ oidNist(1)
-);
-
-// node_modules/.pnpm/@scure+base@2.0.0/node_modules/@scure/base/index.js
-function isBytes2(a) {
-  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
-}
-function isArrayOf(isString, arr) {
-  if (!Array.isArray(arr))
-    return false;
-  if (arr.length === 0)
-    return true;
-  if (isString) {
-    return arr.every((item) => typeof item === "string");
-  } else {
-    return arr.every((item) => Number.isSafeInteger(item));
-  }
-}
-function afn(input) {
-  if (typeof input !== "function")
-    throw new Error("function expected");
-  return true;
-}
-function astr(label, input) {
-  if (typeof input !== "string")
-    throw new Error(`${label}: string expected`);
-  return true;
-}
-function anumber2(n) {
-  if (!Number.isSafeInteger(n))
-    throw new Error(`invalid integer: ${n}`);
-}
-function aArr(input) {
-  if (!Array.isArray(input))
-    throw new Error("array expected");
-}
-function astrArr(label, input) {
-  if (!isArrayOf(true, input))
-    throw new Error(`${label}: array of strings expected`);
-}
-function anumArr(label, input) {
-  if (!isArrayOf(false, input))
-    throw new Error(`${label}: array of numbers expected`);
-}
-// @__NO_SIDE_EFFECTS__
-function chain(...args) {
-  const id = (a) => a;
-  const wrap = (a, b) => (c) => a(b(c));
-  const encode42 = args.map((x) => x.encode).reduceRight(wrap, id);
-  const decode44 = args.map((x) => x.decode).reduce(wrap, id);
-  return { encode: encode42, decode: decode44 };
-}
-// @__NO_SIDE_EFFECTS__
-function alphabet(letters) {
-  const lettersA = typeof letters === "string" ? letters.split("") : letters;
-  const len = lettersA.length;
-  astrArr("alphabet", lettersA);
-  const indexes = new Map(lettersA.map((l, i) => [l, i]));
-  return {
-    encode: (digits) => {
-      aArr(digits);
-      return digits.map((i) => {
-        if (!Number.isSafeInteger(i) || i < 0 || i >= len)
-          throw new Error(`alphabet.encode: digit index outside alphabet "${i}". Allowed: ${letters}`);
-        return lettersA[i];
-      });
-    },
-    decode: (input) => {
-      aArr(input);
-      return input.map((letter) => {
-        astr("alphabet.decode", letter);
-        const i = indexes.get(letter);
-        if (i === void 0)
-          throw new Error(`Unknown letter: "${letter}". Allowed: ${letters}`);
-        return i;
-      });
-    }
-  };
-}
-// @__NO_SIDE_EFFECTS__
-function join(separator = "") {
-  astr("join", separator);
-  return {
-    encode: (from7) => {
-      astrArr("join.decode", from7);
-      return from7.join(separator);
-    },
-    decode: (to) => {
-      astr("join.decode", to);
-      return to.split(separator);
-    }
-  };
-}
-// @__NO_SIDE_EFFECTS__
-function padding(bits, chr = "=") {
-  anumber2(bits);
-  astr("padding", chr);
-  return {
-    encode(data) {
-      astrArr("padding.encode", data);
-      while (data.length * bits % 8)
-        data.push(chr);
-      return data;
-    },
-    decode(input) {
-      astrArr("padding.decode", input);
-      let end = input.length;
-      if (end * bits % 8)
-        throw new Error("padding: invalid, string should have whole number of bytes");
-      for (; end > 0 && input[end - 1] === chr; end--) {
-        const last2 = end - 1;
-        const byte = last2 * bits;
-        if (byte % 8 === 0)
-          throw new Error("padding: invalid, string has too much padding");
-      }
-      return input.slice(0, end);
-    }
-  };
-}
-function convertRadix(data, from7, to) {
-  if (from7 < 2)
-    throw new Error(`convertRadix: invalid from=${from7}, base cannot be less than 2`);
-  if (to < 2)
-    throw new Error(`convertRadix: invalid to=${to}, base cannot be less than 2`);
-  aArr(data);
-  if (!data.length)
-    return [];
-  let pos = 0;
-  const res = [];
-  const digits = Array.from(data, (d) => {
-    anumber2(d);
-    if (d < 0 || d >= from7)
-      throw new Error(`invalid integer: ${d}`);
-    return d;
-  });
-  const dlen = digits.length;
-  while (true) {
-    let carry = 0;
-    let done = true;
-    for (let i = pos; i < dlen; i++) {
-      const digit = digits[i];
-      const fromCarry = from7 * carry;
-      const digitBase = fromCarry + digit;
-      if (!Number.isSafeInteger(digitBase) || fromCarry / from7 !== carry || digitBase - digit !== fromCarry) {
-        throw new Error("convertRadix: carry overflow");
-      }
-      const div = digitBase / to;
-      carry = digitBase % to;
-      const rounded = Math.floor(div);
-      digits[i] = rounded;
-      if (!Number.isSafeInteger(rounded) || rounded * to + carry !== digitBase)
-        throw new Error("convertRadix: carry overflow");
-      if (!done)
-        continue;
-      else if (!rounded)
-        pos = i;
-      else
-        done = false;
-    }
-    res.push(carry);
-    if (done)
-      break;
-  }
-  for (let i = 0; i < data.length - 1 && data[i] === 0; i++)
-    res.push(0);
-  return res.reverse();
-}
-var gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
-var radix2carry = /* @__NO_SIDE_EFFECTS__ */ (from7, to) => from7 + (to - gcd(from7, to));
-var powers = /* @__PURE__ */ (() => {
-  let res = [];
-  for (let i = 0; i < 40; i++)
-    res.push(2 ** i);
-  return res;
-})();
-function convertRadix2(data, from7, to, padding2) {
-  aArr(data);
-  if (from7 <= 0 || from7 > 32)
-    throw new Error(`convertRadix2: wrong from=${from7}`);
-  if (to <= 0 || to > 32)
-    throw new Error(`convertRadix2: wrong to=${to}`);
-  if (/* @__PURE__ */ radix2carry(from7, to) > 32) {
-    throw new Error(`convertRadix2: carry overflow from=${from7} to=${to} carryBits=${/* @__PURE__ */ radix2carry(from7, to)}`);
-  }
-  let carry = 0;
-  let pos = 0;
-  const max = powers[from7];
-  const mask = powers[to] - 1;
-  const res = [];
-  for (const n of data) {
-    anumber2(n);
-    if (n >= max)
-      throw new Error(`convertRadix2: invalid data word=${n} from=${from7}`);
-    carry = carry << from7 | n;
-    if (pos + from7 > 32)
-      throw new Error(`convertRadix2: carry overflow pos=${pos} from=${from7}`);
-    pos += from7;
-    for (; pos >= to; pos -= to)
-      res.push((carry >> pos - to & mask) >>> 0);
-    const pow = powers[pos];
-    if (pow === void 0)
-      throw new Error("invalid carry");
-    carry &= pow - 1;
-  }
-  carry = carry << to - pos & mask;
-  if (!padding2 && pos >= from7)
-    throw new Error("Excess padding");
-  if (!padding2 && carry > 0)
-    throw new Error(`Non-zero padding: ${carry}`);
-  if (padding2 && pos > 0)
-    res.push(carry >>> 0);
-  return res;
-}
-// @__NO_SIDE_EFFECTS__
-function radix(num) {
-  anumber2(num);
-  const _256 = 2 ** 8;
-  return {
-    encode: (bytes) => {
-      if (!isBytes2(bytes))
-        throw new Error("radix.encode input should be Uint8Array");
-      return convertRadix(Array.from(bytes), _256, num);
-    },
-    decode: (digits) => {
-      anumArr("radix.decode", digits);
-      return Uint8Array.from(convertRadix(digits, num, _256));
-    }
-  };
-}
-// @__NO_SIDE_EFFECTS__
-function radix2(bits, revPadding = false) {
-  anumber2(bits);
-  if (bits <= 0 || bits > 32)
-    throw new Error("radix2: bits should be in (0..32]");
-  if (/* @__PURE__ */ radix2carry(8, bits) > 32 || /* @__PURE__ */ radix2carry(bits, 8) > 32)
-    throw new Error("radix2: carry overflow");
-  return {
-    encode: (bytes) => {
-      if (!isBytes2(bytes))
-        throw new Error("radix2.encode input should be Uint8Array");
-      return convertRadix2(Array.from(bytes), 8, bits, !revPadding);
-    },
-    decode: (digits) => {
-      anumArr("radix2.decode", digits);
-      return Uint8Array.from(convertRadix2(digits, bits, 8, revPadding));
-    }
-  };
-}
-function checksum(len, fn) {
-  anumber2(len);
-  afn(fn);
-  return {
-    encode(data) {
-      if (!isBytes2(data))
-        throw new Error("checksum.encode: input should be Uint8Array");
-      const sum = fn(data).slice(0, len);
-      const res = new Uint8Array(data.length + len);
-      res.set(data);
-      res.set(sum, data.length);
-      return res;
-    },
-    decode(data) {
-      if (!isBytes2(data))
-        throw new Error("checksum.decode: input should be Uint8Array");
-      const payload = data.slice(0, -len);
-      const oldChecksum = data.slice(-len);
-      const newChecksum = fn(payload).slice(0, len);
-      for (let i = 0; i < len; i++)
-        if (newChecksum[i] !== oldChecksum[i])
-          throw new Error("Invalid checksum");
-      return payload;
-    }
-  };
-}
-var utils = {
-  alphabet,
-  chain,
-  checksum,
-  convertRadix,
-  convertRadix2,
-  radix,
-  radix2,
-  join,
-  padding
-};
-
-// node_modules/.pnpm/@scure+bip39@2.0.1/node_modules/@scure/bip39/index.js
-var isJapanese = (wordlist2) => wordlist2[0] === "\u3042\u3044\u3053\u304F\u3057\u3093";
-function aentropy(ent) {
-  abytes(ent);
-  if (![16, 20, 24, 28, 32].includes(ent.length))
-    throw new Error("invalid entropy length");
-}
-function generateMnemonic(wordlist2, strength = 128) {
-  anumber(strength);
-  if (strength % 32 !== 0 || strength > 256)
-    throw new TypeError("Invalid entropy");
-  return entropyToMnemonic(randomBytes(strength / 8), wordlist2);
-}
-var calcChecksum = (entropy) => {
-  const bitsLeft = 8 - entropy.length / 4;
-  return new Uint8Array([sha256(entropy)[0] >> bitsLeft << bitsLeft]);
-};
-function getCoder(wordlist2) {
-  if (!Array.isArray(wordlist2) || wordlist2.length !== 2048 || typeof wordlist2[0] !== "string")
-    throw new Error("Wordlist: expected array of 2048 strings");
-  wordlist2.forEach((i) => {
-    if (typeof i !== "string")
-      throw new Error("wordlist: non-string element: " + i);
-  });
-  return utils.chain(utils.checksum(1, calcChecksum), utils.radix2(11, true), utils.alphabet(wordlist2));
-}
-function entropyToMnemonic(entropy, wordlist2) {
-  aentropy(entropy);
-  const words = getCoder(wordlist2).encode(entropy);
-  return words.join(isJapanese(wordlist2) ? "\u3000" : " ");
-}
-
-// node_modules/.pnpm/@scure+bip39@2.0.1/node_modules/@scure/bip39/wordlists/english.js
-var wordlist = `abandon
-ability
-able
-about
-above
-absent
-absorb
-abstract
-absurd
-abuse
-access
-accident
-account
-accuse
-achieve
-acid
-acoustic
-acquire
-across
-act
-action
-actor
-actress
-actual
-adapt
-add
-addict
-address
-adjust
-admit
-adult
-advance
-advice
-aerobic
-affair
-afford
-afraid
-again
-age
-agent
-agree
-ahead
-aim
-air
-airport
-aisle
-alarm
-album
-alcohol
-alert
-alien
-all
-alley
-allow
-almost
-alone
-alpha
-already
-also
-alter
-always
-amateur
-amazing
-among
-amount
-amused
-analyst
-anchor
-ancient
-anger
-angle
-angry
-animal
-ankle
-announce
-annual
-another
-answer
-antenna
-antique
-anxiety
-any
-apart
-apology
-appear
-apple
-approve
-april
-arch
-arctic
-area
-arena
-argue
-arm
-armed
-armor
-army
-around
-arrange
-arrest
-arrive
-arrow
-art
-artefact
-artist
-artwork
-ask
-aspect
-assault
-asset
-assist
-assume
-asthma
-athlete
-atom
-attack
-attend
-attitude
-attract
-auction
-audit
-august
-aunt
-author
-auto
-autumn
-average
-avocado
-avoid
-awake
-aware
-away
-awesome
-awful
-awkward
-axis
-baby
-bachelor
-bacon
-badge
-bag
-balance
-balcony
-ball
-bamboo
-banana
-banner
-bar
-barely
-bargain
-barrel
-base
-basic
-basket
-battle
-beach
-bean
-beauty
-because
-become
-beef
-before
-begin
-behave
-behind
-believe
-below
-belt
-bench
-benefit
-best
-betray
-better
-between
-beyond
-bicycle
-bid
-bike
-bind
-biology
-bird
-birth
-bitter
-black
-blade
-blame
-blanket
-blast
-bleak
-bless
-blind
-blood
-blossom
-blouse
-blue
-blur
-blush
-board
-boat
-body
-boil
-bomb
-bone
-bonus
-book
-boost
-border
-boring
-borrow
-boss
-bottom
-bounce
-box
-boy
-bracket
-brain
-brand
-brass
-brave
-bread
-breeze
-brick
-bridge
-brief
-bright
-bring
-brisk
-broccoli
-broken
-bronze
-broom
-brother
-brown
-brush
-bubble
-buddy
-budget
-buffalo
-build
-bulb
-bulk
-bullet
-bundle
-bunker
-burden
-burger
-burst
-bus
-business
-busy
-butter
-buyer
-buzz
-cabbage
-cabin
-cable
-cactus
-cage
-cake
-call
-calm
-camera
-camp
-can
-canal
-cancel
-candy
-cannon
-canoe
-canvas
-canyon
-capable
-capital
-captain
-car
-carbon
-card
-cargo
-carpet
-carry
-cart
-case
-cash
-casino
-castle
-casual
-cat
-catalog
-catch
-category
-cattle
-caught
-cause
-caution
-cave
-ceiling
-celery
-cement
-census
-century
-cereal
-certain
-chair
-chalk
-champion
-change
-chaos
-chapter
-charge
-chase
-chat
-cheap
-check
-cheese
-chef
-cherry
-chest
-chicken
-chief
-child
-chimney
-choice
-choose
-chronic
-chuckle
-chunk
-churn
-cigar
-cinnamon
-circle
-citizen
-city
-civil
-claim
-clap
-clarify
-claw
-clay
-clean
-clerk
-clever
-click
-client
-cliff
-climb
-clinic
-clip
-clock
-clog
-close
-cloth
-cloud
-clown
-club
-clump
-cluster
-clutch
-coach
-coast
-coconut
-code
-coffee
-coil
-coin
-collect
-color
-column
-combine
-come
-comfort
-comic
-common
-company
-concert
-conduct
-confirm
-congress
-connect
-consider
-control
-convince
-cook
-cool
-copper
-copy
-coral
-core
-corn
-correct
-cost
-cotton
-couch
-country
-couple
-course
-cousin
-cover
-coyote
-crack
-cradle
-craft
-cram
-crane
-crash
-crater
-crawl
-crazy
-cream
-credit
-creek
-crew
-cricket
-crime
-crisp
-critic
-crop
-cross
-crouch
-crowd
-crucial
-cruel
-cruise
-crumble
-crunch
-crush
-cry
-crystal
-cube
-culture
-cup
-cupboard
-curious
-current
-curtain
-curve
-cushion
-custom
-cute
-cycle
-dad
-damage
-damp
-dance
-danger
-daring
-dash
-daughter
-dawn
-day
-deal
-debate
-debris
-decade
-december
-decide
-decline
-decorate
-decrease
-deer
-defense
-define
-defy
-degree
-delay
-deliver
-demand
-demise
-denial
-dentist
-deny
-depart
-depend
-deposit
-depth
-deputy
-derive
-describe
-desert
-design
-desk
-despair
-destroy
-detail
-detect
-develop
-device
-devote
-diagram
-dial
-diamond
-diary
-dice
-diesel
-diet
-differ
-digital
-dignity
-dilemma
-dinner
-dinosaur
-direct
-dirt
-disagree
-discover
-disease
-dish
-dismiss
-disorder
-display
-distance
-divert
-divide
-divorce
-dizzy
-doctor
-document
-dog
-doll
-dolphin
-domain
-donate
-donkey
-donor
-door
-dose
-double
-dove
-draft
-dragon
-drama
-drastic
-draw
-dream
-dress
-drift
-drill
-drink
-drip
-drive
-drop
-drum
-dry
-duck
-dumb
-dune
-during
-dust
-dutch
-duty
-dwarf
-dynamic
-eager
-eagle
-early
-earn
-earth
-easily
-east
-easy
-echo
-ecology
-economy
-edge
-edit
-educate
-effort
-egg
-eight
-either
-elbow
-elder
-electric
-elegant
-element
-elephant
-elevator
-elite
-else
-embark
-embody
-embrace
-emerge
-emotion
-employ
-empower
-empty
-enable
-enact
-end
-endless
-endorse
-enemy
-energy
-enforce
-engage
-engine
-enhance
-enjoy
-enlist
-enough
-enrich
-enroll
-ensure
-enter
-entire
-entry
-envelope
-episode
-equal
-equip
-era
-erase
-erode
-erosion
-error
-erupt
-escape
-essay
-essence
-estate
-eternal
-ethics
-evidence
-evil
-evoke
-evolve
-exact
-example
-excess
-exchange
-excite
-exclude
-excuse
-execute
-exercise
-exhaust
-exhibit
-exile
-exist
-exit
-exotic
-expand
-expect
-expire
-explain
-expose
-express
-extend
-extra
-eye
-eyebrow
-fabric
-face
-faculty
-fade
-faint
-faith
-fall
-false
-fame
-family
-famous
-fan
-fancy
-fantasy
-farm
-fashion
-fat
-fatal
-father
-fatigue
-fault
-favorite
-feature
-february
-federal
-fee
-feed
-feel
-female
-fence
-festival
-fetch
-fever
-few
-fiber
-fiction
-field
-figure
-file
-film
-filter
-final
-find
-fine
-finger
-finish
-fire
-firm
-first
-fiscal
-fish
-fit
-fitness
-fix
-flag
-flame
-flash
-flat
-flavor
-flee
-flight
-flip
-float
-flock
-floor
-flower
-fluid
-flush
-fly
-foam
-focus
-fog
-foil
-fold
-follow
-food
-foot
-force
-forest
-forget
-fork
-fortune
-forum
-forward
-fossil
-foster
-found
-fox
-fragile
-frame
-frequent
-fresh
-friend
-fringe
-frog
-front
-frost
-frown
-frozen
-fruit
-fuel
-fun
-funny
-furnace
-fury
-future
-gadget
-gain
-galaxy
-gallery
-game
-gap
-garage
-garbage
-garden
-garlic
-garment
-gas
-gasp
-gate
-gather
-gauge
-gaze
-general
-genius
-genre
-gentle
-genuine
-gesture
-ghost
-giant
-gift
-giggle
-ginger
-giraffe
-girl
-give
-glad
-glance
-glare
-glass
-glide
-glimpse
-globe
-gloom
-glory
-glove
-glow
-glue
-goat
-goddess
-gold
-good
-goose
-gorilla
-gospel
-gossip
-govern
-gown
-grab
-grace
-grain
-grant
-grape
-grass
-gravity
-great
-green
-grid
-grief
-grit
-grocery
-group
-grow
-grunt
-guard
-guess
-guide
-guilt
-guitar
-gun
-gym
-habit
-hair
-half
-hammer
-hamster
-hand
-happy
-harbor
-hard
-harsh
-harvest
-hat
-have
-hawk
-hazard
-head
-health
-heart
-heavy
-hedgehog
-height
-hello
-helmet
-help
-hen
-hero
-hidden
-high
-hill
-hint
-hip
-hire
-history
-hobby
-hockey
-hold
-hole
-holiday
-hollow
-home
-honey
-hood
-hope
-horn
-horror
-horse
-hospital
-host
-hotel
-hour
-hover
-hub
-huge
-human
-humble
-humor
-hundred
-hungry
-hunt
-hurdle
-hurry
-hurt
-husband
-hybrid
-ice
-icon
-idea
-identify
-idle
-ignore
-ill
-illegal
-illness
-image
-imitate
-immense
-immune
-impact
-impose
-improve
-impulse
-inch
-include
-income
-increase
-index
-indicate
-indoor
-industry
-infant
-inflict
-inform
-inhale
-inherit
-initial
-inject
-injury
-inmate
-inner
-innocent
-input
-inquiry
-insane
-insect
-inside
-inspire
-install
-intact
-interest
-into
-invest
-invite
-involve
-iron
-island
-isolate
-issue
-item
-ivory
-jacket
-jaguar
-jar
-jazz
-jealous
-jeans
-jelly
-jewel
-job
-join
-joke
-journey
-joy
-judge
-juice
-jump
-jungle
-junior
-junk
-just
-kangaroo
-keen
-keep
-ketchup
-key
-kick
-kid
-kidney
-kind
-kingdom
-kiss
-kit
-kitchen
-kite
-kitten
-kiwi
-knee
-knife
-knock
-know
-lab
-label
-labor
-ladder
-lady
-lake
-lamp
-language
-laptop
-large
-later
-latin
-laugh
-laundry
-lava
-law
-lawn
-lawsuit
-layer
-lazy
-leader
-leaf
-learn
-leave
-lecture
-left
-leg
-legal
-legend
-leisure
-lemon
-lend
-length
-lens
-leopard
-lesson
-letter
-level
-liar
-liberty
-library
-license
-life
-lift
-light
-like
-limb
-limit
-link
-lion
-liquid
-list
-little
-live
-lizard
-load
-loan
-lobster
-local
-lock
-logic
-lonely
-long
-loop
-lottery
-loud
-lounge
-love
-loyal
-lucky
-luggage
-lumber
-lunar
-lunch
-luxury
-lyrics
-machine
-mad
-magic
-magnet
-maid
-mail
-main
-major
-make
-mammal
-man
-manage
-mandate
-mango
-mansion
-manual
-maple
-marble
-march
-margin
-marine
-market
-marriage
-mask
-mass
-master
-match
-material
-math
-matrix
-matter
-maximum
-maze
-meadow
-mean
-measure
-meat
-mechanic
-medal
-media
-melody
-melt
-member
-memory
-mention
-menu
-mercy
-merge
-merit
-merry
-mesh
-message
-metal
-method
-middle
-midnight
-milk
-million
-mimic
-mind
-minimum
-minor
-minute
-miracle
-mirror
-misery
-miss
-mistake
-mix
-mixed
-mixture
-mobile
-model
-modify
-mom
-moment
-monitor
-monkey
-monster
-month
-moon
-moral
-more
-morning
-mosquito
-mother
-motion
-motor
-mountain
-mouse
-move
-movie
-much
-muffin
-mule
-multiply
-muscle
-museum
-mushroom
-music
-must
-mutual
-myself
-mystery
-myth
-naive
-name
-napkin
-narrow
-nasty
-nation
-nature
-near
-neck
-need
-negative
-neglect
-neither
-nephew
-nerve
-nest
-net
-network
-neutral
-never
-news
-next
-nice
-night
-noble
-noise
-nominee
-noodle
-normal
-north
-nose
-notable
-note
-nothing
-notice
-novel
-now
-nuclear
-number
-nurse
-nut
-oak
-obey
-object
-oblige
-obscure
-observe
-obtain
-obvious
-occur
-ocean
-october
-odor
-off
-offer
-office
-often
-oil
-okay
-old
-olive
-olympic
-omit
-once
-one
-onion
-online
-only
-open
-opera
-opinion
-oppose
-option
-orange
-orbit
-orchard
-order
-ordinary
-organ
-orient
-original
-orphan
-ostrich
-other
-outdoor
-outer
-output
-outside
-oval
-oven
-over
-own
-owner
-oxygen
-oyster
-ozone
-pact
-paddle
-page
-pair
-palace
-palm
-panda
-panel
-panic
-panther
-paper
-parade
-parent
-park
-parrot
-party
-pass
-patch
-path
-patient
-patrol
-pattern
-pause
-pave
-payment
-peace
-peanut
-pear
-peasant
-pelican
-pen
-penalty
-pencil
-people
-pepper
-perfect
-permit
-person
-pet
-phone
-photo
-phrase
-physical
-piano
-picnic
-picture
-piece
-pig
-pigeon
-pill
-pilot
-pink
-pioneer
-pipe
-pistol
-pitch
-pizza
-place
-planet
-plastic
-plate
-play
-please
-pledge
-pluck
-plug
-plunge
-poem
-poet
-point
-polar
-pole
-police
-pond
-pony
-pool
-popular
-portion
-position
-possible
-post
-potato
-pottery
-poverty
-powder
-power
-practice
-praise
-predict
-prefer
-prepare
-present
-pretty
-prevent
-price
-pride
-primary
-print
-priority
-prison
-private
-prize
-problem
-process
-produce
-profit
-program
-project
-promote
-proof
-property
-prosper
-protect
-proud
-provide
-public
-pudding
-pull
-pulp
-pulse
-pumpkin
-punch
-pupil
-puppy
-purchase
-purity
-purpose
-purse
-push
-put
-puzzle
-pyramid
-quality
-quantum
-quarter
-question
-quick
-quit
-quiz
-quote
-rabbit
-raccoon
-race
-rack
-radar
-radio
-rail
-rain
-raise
-rally
-ramp
-ranch
-random
-range
-rapid
-rare
-rate
-rather
-raven
-raw
-razor
-ready
-real
-reason
-rebel
-rebuild
-recall
-receive
-recipe
-record
-recycle
-reduce
-reflect
-reform
-refuse
-region
-regret
-regular
-reject
-relax
-release
-relief
-rely
-remain
-remember
-remind
-remove
-render
-renew
-rent
-reopen
-repair
-repeat
-replace
-report
-require
-rescue
-resemble
-resist
-resource
-response
-result
-retire
-retreat
-return
-reunion
-reveal
-review
-reward
-rhythm
-rib
-ribbon
-rice
-rich
-ride
-ridge
-rifle
-right
-rigid
-ring
-riot
-ripple
-risk
-ritual
-rival
-river
-road
-roast
-robot
-robust
-rocket
-romance
-roof
-rookie
-room
-rose
-rotate
-rough
-round
-route
-royal
-rubber
-rude
-rug
-rule
-run
-runway
-rural
-sad
-saddle
-sadness
-safe
-sail
-salad
-salmon
-salon
-salt
-salute
-same
-sample
-sand
-satisfy
-satoshi
-sauce
-sausage
-save
-say
-scale
-scan
-scare
-scatter
-scene
-scheme
-school
-science
-scissors
-scorpion
-scout
-scrap
-screen
-script
-scrub
-sea
-search
-season
-seat
-second
-secret
-section
-security
-seed
-seek
-segment
-select
-sell
-seminar
-senior
-sense
-sentence
-series
-service
-session
-settle
-setup
-seven
-shadow
-shaft
-shallow
-share
-shed
-shell
-sheriff
-shield
-shift
-shine
-ship
-shiver
-shock
-shoe
-shoot
-shop
-short
-shoulder
-shove
-shrimp
-shrug
-shuffle
-shy
-sibling
-sick
-side
-siege
-sight
-sign
-silent
-silk
-silly
-silver
-similar
-simple
-since
-sing
-siren
-sister
-situate
-six
-size
-skate
-sketch
-ski
-skill
-skin
-skirt
-skull
-slab
-slam
-sleep
-slender
-slice
-slide
-slight
-slim
-slogan
-slot
-slow
-slush
-small
-smart
-smile
-smoke
-smooth
-snack
-snake
-snap
-sniff
-snow
-soap
-soccer
-social
-sock
-soda
-soft
-solar
-soldier
-solid
-solution
-solve
-someone
-song
-soon
-sorry
-sort
-soul
-sound
-soup
-source
-south
-space
-spare
-spatial
-spawn
-speak
-special
-speed
-spell
-spend
-sphere
-spice
-spider
-spike
-spin
-spirit
-split
-spoil
-sponsor
-spoon
-sport
-spot
-spray
-spread
-spring
-spy
-square
-squeeze
-squirrel
-stable
-stadium
-staff
-stage
-stairs
-stamp
-stand
-start
-state
-stay
-steak
-steel
-stem
-step
-stereo
-stick
-still
-sting
-stock
-stomach
-stone
-stool
-story
-stove
-strategy
-street
-strike
-strong
-struggle
-student
-stuff
-stumble
-style
-subject
-submit
-subway
-success
-such
-sudden
-suffer
-sugar
-suggest
-suit
-summer
-sun
-sunny
-sunset
-super
-supply
-supreme
-sure
-surface
-surge
-surprise
-surround
-survey
-suspect
-sustain
-swallow
-swamp
-swap
-swarm
-swear
-sweet
-swift
-swim
-swing
-switch
-sword
-symbol
-symptom
-syrup
-system
-table
-tackle
-tag
-tail
-talent
-talk
-tank
-tape
-target
-task
-taste
-tattoo
-taxi
-teach
-team
-tell
-ten
-tenant
-tennis
-tent
-term
-test
-text
-thank
-that
-theme
-then
-theory
-there
-they
-thing
-this
-thought
-three
-thrive
-throw
-thumb
-thunder
-ticket
-tide
-tiger
-tilt
-timber
-time
-tiny
-tip
-tired
-tissue
-title
-toast
-tobacco
-today
-toddler
-toe
-together
-toilet
-token
-tomato
-tomorrow
-tone
-tongue
-tonight
-tool
-tooth
-top
-topic
-topple
-torch
-tornado
-tortoise
-toss
-total
-tourist
-toward
-tower
-town
-toy
-track
-trade
-traffic
-tragic
-train
-transfer
-trap
-trash
-travel
-tray
-treat
-tree
-trend
-trial
-tribe
-trick
-trigger
-trim
-trip
-trophy
-trouble
-truck
-true
-truly
-trumpet
-trust
-truth
-try
-tube
-tuition
-tumble
-tuna
-tunnel
-turkey
-turn
-turtle
-twelve
-twenty
-twice
-twin
-twist
-two
-type
-typical
-ugly
-umbrella
-unable
-unaware
-uncle
-uncover
-under
-undo
-unfair
-unfold
-unhappy
-uniform
-unique
-unit
-universe
-unknown
-unlock
-until
-unusual
-unveil
-update
-upgrade
-uphold
-upon
-upper
-upset
-urban
-urge
-usage
-use
-used
-useful
-useless
-usual
-utility
-vacant
-vacuum
-vague
-valid
-valley
-valve
-van
-vanish
-vapor
-various
-vast
-vault
-vehicle
-velvet
-vendor
-venture
-venue
-verb
-verify
-version
-very
-vessel
-veteran
-viable
-vibrant
-vicious
-victory
-video
-view
-village
-vintage
-violin
-virtual
-virus
-visa
-visit
-visual
-vital
-vivid
-vocal
-voice
-void
-volcano
-volume
-vote
-voyage
-wage
-wagon
-wait
-walk
-wall
-walnut
-want
-warfare
-warm
-warrior
-wash
-wasp
-waste
-water
-wave
-way
-wealth
-weapon
-wear
-weasel
-weather
-web
-wedding
-weekend
-weird
-welcome
-west
-wet
-whale
-what
-wheat
-wheel
-when
-where
-whip
-whisper
-wide
-width
-wife
-wild
-will
-win
-window
-wine
-wing
-wink
-winner
-winter
-wire
-wisdom
-wise
-wish
-witness
-wolf
-woman
-wonder
-wood
-wool
-word
-work
-world
-worry
-worth
-wrap
-wreck
-wrestle
-wrist
-write
-wrong
-yard
-year
-yellow
-you
-young
-youth
-zebra
-zero
-zone
-zoo`.split("\n");
 
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/networks.js
 var networks_exports = {};
@@ -9051,15 +6358,15 @@ function p2pk(a, opts) {
 }
 
 // node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/utils.js
-function isBytes3(a) {
+function isBytes(a) {
   return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
 }
-function anumber3(n) {
+function anumber(n) {
   if (!Number.isSafeInteger(n) || n < 0)
     throw new Error("positive integer expected, got " + n);
 }
-function abytes2(b, ...lengths) {
-  if (!isBytes3(b))
+function abytes(b, ...lengths) {
+  if (!isBytes(b))
     throw new Error("Uint8Array expected");
   if (lengths.length > 0 && !lengths.includes(b.length))
     throw new Error("Uint8Array expected of length " + lengths + ", got length=" + b.length);
@@ -9067,31 +6374,31 @@ function abytes2(b, ...lengths) {
 function ahash(h2) {
   if (typeof h2 !== "function" || typeof h2.create !== "function")
     throw new Error("Hash should be wrapped by utils.createHasher");
-  anumber3(h2.outputLen);
-  anumber3(h2.blockLen);
+  anumber(h2.outputLen);
+  anumber(h2.blockLen);
 }
-function aexists2(instance3, checkFinished = true) {
+function aexists(instance3, checkFinished = true) {
   if (instance3.destroyed)
     throw new Error("Hash instance has been destroyed");
   if (checkFinished && instance3.finished)
     throw new Error("Hash#digest() has already been called");
 }
-function aoutput2(out, instance3) {
-  abytes2(out);
+function aoutput(out, instance3) {
+  abytes(out);
   const min = instance3.outputLen;
   if (out.length < min) {
     throw new Error("digestInto() expects output buffer of length at least " + min);
   }
 }
-function clean2(...arrays) {
+function clean(...arrays) {
   for (let i = 0; i < arrays.length; i++) {
     arrays[i].fill(0);
   }
 }
-function createView2(arr) {
+function createView(arr) {
   return new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
 }
-function rotr2(word, shift) {
+function rotr(word, shift) {
   return word << 32 - shift | word >>> shift;
 }
 function rotl(word, shift) {
@@ -9105,12 +6412,12 @@ function utf8ToBytes(str) {
 function toBytes(data) {
   if (typeof data === "string")
     data = utf8ToBytes(data);
-  abytes2(data);
+  abytes(data);
   return data;
 }
 var Hash = class {
 };
-function createHasher2(hashCons) {
+function createHasher(hashCons) {
   const hashC = (msg) => hashCons().update(toBytes(msg)).digest();
   const tmp = hashCons();
   hashC.outputLen = tmp.outputLen;
@@ -9132,13 +6439,13 @@ function setBigUint64(view, byteOffset, value2, isLE) {
   view.setUint32(byteOffset + h2, wh, isLE);
   view.setUint32(byteOffset + l, wl, isLE);
 }
-function Chi2(a, b, c) {
+function Chi(a, b, c) {
   return a & b ^ ~a & c;
 }
-function Maj2(a, b, c) {
+function Maj(a, b, c) {
   return a & b ^ a & c ^ b & c;
 }
-var HashMD2 = class extends Hash {
+var HashMD = class extends Hash {
   constructor(blockLen, outputLen, padOffset, isLE) {
     super();
     this.finished = false;
@@ -9150,18 +6457,18 @@ var HashMD2 = class extends Hash {
     this.padOffset = padOffset;
     this.isLE = isLE;
     this.buffer = new Uint8Array(blockLen);
-    this.view = createView2(this.buffer);
+    this.view = createView(this.buffer);
   }
   update(data) {
-    aexists2(this);
+    aexists(this);
     data = toBytes(data);
-    abytes2(data);
+    abytes(data);
     const { view, buffer: buffer2, blockLen } = this;
     const len = data.length;
     for (let pos = 0; pos < len; ) {
       const take = Math.min(blockLen - this.pos, len - pos);
       if (take === blockLen) {
-        const dataView2 = createView2(data);
+        const dataView2 = createView(data);
         for (; blockLen <= len - pos; pos += blockLen)
           this.process(dataView2, pos);
         continue;
@@ -9179,13 +6486,13 @@ var HashMD2 = class extends Hash {
     return this;
   }
   digestInto(out) {
-    aexists2(this);
-    aoutput2(out, this);
+    aexists(this);
+    aoutput(out, this);
     this.finished = true;
     const { buffer: buffer2, view, blockLen, isLE } = this;
     let { pos } = this;
     buffer2[pos++] = 128;
-    clean2(this.buffer.subarray(pos));
+    clean(this.buffer.subarray(pos));
     if (this.padOffset > blockLen - pos) {
       this.process(view, 0);
       pos = 0;
@@ -9194,7 +6501,7 @@ var HashMD2 = class extends Hash {
       buffer2[i] = 0;
     setBigUint64(view, blockLen - 8, BigInt(this.length * 8), isLE);
     this.process(view, 0);
-    const oview = createView2(out);
+    const oview = createView(out);
     const len = this.outputLen;
     if (len % 4)
       throw new Error("_sha2: outputLen should be aligned to 32bit");
@@ -9228,7 +6535,7 @@ var HashMD2 = class extends Hash {
     return this._cloneInto();
   }
 };
-var SHA256_IV2 = /* @__PURE__ */ Uint32Array.from([
+var SHA256_IV = /* @__PURE__ */ Uint32Array.from([
   1779033703,
   3144134277,
   1013904242,
@@ -9238,7 +6545,7 @@ var SHA256_IV2 = /* @__PURE__ */ Uint32Array.from([
   528734635,
   1541459225
 ]);
-var SHA512_IV2 = /* @__PURE__ */ Uint32Array.from([
+var SHA512_IV = /* @__PURE__ */ Uint32Array.from([
   1779033703,
   4089235720,
   3144134277,
@@ -9324,7 +6631,7 @@ function ripemd_f(group, x, y, z) {
   return x ^ (y | ~z);
 }
 var BUF_160 = /* @__PURE__ */ new Uint32Array(16);
-var RIPEMD160 = class extends HashMD2 {
+var RIPEMD160 = class extends HashMD {
   constructor() {
     super(64, 20, 8, true);
     this.h0 = 1732584193 | 0;
@@ -9365,15 +6672,15 @@ var RIPEMD160 = class extends HashMD2 {
     this.set(this.h1 + cl + dr | 0, this.h2 + dl + er | 0, this.h3 + el + ar | 0, this.h4 + al + br | 0, this.h0 + bl + cr | 0);
   }
   roundClean() {
-    clean2(BUF_160);
+    clean(BUF_160);
   }
   destroy() {
     this.destroyed = true;
-    clean2(this.buffer);
+    clean(this.buffer);
     this.set(0, 0, 0, 0, 0);
   }
 };
-var ripemd160 = /* @__PURE__ */ createHasher2(() => new RIPEMD160());
+var ripemd160 = /* @__PURE__ */ createHasher(() => new RIPEMD160());
 
 // node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/ripemd160.js
 var ripemd1602 = ripemd160;
@@ -9414,7 +6721,7 @@ var add5L = (Al, Bl2, Cl, Dl, El) => (Al >>> 0) + (Bl2 >>> 0) + (Cl >>> 0) + (Dl
 var add5H = (low, Ah, Bh, Ch, Dh, Eh) => Ah + Bh + Ch + Dh + Eh + (low / 2 ** 32 | 0) | 0;
 
 // node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/sha2.js
-var SHA256_K2 = /* @__PURE__ */ Uint32Array.from([
+var SHA256_K = /* @__PURE__ */ Uint32Array.from([
   1116352408,
   1899447441,
   3049323471,
@@ -9480,18 +6787,18 @@ var SHA256_K2 = /* @__PURE__ */ Uint32Array.from([
   3204031479,
   3329325298
 ]);
-var SHA256_W2 = /* @__PURE__ */ new Uint32Array(64);
-var SHA256 = class extends HashMD2 {
+var SHA256_W = /* @__PURE__ */ new Uint32Array(64);
+var SHA256 = class extends HashMD {
   constructor(outputLen = 32) {
     super(64, outputLen, 8, false);
-    this.A = SHA256_IV2[0] | 0;
-    this.B = SHA256_IV2[1] | 0;
-    this.C = SHA256_IV2[2] | 0;
-    this.D = SHA256_IV2[3] | 0;
-    this.E = SHA256_IV2[4] | 0;
-    this.F = SHA256_IV2[5] | 0;
-    this.G = SHA256_IV2[6] | 0;
-    this.H = SHA256_IV2[7] | 0;
+    this.A = SHA256_IV[0] | 0;
+    this.B = SHA256_IV[1] | 0;
+    this.C = SHA256_IV[2] | 0;
+    this.D = SHA256_IV[3] | 0;
+    this.E = SHA256_IV[4] | 0;
+    this.F = SHA256_IV[5] | 0;
+    this.G = SHA256_IV[6] | 0;
+    this.H = SHA256_IV[7] | 0;
   }
   get() {
     const { A, B, C, D, E, F, G, H } = this;
@@ -9510,20 +6817,20 @@ var SHA256 = class extends HashMD2 {
   }
   process(view, offset) {
     for (let i = 0; i < 16; i++, offset += 4)
-      SHA256_W2[i] = view.getUint32(offset, false);
+      SHA256_W[i] = view.getUint32(offset, false);
     for (let i = 16; i < 64; i++) {
-      const W15 = SHA256_W2[i - 15];
-      const W2 = SHA256_W2[i - 2];
-      const s0 = rotr2(W15, 7) ^ rotr2(W15, 18) ^ W15 >>> 3;
-      const s1 = rotr2(W2, 17) ^ rotr2(W2, 19) ^ W2 >>> 10;
-      SHA256_W2[i] = s1 + SHA256_W2[i - 7] + s0 + SHA256_W2[i - 16] | 0;
+      const W15 = SHA256_W[i - 15];
+      const W2 = SHA256_W[i - 2];
+      const s0 = rotr(W15, 7) ^ rotr(W15, 18) ^ W15 >>> 3;
+      const s1 = rotr(W2, 17) ^ rotr(W2, 19) ^ W2 >>> 10;
+      SHA256_W[i] = s1 + SHA256_W[i - 7] + s0 + SHA256_W[i - 16] | 0;
     }
     let { A, B, C, D, E, F, G, H } = this;
     for (let i = 0; i < 64; i++) {
-      const sigma1 = rotr2(E, 6) ^ rotr2(E, 11) ^ rotr2(E, 25);
-      const T1 = H + sigma1 + Chi2(E, F, G) + SHA256_K2[i] + SHA256_W2[i] | 0;
-      const sigma0 = rotr2(A, 2) ^ rotr2(A, 13) ^ rotr2(A, 22);
-      const T2 = sigma0 + Maj2(A, B, C) | 0;
+      const sigma1 = rotr(E, 6) ^ rotr(E, 11) ^ rotr(E, 25);
+      const T1 = H + sigma1 + Chi(E, F, G) + SHA256_K[i] + SHA256_W[i] | 0;
+      const sigma0 = rotr(A, 2) ^ rotr(A, 13) ^ rotr(A, 22);
+      const T2 = sigma0 + Maj(A, B, C) | 0;
       H = G;
       G = F;
       F = E;
@@ -9544,11 +6851,11 @@ var SHA256 = class extends HashMD2 {
     this.set(A, B, C, D, E, F, G, H);
   }
   roundClean() {
-    clean2(SHA256_W2);
+    clean(SHA256_W);
   }
   destroy() {
     this.set(0, 0, 0, 0, 0, 0, 0, 0);
-    clean2(this.buffer);
+    clean(this.buffer);
   }
 };
 var K512 = /* @__PURE__ */ (() => split([
@@ -9637,25 +6944,25 @@ var SHA512_Kh = /* @__PURE__ */ (() => K512[0])();
 var SHA512_Kl = /* @__PURE__ */ (() => K512[1])();
 var SHA512_W_H = /* @__PURE__ */ new Uint32Array(80);
 var SHA512_W_L = /* @__PURE__ */ new Uint32Array(80);
-var SHA512 = class extends HashMD2 {
+var SHA512 = class extends HashMD {
   constructor(outputLen = 64) {
     super(128, outputLen, 16, false);
-    this.Ah = SHA512_IV2[0] | 0;
-    this.Al = SHA512_IV2[1] | 0;
-    this.Bh = SHA512_IV2[2] | 0;
-    this.Bl = SHA512_IV2[3] | 0;
-    this.Ch = SHA512_IV2[4] | 0;
-    this.Cl = SHA512_IV2[5] | 0;
-    this.Dh = SHA512_IV2[6] | 0;
-    this.Dl = SHA512_IV2[7] | 0;
-    this.Eh = SHA512_IV2[8] | 0;
-    this.El = SHA512_IV2[9] | 0;
-    this.Fh = SHA512_IV2[10] | 0;
-    this.Fl = SHA512_IV2[11] | 0;
-    this.Gh = SHA512_IV2[12] | 0;
-    this.Gl = SHA512_IV2[13] | 0;
-    this.Hh = SHA512_IV2[14] | 0;
-    this.Hl = SHA512_IV2[15] | 0;
+    this.Ah = SHA512_IV[0] | 0;
+    this.Al = SHA512_IV[1] | 0;
+    this.Bh = SHA512_IV[2] | 0;
+    this.Bl = SHA512_IV[3] | 0;
+    this.Ch = SHA512_IV[4] | 0;
+    this.Cl = SHA512_IV[5] | 0;
+    this.Dh = SHA512_IV[6] | 0;
+    this.Dl = SHA512_IV[7] | 0;
+    this.Eh = SHA512_IV[8] | 0;
+    this.El = SHA512_IV[9] | 0;
+    this.Fh = SHA512_IV[10] | 0;
+    this.Fl = SHA512_IV[11] | 0;
+    this.Gh = SHA512_IV[12] | 0;
+    this.Gl = SHA512_IV[13] | 0;
+    this.Hh = SHA512_IV[14] | 0;
+    this.Hl = SHA512_IV[15] | 0;
   }
   // prettier-ignore
   get() {
@@ -9741,22 +7048,22 @@ var SHA512 = class extends HashMD2 {
     this.set(Ah, Al, Bh, Bl2, Ch, Cl, Dh, Dl, Eh, El, Fh, Fl, Gh, Gl, Hh, Hl);
   }
   roundClean() {
-    clean2(SHA512_W_H, SHA512_W_L);
+    clean(SHA512_W_H, SHA512_W_L);
   }
   destroy() {
-    clean2(this.buffer);
+    clean(this.buffer);
     this.set(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   }
 };
-var sha2562 = /* @__PURE__ */ createHasher2(() => new SHA256());
-var sha5122 = /* @__PURE__ */ createHasher2(() => new SHA512());
+var sha256 = /* @__PURE__ */ createHasher(() => new SHA256());
+var sha512 = /* @__PURE__ */ createHasher(() => new SHA512());
 
 // node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/sha256.js
-var sha2563 = sha2562;
+var sha2562 = sha256;
 
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/crypto.js
 function hash160(buffer2) {
-  return ripemd1602(sha2563(buffer2));
+  return ripemd1602(sha2562(buffer2));
 }
 var TAGGED_HASH_PREFIXES = {
   "BIP0340/challenge": Uint8Array.from([
@@ -10355,7 +7662,7 @@ var TAGGED_HASH_PREFIXES = {
   ])
 };
 function taggedHash(prefix, data) {
-  return sha2563(concat([TAGGED_HASH_PREFIXES[prefix], data]));
+  return sha2562(concat([TAGGED_HASH_PREFIXES[prefix], data]));
 }
 
 // node_modules/.pnpm/base-x@5.0.1/node_modules/base-x/src/esm/index.js
@@ -10497,18 +7804,18 @@ var esm_default2 = esm_default(ALPHABET);
 function base_default(checksumFn) {
   function encode42(payload) {
     var payloadU8 = Uint8Array.from(payload);
-    var checksum3 = checksumFn(payloadU8);
+    var checksum2 = checksumFn(payloadU8);
     var length6 = payloadU8.length + 4;
     var both = new Uint8Array(length6);
     both.set(payloadU8, 0);
-    both.set(checksum3.subarray(0, 4), payloadU8.length);
+    both.set(checksum2.subarray(0, 4), payloadU8.length);
     return esm_default2.encode(both);
   }
   function decodeRaw(buffer2) {
     var payload = buffer2.slice(0, -4);
-    var checksum3 = buffer2.slice(-4);
+    var checksum2 = buffer2.slice(-4);
     var newChecksum = checksumFn(payload);
-    if (checksum3[0] ^ newChecksum[0] | checksum3[1] ^ newChecksum[1] | checksum3[2] ^ newChecksum[2] | checksum3[3] ^ newChecksum[3])
+    if (checksum2[0] ^ newChecksum[0] | checksum2[1] ^ newChecksum[1] | checksum2[2] ^ newChecksum[2] | checksum2[3] ^ newChecksum[3])
       return;
     return payload;
   }
@@ -10534,7 +7841,7 @@ function base_default(checksumFn) {
 
 // node_modules/.pnpm/bs58check@4.0.0/node_modules/bs58check/src/esm/index.js
 function sha256x2(buffer2) {
-  return sha2563(sha2563(buffer2));
+  return sha2562(sha2562(buffer2));
 }
 var esm_default3 = base_default(sha256x2);
 
@@ -10995,7 +8302,7 @@ function p2wsh(a, opts) {
   prop(o, "hash", () => {
     if (a.output) return a.output.slice(2);
     if (a.address) return _address().data;
-    if (o.redeem && o.redeem.output) return sha2563(o.redeem.output);
+    if (o.redeem && o.redeem.output) return sha2562(o.redeem.output);
   });
   prop(o, "output", () => {
     if (!o.hash) return;
@@ -11072,7 +8379,7 @@ function p2wsh(a, opts) {
           throw new TypeError(
             "Redeem.output unspendable with more than 201 non-push ops"
           );
-        const hash2 = sha2563(a.redeem.output);
+        const hash2 = sha2562(a.redeem.output);
         if (hash.length > 0 && compare(hash, hash2) !== 0)
           throw new TypeError("Hash mismatch");
         else hash = hash2;
@@ -12748,16 +10055,16 @@ var HMAC = class extends Hash {
     for (let i = 0; i < pad.length; i++)
       pad[i] ^= 54 ^ 92;
     this.oHash.update(pad);
-    clean2(pad);
+    clean(pad);
   }
   update(buf2) {
-    aexists2(this);
+    aexists(this);
     this.iHash.update(buf2);
     return this;
   }
   digestInto(out) {
-    aexists2(this);
-    abytes2(out, this.outputLen);
+    aexists(this);
+    abytes(out, this.outputLen);
     this.finished = true;
     this.iHash.digestInto(out);
     this.oHash.update(out);
@@ -12794,14 +10101,14 @@ var hmac = (hash, key, message) => new HMAC(hash, key).update(message).digest();
 hmac.create = (hash, key) => new HMAC(hash, key);
 
 // node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/sha512.js
-var sha5123 = sha5122;
+var sha5122 = sha512;
 
 // node_modules/.pnpm/bip32@5.0.0_typescript@5.9.3/node_modules/bip32/src/esm/crypto.js
 function hash1602(buffer2) {
-  return ripemd1602(sha2563(buffer2));
+  return ripemd1602(sha2562(buffer2));
 }
 function hmacSHA512(key, data) {
-  return hmac(sha5123, key, data);
+  return hmac(sha5122, key, data);
 }
 
 // node_modules/.pnpm/bip32@5.0.0_typescript@5.9.3/node_modules/bip32/src/esm/testecc.js
@@ -12843,10 +10150,10 @@ function assert(bool) {
 }
 
 // node_modules/.pnpm/@scure+base@1.2.6/node_modules/@scure/base/lib/esm/index.js
-function isBytes4(a) {
+function isBytes2(a) {
   return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
 }
-function isArrayOf2(isString, arr) {
+function isArrayOf(isString, arr) {
   if (!Array.isArray(arr))
     return false;
   if (arr.length === 0)
@@ -12857,34 +10164,34 @@ function isArrayOf2(isString, arr) {
     return arr.every((item) => Number.isSafeInteger(item));
   }
 }
-function afn2(input) {
+function afn(input) {
   if (typeof input !== "function")
     throw new Error("function expected");
   return true;
 }
-function astr2(label, input) {
+function astr(label, input) {
   if (typeof input !== "string")
     throw new Error(`${label}: string expected`);
   return true;
 }
-function anumber4(n) {
+function anumber2(n) {
   if (!Number.isSafeInteger(n))
     throw new Error(`invalid integer: ${n}`);
 }
-function aArr2(input) {
+function aArr(input) {
   if (!Array.isArray(input))
     throw new Error("array expected");
 }
-function astrArr2(label, input) {
-  if (!isArrayOf2(true, input))
+function astrArr(label, input) {
+  if (!isArrayOf(true, input))
     throw new Error(`${label}: array of strings expected`);
 }
-function anumArr2(label, input) {
-  if (!isArrayOf2(false, input))
+function anumArr(label, input) {
+  if (!isArrayOf(false, input))
     throw new Error(`${label}: array of numbers expected`);
 }
 // @__NO_SIDE_EFFECTS__
-function chain2(...args) {
+function chain(...args) {
   const id = (a) => a;
   const wrap = (a, b) => (c) => a(b(c));
   const encode42 = args.map((x) => x.encode).reduceRight(wrap, id);
@@ -12892,14 +10199,14 @@ function chain2(...args) {
   return { encode: encode42, decode: decode44 };
 }
 // @__NO_SIDE_EFFECTS__
-function alphabet2(letters) {
+function alphabet(letters) {
   const lettersA = typeof letters === "string" ? letters.split("") : letters;
   const len = lettersA.length;
-  astrArr2("alphabet", lettersA);
+  astrArr("alphabet", lettersA);
   const indexes = new Map(lettersA.map((l, i) => [l, i]));
   return {
     encode: (digits) => {
-      aArr2(digits);
+      aArr(digits);
       return digits.map((i) => {
         if (!Number.isSafeInteger(i) || i < 0 || i >= len)
           throw new Error(`alphabet.encode: digit index outside alphabet "${i}". Allowed: ${letters}`);
@@ -12907,9 +10214,9 @@ function alphabet2(letters) {
       });
     },
     decode: (input) => {
-      aArr2(input);
+      aArr(input);
       return input.map((letter) => {
-        astr2("alphabet.decode", letter);
+        astr("alphabet.decode", letter);
         const i = indexes.get(letter);
         if (i === void 0)
           throw new Error(`Unknown letter: "${letter}". Allowed: ${letters}`);
@@ -12919,31 +10226,31 @@ function alphabet2(letters) {
   };
 }
 // @__NO_SIDE_EFFECTS__
-function join2(separator = "") {
-  astr2("join", separator);
+function join(separator = "") {
+  astr("join", separator);
   return {
     encode: (from7) => {
-      astrArr2("join.decode", from7);
+      astrArr("join.decode", from7);
       return from7.join(separator);
     },
     decode: (to) => {
-      astr2("join.decode", to);
+      astr("join.decode", to);
       return to.split(separator);
     }
   };
 }
-function convertRadix3(data, from7, to) {
+function convertRadix(data, from7, to) {
   if (from7 < 2)
     throw new Error(`convertRadix: invalid from=${from7}, base cannot be less than 2`);
   if (to < 2)
     throw new Error(`convertRadix: invalid to=${to}, base cannot be less than 2`);
-  aArr2(data);
+  aArr(data);
   if (!data.length)
     return [];
   let pos = 0;
   const res = [];
   const digits = Array.from(data, (d) => {
-    anumber4(d);
+    anumber2(d);
     if (d < 0 || d >= from7)
       throw new Error(`invalid integer: ${d}`);
     return d;
@@ -12981,27 +10288,27 @@ function convertRadix3(data, from7, to) {
   return res.reverse();
 }
 // @__NO_SIDE_EFFECTS__
-function radix3(num) {
-  anumber4(num);
+function radix(num) {
+  anumber2(num);
   const _256 = 2 ** 8;
   return {
     encode: (bytes) => {
-      if (!isBytes4(bytes))
+      if (!isBytes2(bytes))
         throw new Error("radix.encode input should be Uint8Array");
-      return convertRadix3(Array.from(bytes), _256, num);
+      return convertRadix(Array.from(bytes), _256, num);
     },
     decode: (digits) => {
-      anumArr2("radix.decode", digits);
-      return Uint8Array.from(convertRadix3(digits, num, _256));
+      anumArr("radix.decode", digits);
+      return Uint8Array.from(convertRadix(digits, num, _256));
     }
   };
 }
-function checksum2(len, fn) {
-  anumber4(len);
-  afn2(fn);
+function checksum(len, fn) {
+  anumber2(len);
+  afn(fn);
   return {
     encode(data) {
-      if (!isBytes4(data))
+      if (!isBytes2(data))
         throw new Error("checksum.encode: input should be Uint8Array");
       const sum = fn(data).slice(0, len);
       const res = new Uint8Array(data.length + len);
@@ -13010,7 +10317,7 @@ function checksum2(len, fn) {
       return res;
     },
     decode(data) {
-      if (!isBytes4(data))
+      if (!isBytes2(data))
         throw new Error("checksum.decode: input should be Uint8Array");
       const payload = data.slice(0, -len);
       const oldChecksum = data.slice(-len);
@@ -13022,9 +10329,9 @@ function checksum2(len, fn) {
     }
   };
 }
-var genBase58 = /* @__NO_SIDE_EFFECTS__ */ (abc) => /* @__PURE__ */ chain2(/* @__PURE__ */ radix3(58), /* @__PURE__ */ alphabet2(abc), /* @__PURE__ */ join2(""));
+var genBase58 = /* @__NO_SIDE_EFFECTS__ */ (abc) => /* @__PURE__ */ chain(/* @__PURE__ */ radix(58), /* @__PURE__ */ alphabet(abc), /* @__PURE__ */ join(""));
 var base58 = /* @__PURE__ */ genBase58("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz");
-var createBase58check = (sha2567) => /* @__PURE__ */ chain2(checksum2(4, (data) => sha2567(sha2567(data))), base58);
+var createBase58check = (sha2566) => /* @__PURE__ */ chain(checksum(4, (data) => sha2566(sha2566(data))), base58);
 var base58check = createBase58check;
 
 // node_modules/.pnpm/valibot@0.37.0_typescript@5.9.3/node_modules/valibot/dist/index.js
@@ -13380,7 +10687,7 @@ function encode19(wif) {
 }
 
 // node_modules/.pnpm/bip32@5.0.0_typescript@5.9.3/node_modules/bip32/src/esm/bip32.js
-var _bs58check = base58check(sha2563);
+var _bs58check = base58check(sha2562);
 var bs58check = {
   encode: (data) => _bs58check.encode(data),
   decode: (str) => _bs58check.decode(str)
@@ -14337,8 +11644,26 @@ var BitcoinWallet = class {
     return this.encryptedMnemonic;
   }
 };
+function generateMnemonicAsync() {
+  return new Promise((resolve2, reject) => {
+    const worker = new Worker("crypto-worker.js");
+    worker.onmessage = (event) => {
+      if (event.data.status === "success" && event.data.mnemonic) {
+        resolve2(event.data.mnemonic);
+      } else {
+        reject(new Error(event.data.error || "Failed to generate mnemonic"));
+      }
+      worker.terminate();
+    };
+    worker.onerror = (error) => {
+      reject(error);
+      worker.terminate();
+    };
+    worker.postMessage({ type: "generateMnemonic" });
+  });
+}
 async function createWallet(secureStorage, pin) {
-  const mnemonic = generateMnemonic(wordlist);
+  const mnemonic = await generateMnemonicAsync();
   const encryptedMnemonic = await secureStorage.encrypt(mnemonic, pin);
   const secureWallet = new SecureWallet(encryptedMnemonic, secureStorage);
   const wallet = new BitcoinWallet(secureWallet, encryptedMnemonic);
@@ -14809,8 +12134,8 @@ var Codec = class {
 function from({ name: name10, prefix, encode: encode42, decode: decode44 }) {
   return new Codec(name10, prefix, encode42, decode44);
 }
-function baseX({ name: name10, prefix, alphabet: alphabet6 }) {
-  const { encode: encode42, decode: decode44 } = base_x_default(alphabet6, name10);
+function baseX({ name: name10, prefix, alphabet: alphabet5 }) {
+  const { encode: encode42, decode: decode44 } = base_x_default(alphabet5, name10);
   return from({
     prefix,
     name: name10,
@@ -14844,8 +12169,8 @@ function decode18(string5, alphabetIdx, bitsPerChar, name10) {
   }
   return out;
 }
-function encode20(data, alphabet6, bitsPerChar) {
-  const pad = alphabet6[alphabet6.length - 1] === "=";
+function encode20(data, alphabet5, bitsPerChar) {
+  const pad = alphabet5[alphabet5.length - 1] === "=";
   const mask = (1 << bitsPerChar) - 1;
   let out = "";
   let bits = 0;
@@ -14855,11 +12180,11 @@ function encode20(data, alphabet6, bitsPerChar) {
     bits += 8;
     while (bits > bitsPerChar) {
       bits -= bitsPerChar;
-      out += alphabet6[mask & buffer2 >> bits];
+      out += alphabet5[mask & buffer2 >> bits];
     }
   }
   if (bits !== 0) {
-    out += alphabet6[mask & buffer2 << bitsPerChar - bits];
+    out += alphabet5[mask & buffer2 << bitsPerChar - bits];
   }
   if (pad) {
     while ((out.length * bitsPerChar & 7) !== 0) {
@@ -14868,20 +12193,20 @@ function encode20(data, alphabet6, bitsPerChar) {
   }
   return out;
 }
-function createAlphabetIdx(alphabet6) {
+function createAlphabetIdx(alphabet5) {
   const alphabetIdx = {};
-  for (let i = 0; i < alphabet6.length; ++i) {
-    alphabetIdx[alphabet6[i]] = i;
+  for (let i = 0; i < alphabet5.length; ++i) {
+    alphabetIdx[alphabet5[i]] = i;
   }
   return alphabetIdx;
 }
-function rfc4648({ name: name10, prefix, bitsPerChar, alphabet: alphabet6 }) {
-  const alphabetIdx = createAlphabetIdx(alphabet6);
+function rfc4648({ name: name10, prefix, bitsPerChar, alphabet: alphabet5 }) {
+  const alphabetIdx = createAlphabetIdx(alphabet5);
   return from({
     prefix,
     name: name10,
     encode(input) {
-      return encode20(input, alphabet6, bitsPerChar);
+      return encode20(input, alphabet5, bitsPerChar);
     },
     decode(input) {
       return decode18(input, alphabetIdx, bitsPerChar, name10);
@@ -19026,8 +16351,8 @@ var Codec2 = class {
   }
 };
 var from3 = ({ name: name10, prefix, encode: encode42, decode: decode44 }) => new Codec2(name10, prefix, encode42, decode44);
-var baseX2 = ({ prefix, name: name10, alphabet: alphabet6 }) => {
-  const { encode: encode42, decode: decode44 } = base_x_default2(alphabet6, name10);
+var baseX2 = ({ prefix, name: name10, alphabet: alphabet5 }) => {
+  const { encode: encode42, decode: decode44 } = base_x_default2(alphabet5, name10);
   return from3({
     prefix,
     name: name10,
@@ -19038,10 +16363,10 @@ var baseX2 = ({ prefix, name: name10, alphabet: alphabet6 }) => {
     decode: (text) => coerce2(decode44(text))
   });
 };
-var decode27 = (string5, alphabet6, bitsPerChar, name10) => {
+var decode27 = (string5, alphabet5, bitsPerChar, name10) => {
   const codes2 = {};
-  for (let i = 0; i < alphabet6.length; ++i) {
-    codes2[alphabet6[i]] = i;
+  for (let i = 0; i < alphabet5.length; ++i) {
+    codes2[alphabet5[i]] = i;
   }
   let end = string5.length;
   while (string5[end - 1] === "=") {
@@ -19068,8 +16393,8 @@ var decode27 = (string5, alphabet6, bitsPerChar, name10) => {
   }
   return out;
 };
-var encode27 = (data, alphabet6, bitsPerChar) => {
-  const pad = alphabet6[alphabet6.length - 1] === "=";
+var encode27 = (data, alphabet5, bitsPerChar) => {
+  const pad = alphabet5[alphabet5.length - 1] === "=";
   const mask = (1 << bitsPerChar) - 1;
   let out = "";
   let bits = 0;
@@ -19079,11 +16404,11 @@ var encode27 = (data, alphabet6, bitsPerChar) => {
     bits += 8;
     while (bits > bitsPerChar) {
       bits -= bitsPerChar;
-      out += alphabet6[mask & buffer2 >> bits];
+      out += alphabet5[mask & buffer2 >> bits];
     }
   }
   if (bits) {
-    out += alphabet6[mask & buffer2 << bitsPerChar - bits];
+    out += alphabet5[mask & buffer2 << bitsPerChar - bits];
   }
   if (pad) {
     while (out.length * bitsPerChar & 7) {
@@ -19092,15 +16417,15 @@ var encode27 = (data, alphabet6, bitsPerChar) => {
   }
   return out;
 };
-var rfc46482 = ({ name: name10, prefix, bitsPerChar, alphabet: alphabet6 }) => {
+var rfc46482 = ({ name: name10, prefix, bitsPerChar, alphabet: alphabet5 }) => {
   return from3({
     prefix,
     name: name10,
     encode(input) {
-      return encode27(input, alphabet6, bitsPerChar);
+      return encode27(input, alphabet5, bitsPerChar);
     },
     decode(input) {
-      return decode27(input, alphabet6, bitsPerChar, name10);
+      return decode27(input, alphabet5, bitsPerChar, name10);
     }
   });
 };
@@ -20111,10 +17436,10 @@ var base256emoji_exports = {};
 __export(base256emoji_exports, {
   base256emoji: () => base256emoji
 });
-var alphabet3 = Array.from("\u{1F680}\u{1FA90}\u2604\u{1F6F0}\u{1F30C}\u{1F311}\u{1F312}\u{1F313}\u{1F314}\u{1F315}\u{1F316}\u{1F317}\u{1F318}\u{1F30D}\u{1F30F}\u{1F30E}\u{1F409}\u2600\u{1F4BB}\u{1F5A5}\u{1F4BE}\u{1F4BF}\u{1F602}\u2764\u{1F60D}\u{1F923}\u{1F60A}\u{1F64F}\u{1F495}\u{1F62D}\u{1F618}\u{1F44D}\u{1F605}\u{1F44F}\u{1F601}\u{1F525}\u{1F970}\u{1F494}\u{1F496}\u{1F499}\u{1F622}\u{1F914}\u{1F606}\u{1F644}\u{1F4AA}\u{1F609}\u263A\u{1F44C}\u{1F917}\u{1F49C}\u{1F614}\u{1F60E}\u{1F607}\u{1F339}\u{1F926}\u{1F389}\u{1F49E}\u270C\u2728\u{1F937}\u{1F631}\u{1F60C}\u{1F338}\u{1F64C}\u{1F60B}\u{1F497}\u{1F49A}\u{1F60F}\u{1F49B}\u{1F642}\u{1F493}\u{1F929}\u{1F604}\u{1F600}\u{1F5A4}\u{1F603}\u{1F4AF}\u{1F648}\u{1F447}\u{1F3B6}\u{1F612}\u{1F92D}\u2763\u{1F61C}\u{1F48B}\u{1F440}\u{1F62A}\u{1F611}\u{1F4A5}\u{1F64B}\u{1F61E}\u{1F629}\u{1F621}\u{1F92A}\u{1F44A}\u{1F973}\u{1F625}\u{1F924}\u{1F449}\u{1F483}\u{1F633}\u270B\u{1F61A}\u{1F61D}\u{1F634}\u{1F31F}\u{1F62C}\u{1F643}\u{1F340}\u{1F337}\u{1F63B}\u{1F613}\u2B50\u2705\u{1F97A}\u{1F308}\u{1F608}\u{1F918}\u{1F4A6}\u2714\u{1F623}\u{1F3C3}\u{1F490}\u2639\u{1F38A}\u{1F498}\u{1F620}\u261D\u{1F615}\u{1F33A}\u{1F382}\u{1F33B}\u{1F610}\u{1F595}\u{1F49D}\u{1F64A}\u{1F639}\u{1F5E3}\u{1F4AB}\u{1F480}\u{1F451}\u{1F3B5}\u{1F91E}\u{1F61B}\u{1F534}\u{1F624}\u{1F33C}\u{1F62B}\u26BD\u{1F919}\u2615\u{1F3C6}\u{1F92B}\u{1F448}\u{1F62E}\u{1F646}\u{1F37B}\u{1F343}\u{1F436}\u{1F481}\u{1F632}\u{1F33F}\u{1F9E1}\u{1F381}\u26A1\u{1F31E}\u{1F388}\u274C\u270A\u{1F44B}\u{1F630}\u{1F928}\u{1F636}\u{1F91D}\u{1F6B6}\u{1F4B0}\u{1F353}\u{1F4A2}\u{1F91F}\u{1F641}\u{1F6A8}\u{1F4A8}\u{1F92C}\u2708\u{1F380}\u{1F37A}\u{1F913}\u{1F619}\u{1F49F}\u{1F331}\u{1F616}\u{1F476}\u{1F974}\u25B6\u27A1\u2753\u{1F48E}\u{1F4B8}\u2B07\u{1F628}\u{1F31A}\u{1F98B}\u{1F637}\u{1F57A}\u26A0\u{1F645}\u{1F61F}\u{1F635}\u{1F44E}\u{1F932}\u{1F920}\u{1F927}\u{1F4CC}\u{1F535}\u{1F485}\u{1F9D0}\u{1F43E}\u{1F352}\u{1F617}\u{1F911}\u{1F30A}\u{1F92F}\u{1F437}\u260E\u{1F4A7}\u{1F62F}\u{1F486}\u{1F446}\u{1F3A4}\u{1F647}\u{1F351}\u2744\u{1F334}\u{1F4A3}\u{1F438}\u{1F48C}\u{1F4CD}\u{1F940}\u{1F922}\u{1F445}\u{1F4A1}\u{1F4A9}\u{1F450}\u{1F4F8}\u{1F47B}\u{1F910}\u{1F92E}\u{1F3BC}\u{1F975}\u{1F6A9}\u{1F34E}\u{1F34A}\u{1F47C}\u{1F48D}\u{1F4E3}\u{1F942}");
+var alphabet2 = Array.from("\u{1F680}\u{1FA90}\u2604\u{1F6F0}\u{1F30C}\u{1F311}\u{1F312}\u{1F313}\u{1F314}\u{1F315}\u{1F316}\u{1F317}\u{1F318}\u{1F30D}\u{1F30F}\u{1F30E}\u{1F409}\u2600\u{1F4BB}\u{1F5A5}\u{1F4BE}\u{1F4BF}\u{1F602}\u2764\u{1F60D}\u{1F923}\u{1F60A}\u{1F64F}\u{1F495}\u{1F62D}\u{1F618}\u{1F44D}\u{1F605}\u{1F44F}\u{1F601}\u{1F525}\u{1F970}\u{1F494}\u{1F496}\u{1F499}\u{1F622}\u{1F914}\u{1F606}\u{1F644}\u{1F4AA}\u{1F609}\u263A\u{1F44C}\u{1F917}\u{1F49C}\u{1F614}\u{1F60E}\u{1F607}\u{1F339}\u{1F926}\u{1F389}\u{1F49E}\u270C\u2728\u{1F937}\u{1F631}\u{1F60C}\u{1F338}\u{1F64C}\u{1F60B}\u{1F497}\u{1F49A}\u{1F60F}\u{1F49B}\u{1F642}\u{1F493}\u{1F929}\u{1F604}\u{1F600}\u{1F5A4}\u{1F603}\u{1F4AF}\u{1F648}\u{1F447}\u{1F3B6}\u{1F612}\u{1F92D}\u2763\u{1F61C}\u{1F48B}\u{1F440}\u{1F62A}\u{1F611}\u{1F4A5}\u{1F64B}\u{1F61E}\u{1F629}\u{1F621}\u{1F92A}\u{1F44A}\u{1F973}\u{1F625}\u{1F924}\u{1F449}\u{1F483}\u{1F633}\u270B\u{1F61A}\u{1F61D}\u{1F634}\u{1F31F}\u{1F62C}\u{1F643}\u{1F340}\u{1F337}\u{1F63B}\u{1F613}\u2B50\u2705\u{1F97A}\u{1F308}\u{1F608}\u{1F918}\u{1F4A6}\u2714\u{1F623}\u{1F3C3}\u{1F490}\u2639\u{1F38A}\u{1F498}\u{1F620}\u261D\u{1F615}\u{1F33A}\u{1F382}\u{1F33B}\u{1F610}\u{1F595}\u{1F49D}\u{1F64A}\u{1F639}\u{1F5E3}\u{1F4AB}\u{1F480}\u{1F451}\u{1F3B5}\u{1F91E}\u{1F61B}\u{1F534}\u{1F624}\u{1F33C}\u{1F62B}\u26BD\u{1F919}\u2615\u{1F3C6}\u{1F92B}\u{1F448}\u{1F62E}\u{1F646}\u{1F37B}\u{1F343}\u{1F436}\u{1F481}\u{1F632}\u{1F33F}\u{1F9E1}\u{1F381}\u26A1\u{1F31E}\u{1F388}\u274C\u270A\u{1F44B}\u{1F630}\u{1F928}\u{1F636}\u{1F91D}\u{1F6B6}\u{1F4B0}\u{1F353}\u{1F4A2}\u{1F91F}\u{1F641}\u{1F6A8}\u{1F4A8}\u{1F92C}\u2708\u{1F380}\u{1F37A}\u{1F913}\u{1F619}\u{1F49F}\u{1F331}\u{1F616}\u{1F476}\u{1F974}\u25B6\u27A1\u2753\u{1F48E}\u{1F4B8}\u2B07\u{1F628}\u{1F31A}\u{1F98B}\u{1F637}\u{1F57A}\u26A0\u{1F645}\u{1F61F}\u{1F635}\u{1F44E}\u{1F932}\u{1F920}\u{1F927}\u{1F4CC}\u{1F535}\u{1F485}\u{1F9D0}\u{1F43E}\u{1F352}\u{1F617}\u{1F911}\u{1F30A}\u{1F92F}\u{1F437}\u260E\u{1F4A7}\u{1F62F}\u{1F486}\u{1F446}\u{1F3A4}\u{1F647}\u{1F351}\u2744\u{1F334}\u{1F4A3}\u{1F438}\u{1F48C}\u{1F4CD}\u{1F940}\u{1F922}\u{1F445}\u{1F4A1}\u{1F4A9}\u{1F450}\u{1F4F8}\u{1F47B}\u{1F910}\u{1F92E}\u{1F3BC}\u{1F975}\u{1F6A9}\u{1F34E}\u{1F34A}\u{1F47C}\u{1F48D}\u{1F4E3}\u{1F942}");
 var alphabetBytesToChars = (
   /** @type {string[]} */
-  alphabet3.reduce(
+  alphabet2.reduce(
     (p, c, i) => {
       p[i] = c;
       return p;
@@ -20125,7 +17450,7 @@ var alphabetBytesToChars = (
 );
 var alphabetCharsToBytes = (
   /** @type {number[]} */
-  alphabet3.reduce(
+  alphabet2.reduce(
     (p, c, i) => {
       p[
         /** @type {number} */
@@ -20167,8 +17492,8 @@ var base256emoji = from3({
 // node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/hashes/sha2-browser.js
 var sha2_browser_exports = {};
 __export(sha2_browser_exports, {
-  sha256: () => sha2564,
-  sha512: () => sha5124
+  sha256: () => sha2563,
+  sha512: () => sha5123
 });
 
 // node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/hashes/hasher.js
@@ -20206,12 +17531,12 @@ var sha = (name10) => (
    */
   async (data) => new Uint8Array(await crypto.subtle.digest(name10, data))
 );
-var sha2564 = from4({
+var sha2563 = from4({
   name: "sha2-256",
   code: 18,
   encode: sha("SHA-256")
 });
-var sha5124 = from4({
+var sha5123 = from4({
   name: "sha2-512",
   code: 19,
   encode: sha("SHA-512")
@@ -20321,7 +17646,7 @@ var Parser = class {
    * at the first non-digit character or eof. Fails if the number has more
    * digits than max_digits or if there is no number.
    */
-  readNumber(radix4, maxDigits, allowZeroPrefix, maxBytes) {
+  readNumber(radix2, maxDigits, allowZeroPrefix, maxBytes) {
     return this.readAtomically(() => {
       let result = 0;
       let digitCount = 0;
@@ -20337,7 +17662,7 @@ var Parser = class {
           if (char === void 0) {
             return void 0;
           }
-          const num = Number.parseInt(char, radix4);
+          const num = Number.parseInt(char, radix2);
           if (Number.isNaN(num)) {
             return void 0;
           }
@@ -20346,7 +17671,7 @@ var Parser = class {
         if (digit === void 0) {
           break;
         }
-        result *= radix4;
+        result *= radix2;
         result += digit;
         if (result > maxValue4) {
           return void 0;
@@ -20782,8 +18107,8 @@ var Codec3 = class {
   }
 };
 var from5 = ({ name: name10, prefix, encode: encode42, decode: decode44 }) => new Codec3(name10, prefix, encode42, decode44);
-var baseX3 = ({ prefix, name: name10, alphabet: alphabet6 }) => {
-  const { encode: encode42, decode: decode44 } = base_x_default3(alphabet6, name10);
+var baseX3 = ({ prefix, name: name10, alphabet: alphabet5 }) => {
+  const { encode: encode42, decode: decode44 } = base_x_default3(alphabet5, name10);
   return from5({
     prefix,
     name: name10,
@@ -20794,10 +18119,10 @@ var baseX3 = ({ prefix, name: name10, alphabet: alphabet6 }) => {
     decode: (text) => coerce3(decode44(text))
   });
 };
-var decode37 = (string5, alphabet6, bitsPerChar, name10) => {
+var decode37 = (string5, alphabet5, bitsPerChar, name10) => {
   const codes2 = {};
-  for (let i = 0; i < alphabet6.length; ++i) {
-    codes2[alphabet6[i]] = i;
+  for (let i = 0; i < alphabet5.length; ++i) {
+    codes2[alphabet5[i]] = i;
   }
   let end = string5.length;
   while (string5[end - 1] === "=") {
@@ -20824,8 +18149,8 @@ var decode37 = (string5, alphabet6, bitsPerChar, name10) => {
   }
   return out;
 };
-var encode36 = (data, alphabet6, bitsPerChar) => {
-  const pad = alphabet6[alphabet6.length - 1] === "=";
+var encode36 = (data, alphabet5, bitsPerChar) => {
+  const pad = alphabet5[alphabet5.length - 1] === "=";
   const mask = (1 << bitsPerChar) - 1;
   let out = "";
   let bits = 0;
@@ -20835,11 +18160,11 @@ var encode36 = (data, alphabet6, bitsPerChar) => {
     bits += 8;
     while (bits > bitsPerChar) {
       bits -= bitsPerChar;
-      out += alphabet6[mask & buffer2 >> bits];
+      out += alphabet5[mask & buffer2 >> bits];
     }
   }
   if (bits) {
-    out += alphabet6[mask & buffer2 << bitsPerChar - bits];
+    out += alphabet5[mask & buffer2 << bitsPerChar - bits];
   }
   if (pad) {
     while (out.length * bitsPerChar & 7) {
@@ -20848,15 +18173,15 @@ var encode36 = (data, alphabet6, bitsPerChar) => {
   }
   return out;
 };
-var rfc46483 = ({ name: name10, prefix, bitsPerChar, alphabet: alphabet6 }) => {
+var rfc46483 = ({ name: name10, prefix, bitsPerChar, alphabet: alphabet5 }) => {
   return from5({
     prefix,
     name: name10,
     encode(input) {
-      return encode36(input, alphabet6, bitsPerChar);
+      return encode36(input, alphabet5, bitsPerChar);
     },
     decode(input) {
-      return decode37(input, alphabet6, bitsPerChar, name10);
+      return decode37(input, alphabet5, bitsPerChar, name10);
     }
   });
 };
@@ -20904,10 +18229,10 @@ var base256emoji_exports2 = {};
 __export(base256emoji_exports2, {
   base256emoji: () => base256emoji2
 });
-var alphabet4 = Array.from("\u{1F680}\u{1FA90}\u2604\u{1F6F0}\u{1F30C}\u{1F311}\u{1F312}\u{1F313}\u{1F314}\u{1F315}\u{1F316}\u{1F317}\u{1F318}\u{1F30D}\u{1F30F}\u{1F30E}\u{1F409}\u2600\u{1F4BB}\u{1F5A5}\u{1F4BE}\u{1F4BF}\u{1F602}\u2764\u{1F60D}\u{1F923}\u{1F60A}\u{1F64F}\u{1F495}\u{1F62D}\u{1F618}\u{1F44D}\u{1F605}\u{1F44F}\u{1F601}\u{1F525}\u{1F970}\u{1F494}\u{1F496}\u{1F499}\u{1F622}\u{1F914}\u{1F606}\u{1F644}\u{1F4AA}\u{1F609}\u263A\u{1F44C}\u{1F917}\u{1F49C}\u{1F614}\u{1F60E}\u{1F607}\u{1F339}\u{1F926}\u{1F389}\u{1F49E}\u270C\u2728\u{1F937}\u{1F631}\u{1F60C}\u{1F338}\u{1F64C}\u{1F60B}\u{1F497}\u{1F49A}\u{1F60F}\u{1F49B}\u{1F642}\u{1F493}\u{1F929}\u{1F604}\u{1F600}\u{1F5A4}\u{1F603}\u{1F4AF}\u{1F648}\u{1F447}\u{1F3B6}\u{1F612}\u{1F92D}\u2763\u{1F61C}\u{1F48B}\u{1F440}\u{1F62A}\u{1F611}\u{1F4A5}\u{1F64B}\u{1F61E}\u{1F629}\u{1F621}\u{1F92A}\u{1F44A}\u{1F973}\u{1F625}\u{1F924}\u{1F449}\u{1F483}\u{1F633}\u270B\u{1F61A}\u{1F61D}\u{1F634}\u{1F31F}\u{1F62C}\u{1F643}\u{1F340}\u{1F337}\u{1F63B}\u{1F613}\u2B50\u2705\u{1F97A}\u{1F308}\u{1F608}\u{1F918}\u{1F4A6}\u2714\u{1F623}\u{1F3C3}\u{1F490}\u2639\u{1F38A}\u{1F498}\u{1F620}\u261D\u{1F615}\u{1F33A}\u{1F382}\u{1F33B}\u{1F610}\u{1F595}\u{1F49D}\u{1F64A}\u{1F639}\u{1F5E3}\u{1F4AB}\u{1F480}\u{1F451}\u{1F3B5}\u{1F91E}\u{1F61B}\u{1F534}\u{1F624}\u{1F33C}\u{1F62B}\u26BD\u{1F919}\u2615\u{1F3C6}\u{1F92B}\u{1F448}\u{1F62E}\u{1F646}\u{1F37B}\u{1F343}\u{1F436}\u{1F481}\u{1F632}\u{1F33F}\u{1F9E1}\u{1F381}\u26A1\u{1F31E}\u{1F388}\u274C\u270A\u{1F44B}\u{1F630}\u{1F928}\u{1F636}\u{1F91D}\u{1F6B6}\u{1F4B0}\u{1F353}\u{1F4A2}\u{1F91F}\u{1F641}\u{1F6A8}\u{1F4A8}\u{1F92C}\u2708\u{1F380}\u{1F37A}\u{1F913}\u{1F619}\u{1F49F}\u{1F331}\u{1F616}\u{1F476}\u{1F974}\u25B6\u27A1\u2753\u{1F48E}\u{1F4B8}\u2B07\u{1F628}\u{1F31A}\u{1F98B}\u{1F637}\u{1F57A}\u26A0\u{1F645}\u{1F61F}\u{1F635}\u{1F44E}\u{1F932}\u{1F920}\u{1F927}\u{1F4CC}\u{1F535}\u{1F485}\u{1F9D0}\u{1F43E}\u{1F352}\u{1F617}\u{1F911}\u{1F30A}\u{1F92F}\u{1F437}\u260E\u{1F4A7}\u{1F62F}\u{1F486}\u{1F446}\u{1F3A4}\u{1F647}\u{1F351}\u2744\u{1F334}\u{1F4A3}\u{1F438}\u{1F48C}\u{1F4CD}\u{1F940}\u{1F922}\u{1F445}\u{1F4A1}\u{1F4A9}\u{1F450}\u{1F4F8}\u{1F47B}\u{1F910}\u{1F92E}\u{1F3BC}\u{1F975}\u{1F6A9}\u{1F34E}\u{1F34A}\u{1F47C}\u{1F48D}\u{1F4E3}\u{1F942}");
+var alphabet3 = Array.from("\u{1F680}\u{1FA90}\u2604\u{1F6F0}\u{1F30C}\u{1F311}\u{1F312}\u{1F313}\u{1F314}\u{1F315}\u{1F316}\u{1F317}\u{1F318}\u{1F30D}\u{1F30F}\u{1F30E}\u{1F409}\u2600\u{1F4BB}\u{1F5A5}\u{1F4BE}\u{1F4BF}\u{1F602}\u2764\u{1F60D}\u{1F923}\u{1F60A}\u{1F64F}\u{1F495}\u{1F62D}\u{1F618}\u{1F44D}\u{1F605}\u{1F44F}\u{1F601}\u{1F525}\u{1F970}\u{1F494}\u{1F496}\u{1F499}\u{1F622}\u{1F914}\u{1F606}\u{1F644}\u{1F4AA}\u{1F609}\u263A\u{1F44C}\u{1F917}\u{1F49C}\u{1F614}\u{1F60E}\u{1F607}\u{1F339}\u{1F926}\u{1F389}\u{1F49E}\u270C\u2728\u{1F937}\u{1F631}\u{1F60C}\u{1F338}\u{1F64C}\u{1F60B}\u{1F497}\u{1F49A}\u{1F60F}\u{1F49B}\u{1F642}\u{1F493}\u{1F929}\u{1F604}\u{1F600}\u{1F5A4}\u{1F603}\u{1F4AF}\u{1F648}\u{1F447}\u{1F3B6}\u{1F612}\u{1F92D}\u2763\u{1F61C}\u{1F48B}\u{1F440}\u{1F62A}\u{1F611}\u{1F4A5}\u{1F64B}\u{1F61E}\u{1F629}\u{1F621}\u{1F92A}\u{1F44A}\u{1F973}\u{1F625}\u{1F924}\u{1F449}\u{1F483}\u{1F633}\u270B\u{1F61A}\u{1F61D}\u{1F634}\u{1F31F}\u{1F62C}\u{1F643}\u{1F340}\u{1F337}\u{1F63B}\u{1F613}\u2B50\u2705\u{1F97A}\u{1F308}\u{1F608}\u{1F918}\u{1F4A6}\u2714\u{1F623}\u{1F3C3}\u{1F490}\u2639\u{1F38A}\u{1F498}\u{1F620}\u261D\u{1F615}\u{1F33A}\u{1F382}\u{1F33B}\u{1F610}\u{1F595}\u{1F49D}\u{1F64A}\u{1F639}\u{1F5E3}\u{1F4AB}\u{1F480}\u{1F451}\u{1F3B5}\u{1F91E}\u{1F61B}\u{1F534}\u{1F624}\u{1F33C}\u{1F62B}\u26BD\u{1F919}\u2615\u{1F3C6}\u{1F92B}\u{1F448}\u{1F62E}\u{1F646}\u{1F37B}\u{1F343}\u{1F436}\u{1F481}\u{1F632}\u{1F33F}\u{1F9E1}\u{1F381}\u26A1\u{1F31E}\u{1F388}\u274C\u270A\u{1F44B}\u{1F630}\u{1F928}\u{1F636}\u{1F91D}\u{1F6B6}\u{1F4B0}\u{1F353}\u{1F4A2}\u{1F91F}\u{1F641}\u{1F6A8}\u{1F4A8}\u{1F92C}\u2708\u{1F380}\u{1F37A}\u{1F913}\u{1F619}\u{1F49F}\u{1F331}\u{1F616}\u{1F476}\u{1F974}\u25B6\u27A1\u2753\u{1F48E}\u{1F4B8}\u2B07\u{1F628}\u{1F31A}\u{1F98B}\u{1F637}\u{1F57A}\u26A0\u{1F645}\u{1F61F}\u{1F635}\u{1F44E}\u{1F932}\u{1F920}\u{1F927}\u{1F4CC}\u{1F535}\u{1F485}\u{1F9D0}\u{1F43E}\u{1F352}\u{1F617}\u{1F911}\u{1F30A}\u{1F92F}\u{1F437}\u260E\u{1F4A7}\u{1F62F}\u{1F486}\u{1F446}\u{1F3A4}\u{1F647}\u{1F351}\u2744\u{1F334}\u{1F4A3}\u{1F438}\u{1F48C}\u{1F4CD}\u{1F940}\u{1F922}\u{1F445}\u{1F4A1}\u{1F4A9}\u{1F450}\u{1F4F8}\u{1F47B}\u{1F910}\u{1F92E}\u{1F3BC}\u{1F975}\u{1F6A9}\u{1F34E}\u{1F34A}\u{1F47C}\u{1F48D}\u{1F4E3}\u{1F942}");
 var alphabetBytesToChars2 = (
   /** @type {string[]} */
-  alphabet4.reduce(
+  alphabet3.reduce(
     (p, c, i) => {
       p[i] = c;
       return p;
@@ -20918,7 +18243,7 @@ var alphabetBytesToChars2 = (
 );
 var alphabetCharsToBytes2 = (
   /** @type {number[]} */
-  alphabet4.reduce(
+  alphabet3.reduce(
     (p, c, i) => {
       p[
         /** @type {number} */
@@ -21257,8 +18582,8 @@ var identity4 = { code: code8, name: name8, encode: encode39, digest: digest2 };
 // node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/hashes/sha2-browser.js
 var sha2_browser_exports2 = {};
 __export(sha2_browser_exports2, {
-  sha256: () => sha2565,
-  sha512: () => sha5125
+  sha256: () => sha2564,
+  sha512: () => sha5124
 });
 
 // node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/hashes/hasher.js
@@ -21296,12 +18621,12 @@ var sha2 = (name10) => (
    */
   async (data) => new Uint8Array(await crypto.subtle.digest(name10, data))
 );
-var sha2565 = from6({
+var sha2564 = from6({
   name: "sha2-256",
   code: 18,
   encode: sha2("SHA-256")
 });
-var sha5125 = from6({
+var sha5124 = from6({
   name: "sha2-512",
   code: 19,
   encode: sha2("SHA-512")
@@ -22829,12 +20154,12 @@ var base256emoji_exports3 = {};
 __export(base256emoji_exports3, {
   base256emoji: () => base256emoji3
 });
-var alphabet5 = Array.from("\u{1F680}\u{1FA90}\u2604\u{1F6F0}\u{1F30C}\u{1F311}\u{1F312}\u{1F313}\u{1F314}\u{1F315}\u{1F316}\u{1F317}\u{1F318}\u{1F30D}\u{1F30F}\u{1F30E}\u{1F409}\u2600\u{1F4BB}\u{1F5A5}\u{1F4BE}\u{1F4BF}\u{1F602}\u2764\u{1F60D}\u{1F923}\u{1F60A}\u{1F64F}\u{1F495}\u{1F62D}\u{1F618}\u{1F44D}\u{1F605}\u{1F44F}\u{1F601}\u{1F525}\u{1F970}\u{1F494}\u{1F496}\u{1F499}\u{1F622}\u{1F914}\u{1F606}\u{1F644}\u{1F4AA}\u{1F609}\u263A\u{1F44C}\u{1F917}\u{1F49C}\u{1F614}\u{1F60E}\u{1F607}\u{1F339}\u{1F926}\u{1F389}\u{1F49E}\u270C\u2728\u{1F937}\u{1F631}\u{1F60C}\u{1F338}\u{1F64C}\u{1F60B}\u{1F497}\u{1F49A}\u{1F60F}\u{1F49B}\u{1F642}\u{1F493}\u{1F929}\u{1F604}\u{1F600}\u{1F5A4}\u{1F603}\u{1F4AF}\u{1F648}\u{1F447}\u{1F3B6}\u{1F612}\u{1F92D}\u2763\u{1F61C}\u{1F48B}\u{1F440}\u{1F62A}\u{1F611}\u{1F4A5}\u{1F64B}\u{1F61E}\u{1F629}\u{1F621}\u{1F92A}\u{1F44A}\u{1F973}\u{1F625}\u{1F924}\u{1F449}\u{1F483}\u{1F633}\u270B\u{1F61A}\u{1F61D}\u{1F634}\u{1F31F}\u{1F62C}\u{1F643}\u{1F340}\u{1F337}\u{1F63B}\u{1F613}\u2B50\u2705\u{1F97A}\u{1F308}\u{1F608}\u{1F918}\u{1F4A6}\u2714\u{1F623}\u{1F3C3}\u{1F490}\u2639\u{1F38A}\u{1F498}\u{1F620}\u261D\u{1F615}\u{1F33A}\u{1F382}\u{1F33B}\u{1F610}\u{1F595}\u{1F49D}\u{1F64A}\u{1F639}\u{1F5E3}\u{1F4AB}\u{1F480}\u{1F451}\u{1F3B5}\u{1F91E}\u{1F61B}\u{1F534}\u{1F624}\u{1F33C}\u{1F62B}\u26BD\u{1F919}\u2615\u{1F3C6}\u{1F92B}\u{1F448}\u{1F62E}\u{1F646}\u{1F37B}\u{1F343}\u{1F436}\u{1F481}\u{1F632}\u{1F33F}\u{1F9E1}\u{1F381}\u26A1\u{1F31E}\u{1F388}\u274C\u270A\u{1F44B}\u{1F630}\u{1F928}\u{1F636}\u{1F91D}\u{1F6B6}\u{1F4B0}\u{1F353}\u{1F4A2}\u{1F91F}\u{1F641}\u{1F6A8}\u{1F4A8}\u{1F92C}\u2708\u{1F380}\u{1F37A}\u{1F913}\u{1F619}\u{1F49F}\u{1F331}\u{1F616}\u{1F476}\u{1F974}\u25B6\u27A1\u2753\u{1F48E}\u{1F4B8}\u2B07\u{1F628}\u{1F31A}\u{1F98B}\u{1F637}\u{1F57A}\u26A0\u{1F645}\u{1F61F}\u{1F635}\u{1F44E}\u{1F932}\u{1F920}\u{1F927}\u{1F4CC}\u{1F535}\u{1F485}\u{1F9D0}\u{1F43E}\u{1F352}\u{1F617}\u{1F911}\u{1F30A}\u{1F92F}\u{1F437}\u260E\u{1F4A7}\u{1F62F}\u{1F486}\u{1F446}\u{1F3A4}\u{1F647}\u{1F351}\u2744\u{1F334}\u{1F4A3}\u{1F438}\u{1F48C}\u{1F4CD}\u{1F940}\u{1F922}\u{1F445}\u{1F4A1}\u{1F4A9}\u{1F450}\u{1F4F8}\u{1F47B}\u{1F910}\u{1F92E}\u{1F3BC}\u{1F975}\u{1F6A9}\u{1F34E}\u{1F34A}\u{1F47C}\u{1F48D}\u{1F4E3}\u{1F942}");
-var alphabetBytesToChars3 = alphabet5.reduce((p, c, i) => {
+var alphabet4 = Array.from("\u{1F680}\u{1FA90}\u2604\u{1F6F0}\u{1F30C}\u{1F311}\u{1F312}\u{1F313}\u{1F314}\u{1F315}\u{1F316}\u{1F317}\u{1F318}\u{1F30D}\u{1F30F}\u{1F30E}\u{1F409}\u2600\u{1F4BB}\u{1F5A5}\u{1F4BE}\u{1F4BF}\u{1F602}\u2764\u{1F60D}\u{1F923}\u{1F60A}\u{1F64F}\u{1F495}\u{1F62D}\u{1F618}\u{1F44D}\u{1F605}\u{1F44F}\u{1F601}\u{1F525}\u{1F970}\u{1F494}\u{1F496}\u{1F499}\u{1F622}\u{1F914}\u{1F606}\u{1F644}\u{1F4AA}\u{1F609}\u263A\u{1F44C}\u{1F917}\u{1F49C}\u{1F614}\u{1F60E}\u{1F607}\u{1F339}\u{1F926}\u{1F389}\u{1F49E}\u270C\u2728\u{1F937}\u{1F631}\u{1F60C}\u{1F338}\u{1F64C}\u{1F60B}\u{1F497}\u{1F49A}\u{1F60F}\u{1F49B}\u{1F642}\u{1F493}\u{1F929}\u{1F604}\u{1F600}\u{1F5A4}\u{1F603}\u{1F4AF}\u{1F648}\u{1F447}\u{1F3B6}\u{1F612}\u{1F92D}\u2763\u{1F61C}\u{1F48B}\u{1F440}\u{1F62A}\u{1F611}\u{1F4A5}\u{1F64B}\u{1F61E}\u{1F629}\u{1F621}\u{1F92A}\u{1F44A}\u{1F973}\u{1F625}\u{1F924}\u{1F449}\u{1F483}\u{1F633}\u270B\u{1F61A}\u{1F61D}\u{1F634}\u{1F31F}\u{1F62C}\u{1F643}\u{1F340}\u{1F337}\u{1F63B}\u{1F613}\u2B50\u2705\u{1F97A}\u{1F308}\u{1F608}\u{1F918}\u{1F4A6}\u2714\u{1F623}\u{1F3C3}\u{1F490}\u2639\u{1F38A}\u{1F498}\u{1F620}\u261D\u{1F615}\u{1F33A}\u{1F382}\u{1F33B}\u{1F610}\u{1F595}\u{1F49D}\u{1F64A}\u{1F639}\u{1F5E3}\u{1F4AB}\u{1F480}\u{1F451}\u{1F3B5}\u{1F91E}\u{1F61B}\u{1F534}\u{1F624}\u{1F33C}\u{1F62B}\u26BD\u{1F919}\u2615\u{1F3C6}\u{1F92B}\u{1F448}\u{1F62E}\u{1F646}\u{1F37B}\u{1F343}\u{1F436}\u{1F481}\u{1F632}\u{1F33F}\u{1F9E1}\u{1F381}\u26A1\u{1F31E}\u{1F388}\u274C\u270A\u{1F44B}\u{1F630}\u{1F928}\u{1F636}\u{1F91D}\u{1F6B6}\u{1F4B0}\u{1F353}\u{1F4A2}\u{1F91F}\u{1F641}\u{1F6A8}\u{1F4A8}\u{1F92C}\u2708\u{1F380}\u{1F37A}\u{1F913}\u{1F619}\u{1F49F}\u{1F331}\u{1F616}\u{1F476}\u{1F974}\u25B6\u27A1\u2753\u{1F48E}\u{1F4B8}\u2B07\u{1F628}\u{1F31A}\u{1F98B}\u{1F637}\u{1F57A}\u26A0\u{1F645}\u{1F61F}\u{1F635}\u{1F44E}\u{1F932}\u{1F920}\u{1F927}\u{1F4CC}\u{1F535}\u{1F485}\u{1F9D0}\u{1F43E}\u{1F352}\u{1F617}\u{1F911}\u{1F30A}\u{1F92F}\u{1F437}\u260E\u{1F4A7}\u{1F62F}\u{1F486}\u{1F446}\u{1F3A4}\u{1F647}\u{1F351}\u2744\u{1F334}\u{1F4A3}\u{1F438}\u{1F48C}\u{1F4CD}\u{1F940}\u{1F922}\u{1F445}\u{1F4A1}\u{1F4A9}\u{1F450}\u{1F4F8}\u{1F47B}\u{1F910}\u{1F92E}\u{1F3BC}\u{1F975}\u{1F6A9}\u{1F34E}\u{1F34A}\u{1F47C}\u{1F48D}\u{1F4E3}\u{1F942}");
+var alphabetBytesToChars3 = alphabet4.reduce((p, c, i) => {
   p[i] = c;
   return p;
 }, []);
-var alphabetCharsToBytes3 = alphabet5.reduce((p, c, i) => {
+var alphabetCharsToBytes3 = alphabet4.reduce((p, c, i) => {
   const codePoint = c.codePointAt(0);
   if (codePoint == null) {
     throw new Error(`Invalid character: ${c}`);
@@ -22920,18 +20245,18 @@ var identity6 = { code: code9, name: name9, encode: encode41, digest: digest3 };
 // node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/hashes/sha2-browser.js
 var sha2_browser_exports3 = {};
 __export(sha2_browser_exports3, {
-  sha256: () => sha2566,
-  sha512: () => sha5126
+  sha256: () => sha2565,
+  sha512: () => sha5125
 });
 function sha3(name10) {
   return async (data) => new Uint8Array(await crypto.subtle.digest(name10, data));
 }
-var sha2566 = from2({
+var sha2565 = from2({
   name: "sha2-256",
   code: 18,
   encode: sha3("SHA-256")
 });
-var sha5126 = from2({
+var sha5125 = from2({
   name: "sha2-512",
   code: 19,
   encode: sha3("SHA-512")
@@ -24744,7 +22069,7 @@ function peerIdFromBytes(buf2) {
         return new Secp256k1PeerIdImpl({ multihash });
       }
     }
-    if (multihash.code === sha2564.code) {
+    if (multihash.code === sha2563.code) {
       return new RSAPeerIdImpl({ multihash });
     }
   } catch {
@@ -24757,7 +22082,7 @@ function peerIdFromCID(cid) {
     throw new Error("Supplied PeerID CID is invalid");
   }
   const multihash = cid.multihash;
-  if (multihash.code === sha2564.code) {
+  if (multihash.code === sha2563.code) {
     return new RSAPeerIdImpl({ multihash: cid.multihash });
   } else if (multihash.code === identity.code) {
     if (multihash.digest.length === MARSHALLED_ED225519_PUBLIC_KEY_LENGTH) {
@@ -24895,7 +22220,7 @@ async function all(source) {
 }
 
 // node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/files/utils.js
-function isBytes5(obj) {
+function isBytes3(obj) {
   return ArrayBuffer.isView(obj) || obj instanceof ArrayBuffer;
 }
 function isBlob(obj) {
@@ -24908,7 +22233,7 @@ var isReadableStream = (value2) => value2 && typeof value2.getReader === "functi
 
 // node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/files/normalise-content.browser.js
 async function normaliseContent(input) {
-  if (isBytes5(input)) {
+  if (isBytes3(input)) {
     return new Blob([input]);
   }
   if (typeof input === "string" || input instanceof String) {
@@ -24930,7 +22255,7 @@ async function normaliseContent(input) {
     if (Number.isInteger(value2)) {
       return new Blob([Uint8Array.from(await all(peekable))]);
     }
-    if (isBytes5(value2) || typeof value2 === "string" || value2 instanceof String) {
+    if (isBytes3(value2) || typeof value2 === "string" || value2 instanceof String) {
       return itToBlob(peekable);
     }
   }
@@ -25435,7 +22760,7 @@ function parseMtime2(input) {
 
 // node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/files/normalise-candidate-multiple.js
 async function* normaliseCandidateMultiple(input, normaliseContent3) {
-  if (typeof input === "string" || input instanceof String || isBytes5(input) || isBlob(input) || input._readableState) {
+  if (typeof input === "string" || input instanceof String || isBytes3(input) || isBlob(input) || input._readableState) {
     throw (0, import_err_code5.default)(new Error("Unexpected input: single item passed - if you are using ipfs.addAll, please use ipfs.add instead"), "ERR_UNEXPECTED_INPUT");
   }
   if (isReadableStream(input)) {
@@ -25456,7 +22781,7 @@ async function* normaliseCandidateMultiple(input, normaliseContent3) {
       yield* map(peekable, (value3) => toFileObject({ content: value3 }, normaliseContent3));
       return;
     }
-    if (isBytes5(value2)) {
+    if (isBytes3(value2)) {
       yield toFileObject({ content: peekable }, normaliseContent3);
       return;
     }
@@ -28086,7 +25411,7 @@ async function* toAsyncIterable(thing) {
   yield thing;
 }
 async function normaliseContent2(input) {
-  if (isBytes5(input)) {
+  if (isBytes3(input)) {
     return toAsyncIterable(toBytes3(input));
   }
   if (typeof input === "string" || input instanceof String) {
@@ -28108,7 +25433,7 @@ async function normaliseContent2(input) {
     if (Number.isInteger(value2)) {
       return toAsyncIterable(Uint8Array.from(await all(peekable)));
     }
-    if (isBytes5(value2) || typeof value2 === "string" || value2 instanceof String) {
+    if (isBytes3(value2) || typeof value2 === "string" || value2 instanceof String) {
       return map(peekable, toBytes3);
     }
   }
@@ -28140,7 +25465,7 @@ async function* normaliseCandidateSingle(input, normaliseContent3) {
     yield toFileObject2(input.toString(), normaliseContent3);
     return;
   }
-  if (isBytes5(input) || isBlob(input)) {
+  if (isBytes3(input) || isBlob(input)) {
     yield toFileObject2(input, normaliseContent3);
     return;
   }
@@ -28155,7 +25480,7 @@ async function* normaliseCandidateSingle(input, normaliseContent3) {
       return;
     }
     peekable.push(value2);
-    if (Number.isInteger(value2) || isBytes5(value2) || typeof value2 === "string" || value2 instanceof String) {
+    if (Number.isInteger(value2) || isBytes3(value2) || typeof value2 === "string" || value2 instanceof String) {
       yield toFileObject2(peekable, normaliseContent3);
       return;
     }
@@ -28653,14 +25978,9 @@ buffer/index.js:
    * @license  MIT
    *)
 
-@noble/hashes/utils.js:
 @noble/hashes/esm/utils.js:
   (*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
 
-@scure/base/index.js:
 @scure/base/lib/esm/index.js:
   (*! scure-base - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
-
-@scure/bip39/index.js:
-  (*! scure-bip39 - MIT License (c) 2022 Patricio Palladino, Paul Miller (paulmillr.com) *)
 */

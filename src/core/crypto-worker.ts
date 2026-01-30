@@ -3,7 +3,8 @@
 // creation and the entire `getAddress` flow, including decryption, seed
 // generation, and key derivation. This ensures the UI remains responsive.
 
-import { mnemonicToSeed, mnemonicToSeedSync } from '@scure/bip39';
+import { generateMnemonic, mnemonicToSeed, mnemonicToSeedSync } from '@scure/bip39';
+import { wordlist } from '@scure/bip39/wordlists/english.js';
 import * as bitcoin from 'bitcoinjs-lib';
 import { BIP32Factory } from 'bip32';
 import * as ecc from 'tiny-secp256k1';
@@ -73,7 +74,10 @@ self.onmessage = async (event: MessageEvent<{ type: string; payload: any }>) => 
   try {
     const { type, payload } = event.data;
 
-    if (type === 'mnemonicToSeed') {
+    if (type === 'generateMnemonic') {
+      const mnemonic = generateMnemonic(wordlist);
+      self.postMessage({ status: 'success', mnemonic });
+    } else if (type === 'mnemonicToSeed') {
       const { mnemonic, passphrase } = payload as MnemonicToSeedPayload;
       const seed = await mnemonicToSeed(mnemonic, passphrase);
       self.postMessage({ status: 'success', seed }, [seed.buffer]);

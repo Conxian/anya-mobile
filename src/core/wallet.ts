@@ -1,5 +1,3 @@
-import { generateMnemonic } from '@scure/bip39';
-import { wordlist } from '@scure/bip39/wordlists/english.js';
 import { SecureWallet } from './secure-bitcoin-lib';
 import { ISecureStorageService } from '../services/secure-storage';
 import * as bitcoin from 'bitcoinjs-lib';
@@ -30,11 +28,45 @@ export class BitcoinWallet {
   }
 }
 
+// ⚡ Bolt: Offload mnemonic generation to the crypto worker.
+// This function communicates with the crypto worker to generate a mnemonic
+// asynchronously, preventing the UI from freezing during this CPU-intensive
+// task. It returns a promise that resolves with the generated mnemonic.
+function generateMnemonicAsync(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    // ⚡ Bolt: Use the existing crypto worker for this new task.
+    // This avoids creating multiple workers and keeps related crypto
+    // operations centralized.
+    const worker = new Worker('crypto-worker.js');
+
+    worker.onmessage = (
+      event: MessageEvent<{ status: string; mnemonic?: string; error?: string }>
+    ) => {
+      if (event.data.status === 'success' && event.data.mnemonic) {
+        resolve(event.data.mnemonic);
+      } else {
+        reject(new Error(event.data.error || 'Failed to generate mnemonic'));
+      }
+      worker.terminate();
+    };
+
+    worker.onerror = (error) => {
+      reject(error);
+      worker.terminate();
+    };
+
+    worker.postMessage({ type: 'generateMnemonic' });
+  });
+}
+
 export async function createWallet(
   secureStorage: ISecureStorageService,
   pin: string
 ): Promise<{ wallet: BitcoinWallet; mnemonic: string }> {
-  const mnemonic = generateMnemonic(wordlist);
+  // ⚡ Bolt: Await the asynchronously generated mnemonic.
+  // By calling `generateMnemonicAsync`, we ensure the main thread remains
+  // unblocked, resulting in a responsive UI during wallet creation.
+  const mnemonic = await generateMnemonicAsync();
   const encryptedMnemonic = await secureStorage.encrypt(mnemonic, pin);
   const secureWallet = new SecureWallet(encryptedMnemonic, secureStorage);
   const wallet = new BitcoinWallet(secureWallet, encryptedMnemonic);

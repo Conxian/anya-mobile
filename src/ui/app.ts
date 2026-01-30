@@ -81,7 +81,7 @@ document.getElementById('loadWallet').addEventListener('click', async () => {
   loadWalletButton.innerText = 'Loading...';
   cidInput.disabled = true;
 
-  const cid = cidInput.value;
+  const cid = cidInput.value.trim();
   const walletInfo = document.getElementById('walletInfo');
   // 🎨 Palette: Provide immediate feedback that the wallet is loading.
   // This prevents the user from wondering if their click was registered.

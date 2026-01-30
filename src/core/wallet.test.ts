@@ -13,6 +13,8 @@ class MockWorker {
       data: {
         status: 'success',
         address: 'mock-address',
+        mnemonic:
+          'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
       },
     });
   }

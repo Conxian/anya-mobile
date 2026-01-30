@@ -22,6 +22,7 @@ The project is in its early stages with a solid architectural foundation based o
 *   **Security:** Lack of secure key management and storage.
 *   **Production-Ready Infrastructure:** No self-hosted node or robust blockchain client.
 *   **Layer 2/Sidechain Support:** No implementations for Lightning, Liquid, or other layers.
+*   **State Chains:** No support for Mercury Layer or similar state chain protocols.
 *   **Hardware Wallet Support:** No integration with hardware wallets.
 
 ### Opportunities:
@@ -33,13 +34,19 @@ The project is in its early stages with a solid architectural foundation based o
 ## 3. Recommended Best-in-Class Tools
 
 *   **Core Wallet & Blockchain:**
-    *   **Bitcoin Development Kit (BDK):** For robust and secure core wallet logic.
+    *   **Bitcoin Development Kit (BDK):** For robust and secure core wallet logic (using BDK-WASM for web).
     *   **Electrum Server (e.g., Electrs or Fulcrum):** For a private and efficient blockchain interface.
 *   **Lightning Network:**
     *   **Lightning Development Kit (LDK):** For flexible and non-custodial Lightning integration.
-*   **Sidechains:**
-    *   **Liquid:** `liquidjs-lib`
-    *   **Rootstock:** `ethers.js` or `web3.js`
+*   **State Chains:**
+    *   **Mercury Layer SDK:** The leading implementation for state chains, offering instant, low-fee, and private transfers.
+*   **Sidechains & Scaling:**
+    *   **Liquid:** `liquidjs-lib` for confidential transactions and issued assets.
+    *   **Rootstock (RSK):** `rsclib` or `ethers.js` for EVM-compatible smart contracts on Bitcoin.
+    *   **Stacks:** `stacks.js` for smart contracts and Bitcoin-backed assets (sBTC).
+    *   **Ark:** A new L2 protocol for scalable, off-chain payments.
+*   **Staking:**
+    *   **Babylon:** For trustless Bitcoin staking.
 *   **Hardware Wallets:**
     *   **Hardware Wallet Interface (HWI):** For a unified interface to major hardware wallets.
 *   **User Interface:**
@@ -57,15 +64,19 @@ The project is in its early stages with a solid architectural foundation based o
 *   Implement send/receive functionality using BDK.
 *   Build a robust UI for on-chain transactions and history.
 
-**Phase 3: Lightning Network Integration**
+**Phase 3: Lightning Network and State Chain Integration**
 *   Integrate LDK for Lightning support.
-*   Develop UI for managing channels and payments.
+*   Integrate Mercury Layer SDK for State Chain support.
+*   Develop UI for managing channels, payments, and state chain coins.
 
-**Phase 4: Liquid Sidechain Integration**
-*   Integrate `liquidjs-lib`.
-*   Extend the wallet to handle multiple assets.
+**Phase 4: Sidechain and Smart Contract Integration**
+*   Integrate `liquidjs-lib` for Liquid support.
+*   Integrate `stacks.js` for Stacks and sBTC support.
+*   Integrate `ethers.js` for Rootstock (RSK) support.
+*   Extend the wallet to handle multiple assets and smart contract interactions.
 
-**Phase 5: Hardware Wallet Integration and Production Readiness**
+**Phase 5: Advanced Features and Production Readiness**
+*   Integrate Babylon for Bitcoin staking.
 *   Integrate HWI for hardware wallet support.
 *   Set up self-hosted infrastructure (Bitcoin Core, Electrum Server).
 *   Conduct comprehensive testing and a security audit.

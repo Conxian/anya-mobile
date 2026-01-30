@@ -1,4 +1,4 @@
-import { Wallet, Account, Transaction, Asset, Amount } from './domain';
+import { Wallet, Account, Transaction, Asset, Amount, AddressType } from './domain';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { BIP32Interface } from 'bip32';
 import { BitcoinWallet } from './wallet';
@@ -48,14 +48,38 @@ describe('Domain Objects', () => {
   });
 
   it('should generate a native SegWit (P2WPKH) address for the specified network', () => {
-    const mainnetAccount = new Account('acc_1', 'My Bitcoin Account', mockNode, bitcoin.networks.bitcoin);
+    const mainnetAccount = new Account('acc_1', 'My Bitcoin Account', mockNode, bitcoin.networks.bitcoin, AddressType.NativeSegWit);
     expect(mainnetAccount.address).toBe(
       'bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4'
     );
 
-    const testnetAccount = new Account('acc_2', 'My Testnet Account', mockNode, bitcoin.networks.testnet);
+    const testnetAccount = new Account('acc_2', 'My Testnet Account', mockNode, bitcoin.networks.testnet, AddressType.NativeSegWit);
     expect(testnetAccount.address).toBe(
       'tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx'
+    );
+  });
+
+  it('should generate a Legacy (P2PKH) address for the specified network', () => {
+    const mainnetAccount = new Account('acc_1', 'My Bitcoin Account', mockNode, bitcoin.networks.bitcoin, AddressType.Legacy);
+    expect(mainnetAccount.address).toBe(
+      '1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH'
+    );
+
+    const testnetAccount = new Account('acc_2', 'My Testnet Account', mockNode, bitcoin.networks.testnet, AddressType.Legacy);
+    expect(testnetAccount.address).toBe(
+      'mrCDrCybB6J1vRfbwM5hemdJz73FwDBC8r'
+    );
+  });
+
+  it('should generate a Taproot (P2TR) address for the specified network', () => {
+    const mainnetAccount = new Account('acc_1', 'My Bitcoin Account', mockNode, bitcoin.networks.bitcoin, AddressType.Taproot);
+    expect(mainnetAccount.address).toBe(
+      'bc1pmfr3p9j00pfxjh0zmgp99y8zftmd3s5pmedqhyptwy6lm87hf5sspknck9'
+    );
+
+    const testnetAccount = new Account('acc_2', 'My Testnet Account', mockNode, bitcoin.networks.testnet, AddressType.Taproot);
+    expect(testnetAccount.address).toBe(
+      'tb1pmfr3p9j00pfxjh0zmgp99y8zftmd3s5pmedqhyptwy6lm87hf5ssk79hv2'
     );
   });
 });

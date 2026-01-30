@@ -1,6 +1,10 @@
 import { BitcoinWallet } from './wallet';
 import * as bitcoin from 'bitcoinjs-lib';
 import { BIP32Interface } from 'bip32';
+import * as ecc from 'tiny-secp256k1';
+
+// Initialize ECC library for Taproot support
+bitcoin.initEccLib(ecc);
 
 export interface Wallet {
   id: string;
@@ -8,11 +12,18 @@ export interface Wallet {
   accounts: Account[];
 }
 
+export enum AddressType {
+  Legacy = 'P2PKH',
+  NativeSegWit = 'P2WPKH',
+  Taproot = 'P2TR',
+}
+
 export class Account {
   id: string;
   name: string;
   private node: BIP32Interface;
   private network: bitcoin.Network;
+  private addressType: AddressType;
 
   // Caching fields for lazy derivation
   private _address?: Address;
@@ -23,25 +34,48 @@ export class Account {
     id: string,
     name: string,
     node: BIP32Interface,
-    network: bitcoin.Network = bitcoin.networks.bitcoin
+    network: bitcoin.Network = bitcoin.networks.bitcoin,
+    addressType: AddressType = AddressType.NativeSegWit
   ) {
     this.id = id;
     this.name = name;
     this.node = node;
     this.network = network;
+    this.addressType = addressType;
   }
 
   get address(): Address {
     if (!this._address) {
-      // P2WPKH (native SegWit)
-      const { address } = bitcoin.payments.p2wpkh({
-        pubkey: this.node.publicKey,
-        network: this.network,
-      });
-      if (!address) {
-        throw new Error('Could not generate address');
+      let result;
+      switch (this.addressType) {
+        case AddressType.Legacy:
+          result = bitcoin.payments.p2pkh({
+            pubkey: this.node.publicKey,
+            network: this.network,
+          });
+          break;
+        case AddressType.NativeSegWit:
+          result = bitcoin.payments.p2wpkh({
+            pubkey: this.node.publicKey,
+            network: this.network,
+          });
+          break;
+        case AddressType.Taproot:
+          // X-only pubkey for Taproot
+          const internalPubkey = Buffer.from(this.node.publicKey.slice(1, 33));
+          result = bitcoin.payments.p2tr({
+            internalPubkey,
+            network: this.network,
+          });
+          break;
+        default:
+          throw new Error(`Unsupported address type: ${this.addressType}`);
       }
-      this._address = address;
+
+      if (!result || !result.address) {
+        throw new Error(`Could not generate ${this.addressType} address`);
+      }
+      this._address = result.address;
     }
     return this._address;
   }

@@ -49,6 +49,15 @@ This document summarizes the research on different Bitcoin layers to inform the 
     *   Ability to interact with Stacks smart contracts written in Clarity.
     *   Ability to read Bitcoin state.
 
+### 6. State Chains (Mercury Layer)
+
+*   **Description:** A Layer 2 solution that allows for the off-chain transfer of UTXO ownership.
+*   **Native Asset:** Bitcoin (BTC)
+*   **Use Cases:** Instant, private, and low-fee transfers of whole UTXOs.
+*   **Wallet Requirements:**
+    *   Integration with Mercury Layer SDK.
+    *   Management of backup transactions for non-custodial security.
+
 ## Summary
 
 A multi-layer Bitcoin wallet needs to support a variety of assets and transaction types across these different layers. The architecture must be modular to accommodate the unique requirements of each layer.

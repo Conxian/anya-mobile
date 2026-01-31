@@ -12,11 +12,20 @@ import { mnemonicToSeedSync } from '@scure/bip39';
 const mockWorker = {
   onmessage: (data: any) => {},
   postMessage: jest.fn(
-    (message: { payload: { mnemonic: string; passphrase?: string } }) => {
-      const { mnemonic, passphrase } = message.payload;
-      const seed = mnemonicToSeedSync(mnemonic, passphrase);
-      // Directly invoke onmessage to simulate the worker's response
-      mockWorker.onmessage({ data: { status: 'success', seed } });
+    (message: {
+      type: string;
+      payload: { mnemonic: string; passphrase?: string };
+      requestId: number;
+    }) => {
+      const { type, payload, requestId } = message;
+      if (type === 'mnemonicToSeed') {
+        const { mnemonic, passphrase } = payload;
+        const seed = mnemonicToSeedSync(mnemonic, passphrase);
+        // Directly invoke onmessage to simulate the worker's response
+        mockWorker.onmessage({
+          data: { requestId, status: 'success', payload: { seed } },
+        });
+      }
     }
   ),
   terminate: jest.fn(),

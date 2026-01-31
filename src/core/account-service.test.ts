@@ -20,6 +20,7 @@ class MockWorker {
   onmessage: (event: any) => void = () => {};
   onerror: (error: any) => void = () => {};
   postMessage(message: any) {
+    const { requestId } = message;
     if (message.type === 'getNode') {
       const seed = Buffer.alloc(32);
       seed.fill(1);
@@ -27,11 +28,14 @@ class MockWorker {
       const child = root.derivePath(`m/84'/0'/0'/0/${message.payload.index}`);
       this.onmessage({
         data: {
+          requestId,
           status: 'success',
-          node: {
-            publicKey: child.publicKey.buffer,
-            privateKey: child.privateKey!.buffer,
-            chainCode: child.chainCode.buffer,
+          payload: {
+            node: {
+              publicKey: child.publicKey.buffer,
+              privateKey: child.privateKey!.buffer,
+              chainCode: child.chainCode.buffer,
+            },
           },
         },
       });

@@ -6,6 +6,7 @@ import { BIP32Factory } from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 import { mock } from 'jest-mock-extended';
 import { BitcoinWallet } from './wallet';
+import { CryptoWorkerClient } from './secure-bitcoin-lib';
 
 const bip32 = BIP32Factory(ecc);
 
@@ -75,34 +76,16 @@ export class WalletServiceImpl implements WalletService {
   // ⚡ Bolt: DRY up worker logic.
   // This private helper encapsulates the logic for running the CPU-intensive
   // mnemonicToSeed function in a Web Worker, avoiding code duplication
-  // in createWallet and loadWalletFromMnemonic.
+  // in createWallet and loadWalletFromMnemonic. It now uses the shared
+  // CryptoWorkerClient for better performance and caching.
   private async runMnemonicToSeedInWorker(
     mnemonic: string,
     passphrase?: string
   ): Promise<Uint8Array> {
-    return new Promise<Uint8Array>((resolve, reject) => {
-      // The worker script is bundled by esbuild into the public directory.
-      // This path must match the 'outfile' in build.js.
-      const worker = new Worker('./crypto-worker.js');
-
-      worker.onmessage = (event) => {
-        if (event.data.status === 'success') {
-          resolve(event.data.seed);
-        } else {
-          reject(new Error(event.data.error));
-        }
-        worker.terminate();
-      };
-
-      worker.onerror = (error) => {
-        reject(error);
-        worker.terminate();
-      };
-
-      worker.postMessage({
-        type: 'mnemonicToSeed',
-        payload: { mnemonic, passphrase },
-      });
-    });
+    const response = await CryptoWorkerClient.call<{ seed: Uint8Array }>(
+      'mnemonicToSeed',
+      { mnemonic, passphrase }
+    );
+    return response.seed;
   }
 }

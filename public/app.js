@@ -11567,66 +11567,79 @@ function verifySchnorr(h2, Q, signature2) {
 
 // src/core/secure-bitcoin-lib.ts
 var bip32 = BIP32Factory(lib_exports);
+var CryptoWorkerClient = class {
+  static {
+    this.instance = null;
+  }
+  static {
+    this.pendingRequests = /* @__PURE__ */ new Map();
+  }
+  static {
+    this.nextRequestId = 0;
+  }
+  static getInstance() {
+    if (!this.instance) {
+      this.instance = new Worker("crypto-worker.js", { type: "module" });
+      this.instance.onmessage = (event) => {
+        const { requestId, status, payload, error } = event.data;
+        const handlers = this.pendingRequests.get(requestId);
+        if (handlers) {
+          if (status === "success") {
+            handlers.resolve(payload);
+          } else {
+            handlers.reject(new Error(error || "Worker operation failed"));
+          }
+          this.pendingRequests.delete(requestId);
+        }
+      };
+      this.instance.onerror = (error) => {
+        console.error("Crypto worker error:", error);
+        for (const handlers of this.pendingRequests.values()) {
+          handlers.reject(new Error("Crypto worker crashed"));
+        }
+        this.pendingRequests.clear();
+        this.instance = null;
+      };
+    }
+    return this.instance;
+  }
+  static call(type, payload) {
+    const requestId = this.nextRequestId++;
+    const worker = this.getInstance();
+    return new Promise((resolve2, reject) => {
+      this.pendingRequests.set(requestId, { resolve: resolve2, reject });
+      worker.postMessage({ type, payload, requestId });
+    });
+  }
+};
 var SecureWallet = class {
   constructor(encryptedMnemonic, secureStorage) {
     this.encryptedMnemonic = encryptedMnemonic;
     this.secureStorage = secureStorage;
   }
-  getAddress(index, pin) {
-    return new Promise((resolve2, reject) => {
-      const worker = new Worker("crypto-worker.js", { type: "module" });
-      worker.onmessage = (event) => {
-        if (event.data.status === "success" && event.data.address) {
-          resolve2(event.data.address);
-        } else {
-          reject(new Error(event.data.error || "Worker failed to derive address"));
-        }
-        worker.terminate();
-      };
-      worker.onerror = (error) => {
-        reject(error);
-        worker.terminate();
-      };
-      worker.postMessage({
-        type: "getAddress",
-        payload: {
-          encryptedMnemonic: this.encryptedMnemonic,
-          pin,
-          index
-        }
-      });
-    });
+  async getAddress(index, pin) {
+    const response = await CryptoWorkerClient.call(
+      "getAddress",
+      {
+        encryptedMnemonic: this.encryptedMnemonic,
+        pin,
+        index
+      }
+    );
+    return response.address;
   }
-  getNode(index, pin) {
-    return new Promise((resolve2, reject) => {
-      const worker = new Worker("crypto-worker.js", { type: "module" });
-      worker.onmessage = (event) => {
-        if (event.data.status === "success" && event.data.node) {
-          const { privateKey, chainCode } = event.data.node;
-          const node = bip32.fromPrivateKey(
-            Buffer.from(privateKey),
-            Buffer.from(chainCode),
-            networks_exports.bitcoin
-          );
-          resolve2(node);
-        } else {
-          reject(new Error(event.data.error || "Worker failed to derive node"));
-        }
-        worker.terminate();
-      };
-      worker.onerror = (error) => {
-        reject(error);
-        worker.terminate();
-      };
-      worker.postMessage({
-        type: "getNode",
-        payload: {
-          encryptedMnemonic: this.encryptedMnemonic,
-          pin,
-          index
-        }
-      });
+  async getNode(index, pin) {
+    const response = await CryptoWorkerClient.call("getNode", {
+      encryptedMnemonic: this.encryptedMnemonic,
+      pin,
+      index
     });
+    const { privateKey, chainCode } = response.node;
+    return bip32.fromPrivateKey(
+      Buffer.from(privateKey),
+      Buffer.from(chainCode),
+      networks_exports.bitcoin
+    );
   }
 };
 
@@ -11644,23 +11657,12 @@ var BitcoinWallet = class {
     return this.encryptedMnemonic;
   }
 };
-function generateMnemonicAsync() {
-  return new Promise((resolve2, reject) => {
-    const worker = new Worker("crypto-worker.js");
-    worker.onmessage = (event) => {
-      if (event.data.status === "success" && event.data.mnemonic) {
-        resolve2(event.data.mnemonic);
-      } else {
-        reject(new Error(event.data.error || "Failed to generate mnemonic"));
-      }
-      worker.terminate();
-    };
-    worker.onerror = (error) => {
-      reject(error);
-      worker.terminate();
-    };
-    worker.postMessage({ type: "generateMnemonic" });
-  });
+async function generateMnemonicAsync() {
+  const response = await CryptoWorkerClient.call(
+    "generateMnemonic",
+    {}
+  );
+  return response.mnemonic;
 }
 async function createWallet(secureStorage, pin) {
   const mnemonic = await generateMnemonicAsync();
@@ -25944,7 +25946,7 @@ document.getElementById("loadWallet").addEventListener("click", async () => {
   loadWalletButton.disabled = true;
   loadWalletButton.innerText = "Loading...";
   cidInput.disabled = true;
-  const cid = cidInput.value;
+  const cid = cidInput.value.trim();
   const walletInfo = document.getElementById("walletInfo");
   walletInfo.innerHTML = "<p>Loading wallet from IPFS...</p>";
   let walletInfoHTML = "";

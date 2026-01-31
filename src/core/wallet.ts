@@ -1,4 +1,4 @@
-import { SecureWallet } from './secure-bitcoin-lib';
+import { SecureWallet, CryptoWorkerClient } from './secure-bitcoin-lib';
 import { ISecureStorageService } from '../services/secure-storage';
 import * as bitcoin from 'bitcoinjs-lib';
 import { BIP32Factory } from 'bip32';
@@ -31,32 +31,13 @@ export class BitcoinWallet {
 // ⚡ Bolt: Offload mnemonic generation to the crypto worker.
 // This function communicates with the crypto worker to generate a mnemonic
 // asynchronously, preventing the UI from freezing during this CPU-intensive
-// task. It returns a promise that resolves with the generated mnemonic.
-function generateMnemonicAsync(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    // ⚡ Bolt: Use the existing crypto worker for this new task.
-    // This avoids creating multiple workers and keeps related crypto
-    // operations centralized.
-    const worker = new Worker('crypto-worker.js');
-
-    worker.onmessage = (
-      event: MessageEvent<{ status: string; mnemonic?: string; error?: string }>
-    ) => {
-      if (event.data.status === 'success' && event.data.mnemonic) {
-        resolve(event.data.mnemonic);
-      } else {
-        reject(new Error(event.data.error || 'Failed to generate mnemonic'));
-      }
-      worker.terminate();
-    };
-
-    worker.onerror = (error) => {
-      reject(error);
-      worker.terminate();
-    };
-
-    worker.postMessage({ type: 'generateMnemonic' });
-  });
+// task. It now uses the shared CryptoWorkerClient for better efficiency.
+async function generateMnemonicAsync(): Promise<string> {
+  const response = await CryptoWorkerClient.call<{ mnemonic: string }>(
+    'generateMnemonic',
+    {}
+  );
+  return response.mnemonic;
 }
 
 export async function createWallet(

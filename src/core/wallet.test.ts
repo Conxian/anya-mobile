@@ -9,12 +9,16 @@ class MockWorker {
   onmessage: (event: any) => void = () => {};
   onerror: (error: any) => void = () => {};
   postMessage(message: any) {
+    const { requestId } = message;
     this.onmessage({
       data: {
+        requestId,
         status: 'success',
-        address: 'mock-address',
-        mnemonic:
-          'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+        payload: {
+          address: 'mock-address',
+          mnemonic:
+            'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+        },
       },
     });
   }

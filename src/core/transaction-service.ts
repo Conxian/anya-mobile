@@ -9,6 +9,7 @@ import {
   PrivateKey,
   UTXO,
   DraftTransaction,
+  AddressType,
 } from './domain';
 import * as bitcoin from 'bitcoinjs-lib';
 import { BIP32Factory } from 'bip32';
@@ -44,19 +45,35 @@ export class TransactionServiceImpl implements TransactionService {
     );
 
     const psbt = new bitcoin.Psbt({ network: this.network });
-    const { output } = bitcoin.payments.p2wpkh({
-      pubkey: sourceAccount.getSigner().publicKey,
-      network: this.network,
-    });
+    const paymentScript = bitcoin.address.toOutputScript(
+      sourceAccount.address,
+      this.network
+    );
+
     for (const input of inputs) {
-      psbt.addInput({
+      const inputData: any = {
         hash: input.txid,
         index: input.vout,
-        witnessUtxo: {
-          script: output!,
-          value: input.value,
-        },
-      });
+      };
+
+      if (sourceAccount.addressType === AddressType.Legacy) {
+        // Legacy (P2PKH) requires the full previous transaction to be provided as nonWitnessUtxo.
+        // Our current BlockchainClient/UTXO model doesn't provide this yet.
+        throw new Error('Legacy (P2PKH) is not yet supported in this version.');
+      }
+
+      inputData.witnessUtxo = {
+        script: paymentScript,
+        value: input.value,
+      };
+
+      if (sourceAccount.addressType === AddressType.Taproot) {
+        inputData.tapInternalKey = Buffer.from(
+          sourceAccount.getSigner().publicKey.slice(1, 33)
+        );
+      }
+
+      psbt.addInput(inputData);
     }
 
     psbt.addOutput({
@@ -132,7 +149,21 @@ export class TransactionServiceImpl implements TransactionService {
       network: this.network,
     });
     const signer = account.getSigner();
-    psbt.signAllInputs(signer);
+
+    if (account.addressType === AddressType.Taproot) {
+      // For Taproot Keypath spending, we need to tweak the signer
+      const internalPubkey = Buffer.from(signer.publicKey.slice(1, 33));
+      // @ts-ignore - bitcoinjs-lib internal types can be tricky
+      const tweakedSigner = signer.tweak(
+        bitcoin.crypto.taggedHash('TapTweak', internalPubkey)
+      );
+
+      for (let i = 0; i < psbt.inputCount; i++) {
+        psbt.signInput(i, tweakedSigner);
+      }
+    } else {
+      psbt.signAllInputs(signer);
+    }
 
     return { ...transaction, psbt: psbt.toBase64() };
   }

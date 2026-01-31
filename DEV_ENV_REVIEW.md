@@ -1,84 +1,66 @@
-# Bitcoin Dev Env Review
+# Bitcoin Development Environment Review: Full Stack Manifest
 
-This document provides a comprehensive review of the current development environment and a strategic roadmap for building a best-in-class, multi-layer Bitcoin wallet.
+This document provides a comprehensive review of the development environment and defines the "Best-in-Class" stack for building a full-featured, multi-layer Bitcoin wallet.
 
-## 1. Current State Analysis
+## 1. Vision: The Best Full Bitcoin Wallet
 
-The project is in its early stages with a solid architectural foundation based on the "Ports and Adapters" pattern. This is a strong starting point for a modular and extensible system.
+To achieve the goal of being the best full Bitcoin wallet, we must support:
+- **All Layers**: L1, Lightning (L2), Sidechains (Liquid, Rootstock), and State Chains.
+- **Advanced Protocols**: Taproot, Miniscript, Musig2, Silent Payments.
+- **Self-Sovereignty**: Non-custodial by default, optional self-hosting of backends (Electrum, Lightning nodes).
 
-### Key Observations:
+## 2. Best-in-Class Tool Selection
 
-*   **Core Logic:** The core wallet logic is present but minimal. It lacks essential features like transaction creation, signing, and history.
-*   **Security:** There are critical security vulnerabilities in the current implementation. Private keys and mnemonic phrases are stored in plaintext within the domain models.
-*   **Blockchain Client:** The `BlockstreamClient` is a good proof-of-concept but is not suitable for a production wallet due to privacy, rate-limiting, and reliability concerns.
-*   **UI:** The user interface is a basic proof-of-concept that demonstrates IPFS integration but exposes sensitive information and lacks essential wallet features.
-*   **Dependencies:** The project uses a modern TypeScript and pnpm setup. However, the test suite is currently broken due to a missing Babel preset.
+### 2.1. Layer 1 (Base Layer)
+*   **Current Tool:** `bitcoinjs-lib`
+*   **Status:** Excellent for JS-based environments. Mature, stable, and widely used.
+*   **Recommendation:** Continue using `bitcoinjs-lib` for core transaction construction and signing. For more advanced features like Descriptor-based wallets and robust UTXO management, consider integrating **BDK (Bitcoin Development Kit)** via WASM.
+*   **Reasoning:** `bitcoinjs-lib` provides the flexibility needed for custom script construction, while BDK offers a higher-level API for complex wallet logic.
 
-## 2. Gaps and Opportunities
+### 2.2. Layer 2 (Lightning Network)
+*   **Tool:** **LDK (Lightning Development Kit)**
+*   **Recommendation:** Use LDK-WASM for a non-custodial Lightning implementation in the browser.
+*   **Reasoning:** LDK is designed to be integrated into wallets, providing full control over the Lightning node's behavior while abstracting the complexity of the protocol.
 
-### Gaps:
+### 2.3. Sidechains (Liquid Network)
+*   **Tool:** **liquidjs-lib**
+*   **Recommendation:** Integrate `liquidjs-lib` for native Liquid support.
+*   **Reasoning:** It is the official JS library for Liquid, supporting confidential transactions and issued assets (L-BTC, USDT, etc.).
 
-*   **Core Wallet Functionality:** Missing send/receive, transaction history, and multi-account management.
-*   **Security:** Lack of secure key management and storage.
-*   **Production-Ready Infrastructure:** No self-hosted node or robust blockchain client.
-*   **Layer 2/Sidechain Support:** No implementations for Lightning, Liquid, or other layers.
-*   **State Chains:** No support for Mercury Layer or similar state chain protocols.
-*   **Hardware Wallet Support:** No integration with hardware wallets.
+### 2.4. State Chains
+*   **Tool:** **Mercury Layer SDK**
+*   **Recommendation:** Integrate the Mercury Layer protocol for instant, private, and low-fee transfers of UTXOs.
+*   **Reasoning:** Mercury Layer is the leading implementation of State Chains, offering a unique middle ground between L1 and Lightning.
 
-### Opportunities:
+### 2.5. Stacks & Smart Contracts
+*   **Tool:** **@stacks/transactions**
+*   **Recommendation:** Use `@stacks/transactions` for interacting with the Stacks layer and sBTC.
+*   **Reasoning:** It provides the necessary tools for Clarity smart contract interaction and Stacks-specific transaction signing.
 
-*   **Modularity:** The architecture allows for easy integration of new features.
-*   **Decentralization:** The use of IPFS can be extended to decentralized identity.
-*   **Advanced Features:** The foundation is suitable for adding multi-signature, social recovery, cross-chain swaps, and DeFi integrations.
+## 3. Infrastructure & Privacy
+*   **Electrum Protocol:** Replace centralized APIs (like Blockstream.info) with an Electrum client. This allows users to connect to their own nodes (e.g., Electrs, Fulcrum), significantly improving privacy and reliability.
+*   **Web Workers:** Use Web Workers for all cryptographic operations to keep the UI responsive (implemented via `CryptoWorkerClient`).
+*   **Secure Storage:** Use Web Crypto API (AES-GCM) for encrypting sensitive data with a user-defined PIN (implemented via `SecureStorageService`).
 
-## 3. Recommended Best-in-Class Tools
+## 4. Architectural Roadmap
 
-*   **Core Wallet & Blockchain:**
-    *   **Bitcoin Development Kit (BDK):** For robust and secure core wallet logic (using BDK-WASM for web).
-    *   **Electrum Server (e.g., Electrs or Fulcrum):** For a private and efficient blockchain interface.
-*   **Lightning Network:**
-    *   **Lightning Development Kit (LDK):** For flexible and non-custodial Lightning integration.
-*   **State Chains:**
-    *   **Mercury Layer SDK:** The leading implementation for state chains, offering instant, low-fee, and private transfers.
-*   **Sidechains & Scaling:**
-    *   **Liquid:** `liquidjs-lib` for confidential transactions and issued assets.
-    *   **Rootstock (RSK):** `rsclib` or `ethers.js` for EVM-compatible smart contracts on Bitcoin.
-    *   **Stacks:** `stacks.js` for smart contracts and Bitcoin-backed assets (sBTC).
-    *   **Ark:** A new L2 protocol for scalable, off-chain payments.
-*   **Staking:**
-    *   **Babylon:** For trustless Bitcoin staking.
-*   **Hardware Wallets:**
-    *   **Hardware Wallet Interface (HWI):** For a unified interface to major hardware wallets.
-*   **User Interface:**
-    *   **Framework:** React, Vue, or Svelte.
-    *   **Component Library:** Material-UI or Tailwind CSS.
+### Phase 1: Foundation (Current)
+- [x] Hexagonal Architecture (Ports & Adapters)
+- [x] Secure Key Management (Encrypted Mnemonic)
+- [x] Basic L1 Support (P2WPKH)
 
-## 4. High-Level Integration Roadmap
+### Phase 2: Multi-Layer Expansion
+- [ ] Implement `LightningService` and `SidechainService` ports.
+- [ ] Add Taproot (P2TR) support to L1.
+- [ ] Integrate `liquidjs-lib`.
 
-**Phase 1: Core Wallet Refactoring and Security Hardening**
-*   Integrate BDK for wallet logic.
-*   Implement secure, encrypted storage for wallet data.
-*   Replace `BlockstreamClient` with an `ElectrumClient`.
+### Phase 3: Lightning & State Chains
+- [ ] Integrate LDK-WASM for Lightning channels.
+- [ ] Integrate Mercury Layer for State Chain coins.
 
-**Phase 2: On-Chain Transactions**
-*   Implement send/receive functionality using BDK.
-*   Build a robust UI for on-chain transactions and history.
+### Phase 4: Advanced UX & Privacy
+- [ ] Implement Silent Payments.
+- [ ] Unified multi-layer balance view.
+- [ ] In-wallet swaps between layers.
 
-**Phase 3: Lightning Network and State Chain Integration**
-*   Integrate LDK for Lightning support.
-*   Integrate Mercury Layer SDK for State Chain support.
-*   Develop UI for managing channels, payments, and state chain coins.
-
-**Phase 4: Sidechain and Smart Contract Integration**
-*   Integrate `liquidjs-lib` for Liquid support.
-*   Integrate `stacks.js` for Stacks and sBTC support.
-*   Integrate `ethers.js` for Rootstock (RSK) support.
-*   Extend the wallet to handle multiple assets and smart contract interactions.
-
-**Phase 5: Advanced Features and Production Readiness**
-*   Integrate Babylon for Bitcoin staking.
-*   Integrate HWI for hardware wallet support.
-*   Set up self-hosted infrastructure (Bitcoin Core, Electrum Server).
-*   Conduct comprehensive testing and a security audit.
-
-By following this roadmap and leveraging the recommended tools, this project can evolve into a secure, feature-rich, and truly multi-layer Bitcoin wallet.
+By adhering to this manifest, we ensure that the wallet remains at the cutting edge of Bitcoin technology, providing users with the most powerful and secure tools available.

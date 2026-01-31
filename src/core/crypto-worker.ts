@@ -56,36 +56,76 @@ async function decrypt(encryptedHexString: string, pin: string): Promise<string>
 
 // --- Message Handling ---
 
+// ⚡ Bolt: Efficient Result Caching.
+// Caching the results of expensive PBKDF2 derivations (decrypting the
+// mnemonic and generating the seed) dramatically improves performance for
+// subsequent operations. 100,000 PBKDF2 iterations are now only performed once.
+let lastEncryptedMnemonic: string | null = null;
+let lastPin: string | null = null;
+let lastMnemonic: string | null = null;
+let lastSeed: Uint8Array | null = null;
+
+let lastPlainMnemonic: string | null = null;
+let lastPassphrase: string | null = null;
+let lastSeedFromMnemonic: Uint8Array | null = null;
+
 interface DerivationPayload {
   encryptedMnemonic: string;
   pin: string;
   index: number;
 }
 
-// ⚡ Bolt: Standardized worker communication. All messages now use a
-// { type, payload } structure for consistency and clarity. This change
-// also allows passing a passphrase for seed generation.
 interface MnemonicToSeedPayload {
   mnemonic: string;
   passphrase?: string;
 }
 
-self.onmessage = async (event: MessageEvent<{ type: string; payload: any }>) => {
+self.onmessage = async (
+  event: MessageEvent<{ type: string; payload: any; requestId: number }>
+) => {
+  const { type, payload, requestId } = event.data;
   try {
-    const { type, payload } = event.data;
-
     if (type === 'generateMnemonic') {
       const mnemonic = generateMnemonic(wordlist);
-      self.postMessage({ status: 'success', mnemonic });
+      self.postMessage({ requestId, status: 'success', payload: { mnemonic } });
     } else if (type === 'mnemonicToSeed') {
       const { mnemonic, passphrase } = payload as MnemonicToSeedPayload;
-      const seed = await mnemonicToSeed(mnemonic, passphrase);
-      self.postMessage({ status: 'success', seed }, [seed.buffer]);
+
+      let seed: Uint8Array;
+      if (mnemonic === lastPlainMnemonic && passphrase === lastPassphrase && lastSeedFromMnemonic) {
+        seed = lastSeedFromMnemonic;
+      } else {
+        seed = await mnemonicToSeed(mnemonic, passphrase);
+        lastPlainMnemonic = mnemonic;
+        lastPassphrase = passphrase || null;
+        lastSeedFromMnemonic = seed;
+      }
+      // Note: We don't transfer the buffer if we're caching it
+      self.postMessage({ requestId, status: 'success', payload: { seed } });
     } else if (type === 'getAddress' || type === 'getNode') {
       const { encryptedMnemonic, pin, index } = payload as DerivationPayload;
-      const mnemonic = await decrypt(encryptedMnemonic, pin);
-      const seed = mnemonicToSeedSync(mnemonic);
-      const root = bip32.fromSeed(seed);
+
+      let mnemonic: string;
+      let seed: Uint8Array;
+
+      if (
+        encryptedMnemonic === lastEncryptedMnemonic &&
+        pin === lastPin &&
+        lastMnemonic &&
+        lastSeed
+      ) {
+        mnemonic = lastMnemonic;
+        seed = lastSeed;
+      } else {
+        mnemonic = await decrypt(encryptedMnemonic, pin);
+        seed = mnemonicToSeedSync(mnemonic);
+        lastEncryptedMnemonic = encryptedMnemonic;
+        lastPin = pin;
+        lastMnemonic = mnemonic;
+        lastSeed = seed;
+      }
+
+      const root = bip32.fromSeed(Buffer.from(seed));
       const path = `m/84'/0'/0'/0/${index}`;
       const child = root.derivePath(path);
 
@@ -93,22 +133,29 @@ self.onmessage = async (event: MessageEvent<{ type: string; payload: any }>) => 
         const { address } = bitcoin.payments.p2wpkh({
           pubkey: child.publicKey,
         });
-        self.postMessage({ status: 'success', address });
+        self.postMessage({ requestId, status: 'success', payload: { address } });
       } else if (type === 'getNode') {
         if (!child.privateKey) {
           throw new Error('Could not derive private key');
         }
         self.postMessage({
+          requestId,
           status: 'success',
-          node: {
-            publicKey: child.publicKey.buffer,
-            privateKey: child.privateKey.buffer,
-            chainCode: child.chainCode.buffer,
+          payload: {
+            node: {
+              publicKey: child.publicKey.buffer,
+              privateKey: child.privateKey.buffer,
+              chainCode: child.chainCode.buffer,
+            },
           },
         });
       }
     }
   } catch (error) {
-    self.postMessage({ status: 'error', error: (error as Error).message });
+    self.postMessage({
+      requestId,
+      status: 'error',
+      error: (error as Error).message,
+    });
   }
 };

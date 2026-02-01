@@ -2,50 +2,38 @@
 
 ## 1. Executive Summary
 
-This document outlines a strategic roadmap for the development of the Bitcoin Layer 1 (L1) functionality within the multi-layer wallet. Our objective is to build a secure, robust, and feature-complete L1 wallet that serves as a solid foundation for all other layers. The current implementation, while architecturally sound, is in an early, non-functional state. This roadmap prioritizes the features required to achieve a Minimum Viable Product (MVP) for the L1 wallet.
+This document outlines a strategic roadmap for the development of the Bitcoin Layer 1 (L1) functionality within the multi-layer wallet. Our objective is to build a secure, robust, and feature-complete L1 wallet that serves as a solid foundation for all other layers.
 
 ## 2. Current State
 
-Our gap analysis revealed that the existing L1 implementation lacks the following critical components:
+The L1 implementation has progressed significantly:
+*   **Transaction Lifecycle:** `TransactionService` is implemented with support for P2WPKH transaction creation, signing, and broadcasting via the `BlockstreamClient`.
+*   **Address Type Support:** The `Account` model supports Legacy (P2PKH), Native SegWit (P2WPKH), and Taproot (P2TR) address generation.
+*   **Transaction History:** Basic transaction history retrieval is implemented in the `BlockstreamClient`.
 
-*   **Transaction Lifecycle:** No services for creating, signing, or broadcasting transactions.
-*   **Address Type Support:** Hardcoded for native SegWit (P2WPKH) addresses only.
-*   **Transaction History:** Inability to retrieve a user's transaction history.
+## 3. L1 Roadmap: Path to Excellence
 
-Our dependency evaluation confirmed that our core libraries (`bitcoinjs-lib`, `bip32`, `axios`) are modern, well-maintained, and suitable for our needs. Therefore, this roadmap focuses on implementation rather than tooling changes.
+The following is a prioritized list of features required to move from an MVP to a best-in-class L1 wallet.
 
-## 3. L1 Roadmap: Path to MVP
+### 3.1. **Priority 1: Multi-Address Type Signing Support**
 
-The following is a prioritized list of features required to build out the L1 wallet.
+While we can generate various address types, the `TransactionService` needs to be updated to sign them correctly.
 
-### 3.1. **Priority 1: Implement the Transaction Lifecycle**
+*   **Implement Taproot (P2TR) Signing:** Add support for signing Schnorr-based Taproot inputs.
+*   **Implement Legacy (P2PKH) Signing:** Ensure full backward compatibility.
 
-This is the most critical missing piece and should be the immediate focus of development.
+### 3.2. **Priority 2: Robust Infrastructure (Electrum)**
 
-*   **Implement `TransactionService`:**
-    *   **UTXO Management:** Fetch and manage UTXOs for an address.
-    *   **Coin Selection:** Implement a basic coin selection algorithm to choose UTXOs for a transaction.
-    *   **Transaction Construction:** Build a transaction with inputs, outputs, and a change address.
-    *   **Fee Calculation:** Integrate with the `BlockstreamClient` to calculate transaction fees.
-    *   **Transaction Signing:** Sign the transaction using the account's private key.
-    *   **Transaction Broadcasting:** Broadcast the signed transaction using the `BlockstreamClient`.
+Move away from centralized APIs to improve privacy and reliability.
 
-### 3.2. **Priority 2: Add Comprehensive Address Support**
+*   **Implement `ElectrumClient`:** A new adapter for the Electrum protocol.
+*   **User-Configurable Nodes:** Allow users to specify their own Electrum server.
 
-To ensure full compatibility with the Bitcoin ecosystem, we must support multiple address types.
+### 3.3. **Priority 3: Advanced Logic (BDK Integration)**
 
-*   **Extend `AccountService`:**
-    *   Add support for generating Legacy (P2PKH) and Taproot (P2TR) addresses, in addition to the existing native SegWit (P2WPKH) support.
-    *   Modify the derivation paths and address generation logic to accommodate these new address types.
-
-### 3.3. **Priority 3: Implement Transaction History**
-
-A user-facing wallet must be able to display a user's transaction history.
-
-*   **Enhance `BlockstreamClient`:**
-    *   Add a method to fetch the full transaction history for a given address.
-    *   Implement robust error handling and pagination to manage large transaction histories.
+*   **Descriptor-Based Wallets:** Move to descriptors for better backup and multi-sig support.
+*   **Improved Coin Selection:** Implement more sophisticated algorithms (e.g., Branch and Bound) to optimize for fees and privacy.
 
 ## 4. Next Steps
 
-The immediate next step is to begin the implementation of the `TransactionService` as outlined in Priority 1 of this roadmap. This will be a significant undertaking, but it is the most critical step toward building a functional L1 wallet.
+The immediate next step is to implement Taproot signing support in the `TransactionService` and expand the architecture to support L2 and Sidechains.

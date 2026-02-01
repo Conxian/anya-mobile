@@ -9,6 +9,7 @@ import {
   PrivateKey,
   UTXO,
   DraftTransaction,
+  AddressType,
 } from './domain';
 import * as bitcoin from 'bitcoinjs-lib';
 import { BIP32Factory } from 'bip32';
@@ -44,19 +45,38 @@ export class TransactionServiceImpl implements TransactionService {
     );
 
     const psbt = new bitcoin.Psbt({ network: this.network });
-    const { output } = bitcoin.payments.p2wpkh({
-      pubkey: sourceAccount.getSigner().publicKey,
-      network: this.network,
-    });
+
+    // Dynamically handle different address types (Legacy, SegWit, Taproot)
+    const script = bitcoin.address.toOutputScript(
+      sourceAccount.address,
+      this.network
+    );
+
     for (const input of inputs) {
-      psbt.addInput({
+      const inputData: any = {
         hash: input.txid,
         index: input.vout,
-        witnessUtxo: {
-          script: output!,
+      };
+
+      // For SegWit and Taproot, we use witnessUtxo.
+      // For Legacy, bitcoinjs-lib's PSBT requires nonWitnessUtxo.
+      if (
+        sourceAccount.addressType === AddressType.NativeSegWit ||
+        sourceAccount.addressType === AddressType.Taproot
+      ) {
+        inputData.witnessUtxo = {
+          script: script,
           value: input.value,
-        },
-      });
+        };
+      } else if (sourceAccount.addressType === AddressType.Legacy) {
+        // TODO: Fetch full raw transaction for nonWitnessUtxo to support Legacy (P2PKH) properly.
+        // For now, we throw a descriptive error to avoid creating invalid PSBTs.
+        throw new Error(
+          'Legacy (P2PKH) transaction construction is not yet fully implemented (requires nonWitnessUtxo).'
+        );
+      }
+
+      psbt.addInput(inputData);
     }
 
     psbt.addOutput({

@@ -23,7 +23,7 @@ export class Account {
   name: string;
   private node: BIP32Interface;
   private network: bitcoin.Network;
-  private addressType: AddressType;
+  public readonly addressType: AddressType;
 
   // Caching fields for lazy derivation
   private _address?: Address;
@@ -194,4 +194,27 @@ export interface UTXO {
   txid: string;
   vout: number;
   value: bigint; // in satoshis
+}
+
+// --- Multi-Layer Models ---
+
+export interface LightningInvoice {
+  bolt11: string;
+  amountSats: bigint;
+  expiry: number;
+  memo?: string;
+  paymentHash: string;
+}
+
+export interface ConfidentialAsset extends Asset {
+  assetHash: string;
+  isBlinded: boolean;
+}
+
+export interface StateChainCoin {
+  coinId: string;
+  stateChainId: string;
+  amountSats: bigint;
+  lockTime: number;
+  address: string;
 }

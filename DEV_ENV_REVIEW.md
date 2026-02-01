@@ -21,8 +21,8 @@ The project is in its early stages with a solid architectural foundation based o
 *   **Core Wallet Functionality:** Missing send/receive, transaction history, and multi-account management.
 *   **Security:** Lack of secure key management and storage.
 *   **Production-Ready Infrastructure:** No self-hosted node or robust blockchain client.
-*   **Layer 2/Sidechain Support:** No implementations for Lightning, Liquid, or other layers.
-*   **State Chains:** No support for Mercury Layer or similar state chain protocols.
+*   **Layer 2/Sidechain Support:** Initial support for Liquid (`liquidjs-lib`) and mock adapters for Lightning and Liquid.
+*   **State Chains:** Mock adapter for State Chain services implemented.
 *   **Hardware Wallet Support:** No integration with hardware wallets.
 
 ### Opportunities:
@@ -65,12 +65,15 @@ The project is in its early stages with a solid architectural foundation based o
 *   Build a robust UI for on-chain transactions and history.
 
 **Phase 3: Lightning Network and State Chain Integration**
+*   [In Progress] Define ports and domain models for Lightning and State Chains.
+*   [In Progress] Implement mock adapters for testing.
 *   Integrate LDK for Lightning support.
 *   Integrate Mercury Layer SDK for State Chain support.
 *   Develop UI for managing channels, payments, and state chain coins.
 
 **Phase 4: Sidechain and Smart Contract Integration**
-*   Integrate `liquidjs-lib` for Liquid support.
+*   [Done] Integrate `liquidjs-lib` for Liquid support.
+*   [In Progress] Define ports and domain models for sidechains.
 *   Integrate `stacks.js` for Stacks and sBTC support.
 *   Integrate `ethers.js` for Rootstock (RSK) support.
 *   Extend the wallet to handle multiple assets and smart contract interactions.

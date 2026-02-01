@@ -17,6 +17,9 @@ import {
   DecryptedMessage,
   PublicKey,
   UTXO,
+  LightningInvoice,
+  ConfidentialAsset,
+  StateChainCoin,
 } from './domain';
 
 // --- Driving Ports ---
@@ -80,6 +83,28 @@ export interface MessagingService {
     message: Message
   ): Promise<DecryptedMessage>;
   getMessageHistory(account: Account): Promise<Message[]>;
+}
+
+export interface LightningService {
+  createInvoice(amountSats: bigint, memo?: string): Promise<LightningInvoice>;
+  payInvoice(bolt11: string): Promise<void>;
+  getBalance(): Promise<bigint>;
+}
+
+export interface SidechainService {
+  transfer(
+    to: Address,
+    amount: Amount,
+    asset: ConfidentialAsset
+  ): Promise<TransactionID>;
+  getBalances(): Promise<Balance[]>;
+}
+
+export interface StateChainService {
+  deposit(amountSats: bigint): Promise<StateChainCoin>;
+  transfer(coin: StateChainCoin, toPublicKey: string): Promise<void>;
+  withdraw(coin: StateChainCoin, toAddress: string): Promise<TransactionID>;
+  getCoins(): Promise<StateChainCoin[]>;
 }
 
 // --- Driven Ports ---

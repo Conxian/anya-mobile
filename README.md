@@ -1,6 +1,6 @@
 # Multi-Layer Bitcoin Wallet
 
-This project is a multi-layer Bitcoin wallet that aims to provide a comprehensive and user-friendly platform for interacting with the entire Bitcoin ecosystem, from the base layer to the various Layer 2 and sidechain solutions.
+This project is a multi-layer Bitcoin wallet that aims to provide a comprehensive and user-friendly platform for interacting with the entire Bitcoin ecosystem. It supports multiple layers, including Layer 1 (on-chain), Layer 2 (Lightning Network), Sidechains (Liquid), and State Chains.
 
 ## Architecture
 
@@ -18,7 +18,12 @@ A proof-of-concept for a decentralized web application version of the wallet has
 
 ### Current Status
 
-The project is in the early stages of development. The core logic and basic infrastructure are currently being implemented. The decentralized web app is a proof-of-concept and has the following limitations:
+The project is actively expanding its multi-layer capabilities.
+
+*   **Layer 1:** Robust transaction management using `bitcoinjs-lib` with support for Legacy, SegWit, and Taproot.
+*   **Lightning:** Ports and domain models defined; mock adapter for development.
+*   **Sidechains:** `liquidjs-lib` integrated; mock adapter for Liquid support.
+*   **State Chains:** Ports and domain models defined; mock adapter for State Chain services.
 
 *   **IPFS Upload:** The application is configured to upload data to a local IPFS node. For a production environment, this needs to be configured to use a pinning service with authentication.
 *   **Handshake Domain:** The Handshake domain has not been registered.

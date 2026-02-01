@@ -25894,32 +25894,78 @@ async function downloadFromIPFS(cid) {
 }
 
 // src/ui/app.ts
-document.getElementById("createWallet").addEventListener("click", async () => {
-  const createWalletButton = document.getElementById("createWallet");
-  createWalletButton.disabled = true;
-  createWalletButton.innerText = "Creating...";
-  const wallet = await createWallet();
-  const walletInfo = document.getElementById("walletInfo");
-  walletInfo.innerHTML = `
-    <p><strong>Mnemonic:</strong> ${wallet.mnemonic} <button id="copyMnemonic" title="Copy mnemonic to clipboard" aria-label="Copy mnemonic to clipboard">\u{1F4CB}</button></p>
-    <p><strong>Address:</strong> ${await wallet.getP2wpkhAddress()}</p>
-    <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
-  `;
-  const copyMnemonicButton = document.getElementById("copyMnemonic");
-  if (copyMnemonicButton) {
-    copyMnemonicButton.addEventListener("click", () => {
-      navigator.clipboard.writeText(wallet.mnemonic).then(() => {
-        copyMnemonicButton.innerText = "\u2705";
+function setupMnemonicToggle(spanId, buttonId, mnemonic) {
+  const span = document.getElementById(spanId);
+  const button = document.getElementById(buttonId);
+  if (span && button) {
+    let visible = false;
+    const mask = "\u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022";
+    span.innerText = mask;
+    button.addEventListener("click", () => {
+      visible = !visible;
+      span.innerText = visible ? mnemonic : mask;
+      button.innerText = visible ? "\u{1F648}" : "\u{1F441}\uFE0F";
+      button.setAttribute(
+        "aria-label",
+        visible ? "Hide mnemonic" : "Show mnemonic"
+      );
+    });
+  }
+}
+function setupCopyButton(buttonId, textToCopy) {
+  const button = document.getElementById(buttonId);
+  if (button) {
+    const originalLabel = button.getAttribute("aria-label") || "";
+    button.addEventListener("click", () => {
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const originalText = button.innerText;
+        button.innerText = "\u2705";
+        button.setAttribute("aria-label", "Copied!");
         setTimeout(() => {
-          copyMnemonicButton.innerText = "\u{1F4CB}";
+          button.innerText = originalText;
+          button.setAttribute("aria-label", originalLabel);
         }, 2e3);
       }).catch((err) => {
-        console.error("Failed to copy mnemonic: ", err);
-        copyMnemonicButton.innerText = "Error!";
-        copyMnemonicButton.disabled = true;
+        console.error(`Failed to copy ${buttonId}: `, err);
+        button.innerText = "\u274C";
+        button.setAttribute("aria-label", "Failed to copy");
+        setTimeout(() => {
+          button.innerText = "\u{1F4CB}";
+          button.setAttribute("aria-label", originalLabel);
+        }, 2e3);
       });
     });
   }
+}
+document.getElementById("createWallet").addEventListener("click", async () => {
+  const walletInfo = document.getElementById("walletInfo");
+  if (walletInfo && walletInfo.innerHTML.trim() !== "" && !confirm(
+    "Are you sure you want to create a new wallet? This will replace the current one shown. Make sure you have backed up your mnemonic!"
+  )) {
+    return;
+  }
+  const createWalletButton = document.getElementById(
+    "createWallet"
+  );
+  createWalletButton.disabled = true;
+  createWalletButton.innerText = "Creating...";
+  const wallet = await createWallet();
+  const address = await wallet.getP2wpkhAddress();
+  if (walletInfo) {
+    walletInfo.innerHTML = `
+      <p>
+        <strong>Mnemonic:</strong>
+        <span id="mnemonic-value"></span>
+        <button id="toggleMnemonic" title="Show/Hide mnemonic" aria-label="Show mnemonic">\u{1F441}\uFE0F</button>
+        <button id="copyMnemonic" title="Copy mnemonic to clipboard" aria-label="Copy mnemonic to clipboard">\u{1F4CB}</button>
+      </p>
+      <p><strong>Address:</strong> ${address} <button id="copyAddress" title="Copy address to clipboard" aria-label="Copy address to clipboard">\u{1F4CB}</button></p>
+      <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
+    `;
+  }
+  setupMnemonicToggle("mnemonic-value", "toggleMnemonic", wallet.mnemonic);
+  setupCopyButton("copyMnemonic", wallet.mnemonic);
+  setupCopyButton("copyAddress", address);
   createWalletButton.innerText = "Uploading...";
   try {
     const walletData = {
@@ -25929,39 +25975,78 @@ document.getElementById("createWallet").addEventListener("click", async () => {
     };
     const walletJson = JSON.stringify(walletData);
     const cid = await uploadToIPFS(walletJson);
-    document.getElementById("ipfs-status").innerHTML = `<strong>IPFS CID:</strong> ${cid.toString()}`;
-  } catch (error) {
-    document.getElementById("ipfs-status").innerHTML = `<strong>IPFS CID:</strong> Upload failed. (No local IPFS node found)`;
+    const cidStr = cid.toString();
+    const ipfsStatus = document.getElementById("ipfs-status");
+    if (ipfsStatus) {
+      ipfsStatus.innerHTML = `
+        <strong>IPFS CID:</strong> ${cidStr}
+        <button id="copyCID" title="Copy CID to clipboard" aria-label="Copy CID to clipboard">\u{1F4CB}</button>
+      `;
+    }
+    setupCopyButton("copyCID", cidStr);
+  } catch (err) {
+    console.error("IPFS upload failed:", err);
+    const ipfsStatus = document.getElementById("ipfs-status");
+    if (ipfsStatus) {
+      ipfsStatus.innerHTML = `<strong>IPFS CID:</strong> Upload failed. (No local IPFS node found)`;
+    }
   } finally {
     createWalletButton.disabled = false;
     createWalletButton.innerText = "Create New Wallet";
   }
 });
 var cidInput = document.getElementById("cidInput");
-var loadWalletButton = document.getElementById("loadWallet");
-cidInput.addEventListener("input", () => {
-  loadWalletButton.disabled = cidInput.value.trim() === "";
-});
+var loadWalletButton = document.getElementById(
+  "loadWallet"
+);
+if (cidInput && loadWalletButton) {
+  cidInput.addEventListener("input", () => {
+    loadWalletButton.disabled = cidInput.value.trim() === "";
+  });
+}
 document.getElementById("loadWallet").addEventListener("click", async () => {
+  if (!loadWalletButton || !cidInput) return;
   loadWalletButton.disabled = true;
   loadWalletButton.innerText = "Loading...";
   cidInput.disabled = true;
   const cid = cidInput.value.trim();
   const walletInfo = document.getElementById("walletInfo");
-  walletInfo.innerHTML = "<p>Loading wallet from IPFS...</p>";
+  if (walletInfo) {
+    walletInfo.innerHTML = "<p>Loading wallet from IPFS...</p>";
+  }
   let walletInfoHTML = "";
+  let loadedWalletData = null;
+  let loadedAddress = "";
   try {
     const walletJson = await downloadFromIPFS(cid);
-    const walletData = JSON.parse(walletJson.toString());
-    const wallet = new BitcoinWallet(walletData.mnemonic);
+    loadedWalletData = JSON.parse(walletJson.toString());
+    const wallet = new BitcoinWallet(loadedWalletData.mnemonic);
+    loadedAddress = await wallet.getP2wpkhAddress();
     walletInfoHTML = `
-      <p><strong>Mnemonic:</strong> ${wallet.mnemonic}</p>
-      <p><strong>Address:</strong> ${await wallet.getP2wpkhAddress()}</p>
+      <p>
+        <strong>Mnemonic:</strong>
+        <span id="loaded-mnemonic-value"></span>
+        <button id="toggleLoadedMnemonic" title="Show/Hide mnemonic" aria-label="Show mnemonic">\u{1F441}\uFE0F</button>
+        <button id="copyLoadedMnemonic" title="Copy mnemonic to clipboard" aria-label="Copy mnemonic to clipboard">\u{1F4CB}</button>
+      </p>
+      <p><strong>Address:</strong> ${loadedAddress} <button id="copyLoadedAddress" title="Copy address to clipboard" aria-label="Copy address to clipboard">\u{1F4CB}</button></p>
     `;
-  } catch (error) {
+  } catch (err) {
+    console.error("Failed to load wallet:", err);
     walletInfoHTML = `<p>Failed to load wallet from IPFS. Please check the CID and your connection.</p>`;
   } finally {
-    walletInfo.innerHTML = walletInfoHTML;
+    if (walletInfo) {
+      walletInfo.innerHTML = walletInfoHTML;
+    }
+    if (loadedWalletData) {
+      setupMnemonicToggle(
+        "loaded-mnemonic-value",
+        "toggleLoadedMnemonic",
+        loadedWalletData.mnemonic
+      );
+      setupCopyButton("copyLoadedMnemonic", loadedWalletData.mnemonic);
+      setupCopyButton("copyLoadedAddress", loadedAddress);
+    }
     loadWalletButton.disabled = false;
     loadWalletButton.innerText = "Load Wallet from IPFS";
     cidInput.disabled = false;

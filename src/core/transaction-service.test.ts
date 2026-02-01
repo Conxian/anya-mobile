@@ -1,6 +1,12 @@
 import { TransactionServiceImpl } from './transaction-service';
 import { BlockchainClient, FeeRate } from './ports';
-import { Account, Transaction, DraftTransaction, FeeEstimates } from './domain';
+import {
+  Account,
+  Transaction,
+  DraftTransaction,
+  FeeEstimates,
+  AddressType,
+} from './domain';
 import { mock, MockProxy } from 'jest-mock-extended';
 import * as bitcoin from 'bitcoinjs-lib';
 import { BIP32Factory } from 'bip32';
@@ -185,6 +191,70 @@ describe('TransactionServiceImpl', () => {
           expect(signedPsbt.data.inputs[0].partialSig).toBeDefined();
           expect(signedPsbt.data.inputs[0].partialSig!.length).toBeGreaterThan(0);
         });
+
+        it('should sign a Taproot transaction', async () => {
+          const network = bitcoin.networks.testnet;
+          const node = bip32.fromSeed(Buffer.alloc(64));
+          const taprootAccount = new Account(
+            'tap-id',
+            'tap-account',
+            node,
+            network,
+            AddressType.Taproot
+          );
+
+          const utxo = {
+            txid: 'a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1',
+            vout: 0,
+            value: 10000n,
+          };
+
+          const paymentScript = bitcoin.address.toOutputScript(
+            taprootAccount.address,
+            network
+          );
+
+          const psbt = new bitcoin.Psbt({ network })
+            .addInput({
+              hash: utxo.txid,
+              index: utxo.vout,
+              witnessUtxo: {
+                script: paymentScript,
+                value: utxo.value,
+              },
+              tapInternalKey: Buffer.from(
+                taprootAccount.getSigner().publicKey.slice(1, 33)
+              ),
+            })
+            .addOutput({
+              address:
+                'tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7',
+              value: 5000n,
+            });
+
+          const draftTx: DraftTransaction = {
+            psbt: psbt.toBase64(),
+            from: taprootAccount.address,
+            to: 'some-address',
+            asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 },
+            amount: {
+              value: '5000',
+              asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 },
+            },
+            fee: {
+              value: '100',
+              asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 },
+            },
+          };
+
+          const signedDraftTx = await transactionService.signTransaction(
+            draftTx,
+            taprootAccount
+          );
+          const signedPsbt = bitcoin.Psbt.fromBase64(signedDraftTx.psbt);
+
+          expect(signedPsbt.data.inputs[0].tapKeySig).toBeDefined();
+        });
       });
 
       describe('broadcastTransaction', () => {
@@ -271,6 +341,58 @@ describe('TransactionServiceImpl', () => {
       expect(blockchainClient.getUTXOs).toHaveBeenCalledWith(account.address);
       expect(blockchainClient.getFeeEstimates).toHaveBeenCalled();
       expect(blockchainClient.broadcastTransaction).toHaveBeenCalled();
+    });
+
+    it('should complete flow for Taproot account successfully', async () => {
+      const network = bitcoin.networks.testnet;
+      const node = bip32.fromSeed(Buffer.alloc(64));
+      const taprootAccount = new Account(
+        'tap-id',
+        'tap-account',
+        node,
+        network,
+        AddressType.Taproot
+      );
+
+      const utxos = [
+        {
+          txid: 'd1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1',
+          vout: 0,
+          value: 300000n,
+        },
+      ];
+      const feeEstimates: FeeEstimates = { slow: 5, medium: 10, fast: 15 };
+      const destinationAddress =
+        'tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7';
+      const amount = {
+        value: '250000',
+        asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 },
+      };
+      const feeRate: FeeRate = 'fast';
+      const expectedTxId = 'tap-tx-id';
+
+      blockchainClient.getUTXOs.mockResolvedValue(utxos);
+      blockchainClient.getFeeEstimates.mockResolvedValue(feeEstimates);
+      blockchainClient.broadcastTransaction.mockResolvedValue(expectedTxId);
+
+      const draftTx = await transactionService.createTransaction(
+        taprootAccount,
+        destinationAddress,
+        amount.asset,
+        amount,
+        feeRate
+      );
+
+      const signedDraftTx = await transactionService.signTransaction(
+        draftTx,
+        taprootAccount
+      );
+
+      const txId = await transactionService.broadcastTransaction(signedDraftTx);
+
+      expect(txId).toEqual(expectedTxId);
+      const signedPsbt = bitcoin.Psbt.fromBase64(signedDraftTx.psbt);
+      expect(signedPsbt.data.inputs[0].tapKeySig).toBeDefined();
     });
   });
 });

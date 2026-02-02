@@ -39,6 +39,10 @@ input[type="text"] {
   border-radius: 5px;
 }
 
+#walletInfo:empty {
+  display: none;
+}
+
 #walletInfo {
   background-color: #FFFFFF;
   border: 1px solid #E0E0E0;

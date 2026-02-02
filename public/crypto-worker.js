@@ -10112,6 +10112,9 @@ var lastEncryptedMnemonic = null;
 var lastPin = null;
 var lastMnemonic = null;
 var lastSeed = null;
+var lastRoot = null;
+var lastChainNode = null;
+var lastPathPrefix = null;
 var lastPlainMnemonic = null;
 var lastPassphrase = null;
 var lastSeedFromMnemonic = null;
@@ -10137,7 +10140,9 @@ self.onmessage = async (event) => {
       const { encryptedMnemonic, pin, index } = payload;
       let mnemonic;
       let seed;
-      if (encryptedMnemonic === lastEncryptedMnemonic && pin === lastPin && lastMnemonic && lastSeed) {
+      let root;
+      if (encryptedMnemonic === lastEncryptedMnemonic && pin === lastPin && lastRoot) {
+        root = lastRoot;
         mnemonic = lastMnemonic;
         seed = lastSeed;
       } else {
@@ -10147,10 +10152,21 @@ self.onmessage = async (event) => {
         lastPin = pin;
         lastMnemonic = mnemonic;
         lastSeed = seed;
+        root = bip32.fromSeed(Buffer.from(seed));
+        lastRoot = root;
+        lastChainNode = null;
+        lastPathPrefix = null;
       }
-      const root = bip32.fromSeed(Buffer.from(seed));
-      const path = `m/84'/0'/0'/0/${index}`;
-      const child = root.derivePath(path);
+      const pathPrefix = `m/84'/0'/0'/0`;
+      let chainNode;
+      if (lastChainNode && lastPathPrefix === pathPrefix) {
+        chainNode = lastChainNode;
+      } else {
+        chainNode = root.derivePath(pathPrefix);
+        lastChainNode = chainNode;
+        lastPathPrefix = pathPrefix;
+      }
+      const child = chainNode.derive(index);
       if (type === "getAddress") {
         const { address } = payments_exports.p2wpkh({
           pubkey: child.publicKey

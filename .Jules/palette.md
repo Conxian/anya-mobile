@@ -9,3 +9,6 @@
 ## 2024-08-17 - Standard Privacy Pattern for Sensitive Data
 **Learning:** For a Bitcoin wallet, displaying the mnemonic in plain text by default is a privacy risk. Users expect sensitive data to be masked.
 **Action:** Implement a standard "Show/Hide" toggle pattern for mnemonics. Mask the value with dots by default and provide a clear visual toggle (e.g., eye icon) that also updates ARIA labels for accessibility.
+## 2024-08-18 - Hiding Empty Containers for Cleaner Initial State
+**Learning:** Containers with borders, padding, or background colors can appear as distracting "empty boxes" when they don't have content yet. This can look like a UI bug or incomplete state to the user.
+**Action:** Use the `:empty` CSS pseudo-class to hide these containers when they have no content, ensuring a cleaner and more professional initial interface state.

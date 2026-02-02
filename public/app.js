@@ -25916,22 +25916,26 @@ function setupCopyButton(buttonId, textToCopy) {
   const button = document.getElementById(buttonId);
   if (button) {
     const originalLabel = button.getAttribute("aria-label") || "";
+    const originalText = button.innerText;
+    let timeoutId = null;
     button.addEventListener("click", () => {
+      if (timeoutId) clearTimeout(timeoutId);
       navigator.clipboard.writeText(textToCopy).then(() => {
-        const originalText = button.innerText;
         button.innerText = "\u2705";
         button.setAttribute("aria-label", "Copied!");
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           button.innerText = originalText;
           button.setAttribute("aria-label", originalLabel);
+          timeoutId = null;
         }, 2e3);
       }).catch((err) => {
         console.error(`Failed to copy ${buttonId}: `, err);
         button.innerText = "\u274C";
         button.setAttribute("aria-label", "Failed to copy");
-        setTimeout(() => {
-          button.innerText = "\u{1F4CB}";
+        timeoutId = setTimeout(() => {
+          button.innerText = originalText;
           button.setAttribute("aria-label", originalLabel);
+          timeoutId = null;
         }, 2e3);
       });
     });

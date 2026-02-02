@@ -12,7 +12,6 @@ import {
   FeeEstimates,
   Price,
   WalletStatus,
-  PrivateKey,
   Message,
   DecryptedMessage,
   PublicKey,
@@ -115,7 +114,8 @@ export interface StateChainService {
 export interface BlockchainClient {
   getBalance(address: Address, asset: Asset): Promise<Balance>;
   getTransaction(transactionID: TransactionID): Promise<Transaction>;
-  broadcastTransaction(signedTransaction: Transaction): Promise<TransactionID>;
+  getRawTransaction(transactionID: TransactionID): Promise<string>;
+  broadcastTransaction(signedTransaction: any): Promise<TransactionID>;
   getFeeEstimates(): Promise<FeeEstimates>;
   getUTXOs(address: Address): Promise<UTXO[]>;
   getTransactionHistory(address: Address): Promise<Transaction[]>;

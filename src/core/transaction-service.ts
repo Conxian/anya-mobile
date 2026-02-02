@@ -6,18 +6,11 @@ import {
   Amount,
   Transaction,
   TransactionID,
-  PrivateKey,
   UTXO,
   DraftTransaction,
   AddressType,
 } from './domain';
 import * as bitcoin from 'bitcoinjs-lib';
-import { BIP32Factory } from 'bip32';
-import { ECPairFactory } from 'ecpair';
-import * as ecc from 'tiny-secp256k1';
-
-const bip32 = BIP32Factory(ecc);
-const ECPair = ECPairFactory(ecc);
 
 export class TransactionServiceImpl implements TransactionService {
   constructor(
@@ -58,14 +51,14 @@ export class TransactionServiceImpl implements TransactionService {
 
       if (sourceAccount.addressType === AddressType.Legacy) {
         // Legacy (P2PKH) requires the full previous transaction to be provided as nonWitnessUtxo.
-        // Our current BlockchainClient/UTXO model doesn't provide this yet.
-        throw new Error('Legacy (P2PKH) is not yet supported in this version.');
+        const rawTxHex = await this.blockchainClient.getRawTransaction(input.txid);
+        inputData.nonWitnessUtxo = Buffer.from(rawTxHex, 'hex');
+      } else {
+        inputData.witnessUtxo = {
+          script: paymentScript,
+          value: input.value,
+        };
       }
-
-      inputData.witnessUtxo = {
-        script: paymentScript,
-        value: input.value,
-      };
 
       if (sourceAccount.addressType === AddressType.Taproot) {
         inputData.tapInternalKey = Buffer.from(
@@ -153,9 +146,8 @@ export class TransactionServiceImpl implements TransactionService {
     if (account.addressType === AddressType.Taproot) {
       // For Taproot Keypath spending, we need to tweak the signer
       const internalPubkey = Buffer.from(signer.publicKey.slice(1, 33));
-      // @ts-ignore - bitcoinjs-lib internal types can be tricky
       const tweakedSigner = signer.tweak(
-        bitcoin.crypto.taggedHash('TapTweak', internalPubkey)
+        bitcoin.crypto.taggedHash('TapTweak', internalPubkey as any)
       );
 
       for (let i = 0; i < psbt.inputCount; i++) {

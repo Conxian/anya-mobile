@@ -1,10 +1,5 @@
 import { SecureWallet, CryptoWorkerClient } from './secure-bitcoin-lib';
 import { ISecureStorageService } from '../services/secure-storage';
-import * as bitcoin from 'bitcoinjs-lib';
-import { BIP32Factory } from 'bip32';
-import * as ecc from 'tiny-secp256k1';
-
-const bip32 = BIP32Factory(ecc);
 
 export class BitcoinWallet {
   private _masterPrivateKey?: string;

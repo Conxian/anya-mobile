@@ -1,6 +1,6 @@
 import { AccountService, WalletService } from '../core/ports';
 import { Wallet, WalletStatus } from '../core/domain';
-import { generateMnemonic, mnemonicToSeed } from '@scure/bip39';
+import { generateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
 import { BIP32Factory } from 'bip32';
 import * as ecc from 'tiny-secp256k1';

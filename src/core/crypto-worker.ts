@@ -3,6 +3,8 @@
 // creation and the entire `getAddress` flow, including decryption, seed
 // generation, and key derivation. This ensures the UI remains responsive.
 
+import { Buffer } from 'buffer';
+(self as any).Buffer = Buffer;
 import { generateMnemonic, mnemonicToSeed, mnemonicToSeedSync } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
 import * as bitcoin from 'bitcoinjs-lib';
@@ -56,10 +58,6 @@ async function decrypt(encryptedHexString: string, pin: string): Promise<string>
 
 // --- Message Handling ---
 
-// ⚡ Bolt: Efficient Result Caching.
-// Caching the results of expensive PBKDF2 derivations (decrypting the
-// mnemonic and generating the seed) dramatically improves performance for
-// subsequent operations. 100,000 PBKDF2 iterations are now only performed once.
 let lastEncryptedMnemonic: string | null = null;
 let lastPin: string | null = null;
 let lastMnemonic: string | null = null;
@@ -76,6 +74,8 @@ interface DerivationPayload {
   encryptedMnemonic: string;
   pin: string;
   index: number;
+  path?: string;
+  addressType?: string;
 }
 
 interface MnemonicToSeedPayload {
@@ -87,6 +87,7 @@ self.onmessage = async (
   event: MessageEvent<{ type: string; payload: any; requestId: number }>
 ) => {
   const { type, payload, requestId } = event.data;
+  console.log(`Worker received ${type} (request ${requestId})`);
   try {
     if (type === 'generateMnemonic') {
       const mnemonic = generateMnemonic(wordlist);
@@ -103,13 +104,9 @@ self.onmessage = async (
         lastPassphrase = passphrase || null;
         lastSeedFromMnemonic = seed;
       }
-      // Note: We don't transfer the buffer if we're caching it
       self.postMessage({ requestId, status: 'success', payload: { seed } });
     } else if (type === 'getAddress' || type === 'getNode') {
-      const { encryptedMnemonic, pin, index } = payload as DerivationPayload;
-
-      let mnemonic: string;
-      let seed: Uint8Array;
+      const { encryptedMnemonic, pin, index, path, addressType } = payload as DerivationPayload;
 
       let root;
       if (
@@ -118,27 +115,20 @@ self.onmessage = async (
         lastRoot
       ) {
         root = lastRoot;
-        mnemonic = lastMnemonic!;
-        seed = lastSeed!;
       } else {
-        mnemonic = await decrypt(encryptedMnemonic, pin);
-        seed = mnemonicToSeedSync(mnemonic);
+        const mnemonic = await decrypt(encryptedMnemonic, pin);
+        const seed = mnemonicToSeedSync(mnemonic);
         lastEncryptedMnemonic = encryptedMnemonic;
         lastPin = pin;
         lastMnemonic = mnemonic;
         lastSeed = seed;
         root = bip32.fromSeed(Buffer.from(seed));
         lastRoot = root;
-        // Invalidate dependent caches
         lastChainNode = null;
         lastPathPrefix = null;
       }
 
-      // ⚡ Bolt: Multi-level BIP32 Node Caching.
-      // Caching the root node and common path prefixes (like the account chain)
-      // reduces address derivation from O(Depth) to O(1) for sequential indices.
-      // This provides a >90% speedup for address discovery and batch generation.
-      const pathPrefix = `m/84'/0'/0'/0`;
+      const pathPrefix = path || `m/84'/0'/0'/0`;
       let chainNode;
       if (lastChainNode && lastPathPrefix === pathPrefix) {
         chainNode = lastChainNode;
@@ -151,10 +141,16 @@ self.onmessage = async (
       const child = chainNode.derive(index);
 
       if (type === 'getAddress') {
-        const { address } = bitcoin.payments.p2wpkh({
-          pubkey: child.publicKey,
-        });
-        self.postMessage({ requestId, status: 'success', payload: { address } });
+        let result;
+        if (addressType === 'P2PKH') {
+          result = bitcoin.payments.p2pkh({ pubkey: child.publicKey });
+        } else if (addressType === 'P2TR') {
+          const internalPubkey = Buffer.from(child.publicKey.slice(1, 33));
+          result = bitcoin.payments.p2tr({ internalPubkey: internalPubkey as any });
+        } else {
+          result = bitcoin.payments.p2wpkh({ pubkey: child.publicKey });
+        }
+        self.postMessage({ requestId, status: 'success', payload: { address: result.address } });
       } else if (type === 'getNode') {
         if (!child.privateKey) {
           throw new Error('Could not derive private key');
@@ -164,15 +160,16 @@ self.onmessage = async (
           status: 'success',
           payload: {
             node: {
-              publicKey: child.publicKey.buffer,
-              privateKey: child.privateKey.buffer,
-              chainCode: child.chainCode.buffer,
+              publicKey: new Uint8Array(child.publicKey).buffer,
+              privateKey: new Uint8Array(child.privateKey).buffer,
+              chainCode: new Uint8Array(child.chainCode).buffer,
             },
           },
         });
       }
     }
   } catch (error) {
+    console.error(`Worker error in ${type}:`, error);
     self.postMessage({
       requestId,
       status: 'error',

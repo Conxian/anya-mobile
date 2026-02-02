@@ -1,3 +1,6 @@
+import { Buffer } from 'buffer';
+if (typeof window !== 'undefined') (window as any).Buffer = Buffer;
+if (typeof self !== 'undefined') (self as any).Buffer = Buffer;
 import * as bitcoin from 'bitcoinjs-lib';
 import { BIP32Factory, BIP32Interface } from 'bip32';
 import * as ecc from 'tiny-secp256k1';

@@ -34,10 +34,14 @@ export class MockBlockchainClient implements BlockchainClient {
   }
 
   async broadcastTransaction(
-    signedTransaction: Transaction
+    _signedTransaction: any
   ): Promise<TransactionID> {
     // Return a mock transaction ID for testing purposes.
     return 'mock-transaction-id';
+  }
+
+  async getRawTransaction(_transactionID: TransactionID): Promise<string> {
+    return '01000000000000000000'; // Mock raw transaction
   }
 
   async getFeeEstimates(): Promise<FeeEstimates> {
@@ -49,7 +53,7 @@ export class MockBlockchainClient implements BlockchainClient {
     };
   }
 
-  async getUTXOs(address: Address): Promise<UTXO[]> {
+  async getUTXOs(_address: Address): Promise<UTXO[]> {
     // Return mock UTXOs for testing purposes.
     return [
       {
@@ -65,7 +69,7 @@ export class MockBlockchainClient implements BlockchainClient {
     ];
   }
 
-  async getTransactionHistory(address: Address): Promise<Transaction[]> {
+  async getTransactionHistory(_address: Address): Promise<Transaction[]> {
     // Return a mock transaction history for testing purposes.
     const mockAsset: Asset = { symbol: 'BTC', name: 'Bitcoin', decimals: 8 };
     return [

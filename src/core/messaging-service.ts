@@ -14,15 +14,14 @@ export class MessagingServiceImpl implements MessagingService {
     recipientPublicKey: PublicKey,
     plaintext: string
   ): Promise<Message> {
-    const privateKey = Buffer.from(senderAccount.privateKey, 'hex');
     const recipientPubKey = Buffer.from(recipientPublicKey, 'hex');
 
     const ephemeralPrivateKey = this.generatePrivateKey();
-    const ephemeralPublicKey = getPublicKey(ephemeralPrivateKey, true);
+    const ephemeralPublicKey = getPublicKey(ephemeralPrivateKey as any, true);
 
     const sharedSecret = getSharedSecret(
-      ephemeralPrivateKey,
-      recipientPubKey,
+      ephemeralPrivateKey as any,
+      recipientPubKey as any,
       true
     );
     const hashedSharedSecret = createHash('sha256')
@@ -52,7 +51,7 @@ export class MessagingServiceImpl implements MessagingService {
     const privateKey = Buffer.from(recipientAccount.privateKey, 'hex');
     const senderPublicKey = Buffer.from(message.senderPublicKey, 'hex');
 
-    const sharedSecret = getSharedSecret(privateKey, senderPublicKey, true);
+    const sharedSecret = getSharedSecret(privateKey as any, senderPublicKey as any, true);
     const hashedSharedSecret = createHash('sha256')
       .update(sharedSecret.slice(1))
       .digest();
@@ -82,14 +81,14 @@ export class MessagingServiceImpl implements MessagingService {
   }
 
   private encrypt(text: string, key: Buffer, iv: Buffer): string {
-    const cipher = createCipheriv('aes-256-cbc', key, iv);
+    const cipher = createCipheriv('aes-256-cbc', key as any, iv as any);
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
     return encrypted;
   }
 
   private decrypt(text: string, key: Buffer, iv: Buffer): string {
-    const decipher = createDecipheriv('aes-256-cbc', key, iv);
+    const decipher = createDecipheriv('aes-256-cbc', key as any, iv as any);
     let decrypted = decipher.update(text, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;

@@ -97,13 +97,31 @@ export class BlockstreamClient implements BlockchainClient {
     const txs = response.data;
 
     return txs.map((tx) => {
-      const valueIn = tx.vout
-        .filter((vout) => vout.scriptpubkey_address === address)
-        .reduce((sum, vout) => sum + vout.value, 0);
+      // ⚡ Bolt: Single-pass transaction parsing.
+      // We calculate valueIn and valueOut in a single iteration over vout and vin,
+      // while simultaneously identifying the recipient or sender address.
+      // This avoids multiple iterations (filter + reduce + find) and
+      // eliminates intermediate array allocations, significantly improving
+      // performance for accounts with large transaction histories.
+      let valueIn = 0;
+      let recipientOutput: Vout | undefined;
+      for (const vout of tx.vout) {
+        if (vout.scriptpubkey_address === address) {
+          valueIn += vout.value;
+        } else if (!recipientOutput) {
+          recipientOutput = vout;
+        }
+      }
 
-      const valueOut = tx.vin
-        .filter((vin) => vin.prevout?.scriptpubkey_address === address)
-        .reduce((sum, vin) => sum + vin.prevout.value, 0);
+      let valueOut = 0;
+      let senderInput: Vin | undefined;
+      for (const vin of tx.vin) {
+        if (vin.prevout?.scriptpubkey_address === address) {
+          valueOut += vin.prevout.value;
+        } else if (!senderInput) {
+          senderInput = vin;
+        }
+      }
 
       const netValue = valueIn - valueOut;
       const isSend = netValue < 0;
@@ -114,21 +132,12 @@ export class BlockstreamClient implements BlockchainClient {
 
       if (isSend) {
         fromAddress = address;
-        // Find the recipient address (an output that is not our change address)
-        const recipientOutput = tx.vout.find(
-          (vout) => vout.scriptpubkey_address !== address
-        );
         toAddress = recipientOutput?.scriptpubkey_address || 'unknown';
-        // For a send, the amount is the value of the non-change output
         if (recipientOutput) {
           amountValue = recipientOutput.value;
         }
       } else {
         toAddress = address;
-        // Find the sender address (an input that is not ours)
-        const senderInput = tx.vin.find(
-          (vin) => vin.prevout?.scriptpubkey_address !== address
-        );
         fromAddress = senderInput?.prevout?.scriptpubkey_address || 'coinbase';
       }
 

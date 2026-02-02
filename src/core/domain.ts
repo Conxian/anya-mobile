@@ -60,7 +60,7 @@ export class Account {
             network: this.network,
           });
           break;
-        case AddressType.Taproot:
+        case AddressType.Taproot: {
           // X-only pubkey for Taproot
           const internalPubkey = Buffer.from(this.node.publicKey.slice(1, 33));
           result = bitcoin.payments.p2tr({
@@ -68,6 +68,7 @@ export class Account {
             network: this.network,
           });
           break;
+        }
         default:
           throw new Error(`Unsupported address type: ${this.addressType}`);
       }

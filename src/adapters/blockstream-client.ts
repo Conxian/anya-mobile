@@ -30,11 +30,11 @@ export class BlockstreamClient implements BlockchainClient {
     const tx = response.data;
 
     const totalInputValue = tx.vin.reduce(
-      (sum: number, input: any) => sum + input.prevout.value,
+      (sum: number, input: Vin) => sum + input.prevout.value,
       0
     );
     const totalOutputValue = tx.vout.reduce(
-      (sum: number, output: any) => sum + output.value,
+      (sum: number, output: Vout) => sum + output.value,
       0
     );
 
@@ -67,6 +67,11 @@ export class BlockstreamClient implements BlockchainClient {
     return response.data;
   }
 
+  async getRawTransaction(transactionID: TransactionID): Promise<string> {
+    const response = await axios.get(`${BASE_URL}/tx/${transactionID}/hex`);
+    return response.data;
+  }
+
   async getFeeEstimates(): Promise<FeeEstimates> {
     const response = await axios.get(`${BASE_URL}/fee-estimates`);
     const fees = response.data;
@@ -80,10 +85,10 @@ export class BlockstreamClient implements BlockchainClient {
 
   async getUTXOs(address: Address): Promise<UTXO[]> {
     const response = await axios.get(`${BASE_URL}/address/${address}/utxo`);
-    return response.data.map((utxo: any) => ({
+    return response.data.map((utxo: { txid: string, vout: number, value: number }) => ({
       txid: utxo.txid,
       vout: utxo.vout,
-      value: utxo.value,
+      value: BigInt(utxo.value),
     }));
   }
 

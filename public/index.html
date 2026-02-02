@@ -8,7 +8,14 @@
   <h1>Anya-Core Wallet</h1>
 
   <div>
+    <label for="pinInput">Wallet PIN (for encryption):</label>
+    <input type="password" id="pinInput" value="1234" placeholder="Enter PIN">
     <button id="createWallet">Create New Wallet</button>
+    <select id="addressType">
+      <option value="P2WPKH">Native SegWit (Bech32)</option>
+      <option value="P2TR">Taproot (Bech32m)</option>
+      <option value="P2PKH">Legacy (Base58)</option>
+    </select>
   </div>
 
   <hr>

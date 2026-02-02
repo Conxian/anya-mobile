@@ -86,8 +86,8 @@ describe('BlockstreamClient', () => {
     mockedAxios.get.mockResolvedValue(response);
     const utxos = await client.getUTXOs(address);
     expect(utxos).toEqual([
-      { txid: 'txid1', vout: 0, value: 100000 },
-      { txid: 'txid2', vout: 1, value: 200000 },
+      { txid: 'txid1', vout: 0, value: 100000n },
+      { txid: 'txid2', vout: 1, value: 200000n },
     ]);
   });
 });

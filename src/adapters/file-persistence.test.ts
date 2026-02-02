@@ -1,13 +1,7 @@
 import { FilePersistence } from './file-persistence';
-import { Wallet, Account } from '../core/domain';
 import { promises as fs } from 'fs';
-import * as path from 'path';
-import { mock } from 'jest-mock-extended';
-import { BIP32Interface } from 'bip32';
-import { BitcoinWallet } from '../core/wallet';
 
 const TEST_DATA_DIR = './test-data';
-const WALLET_FILE = 'wallet.json';
 
 describe('FilePersistence', () => {
   beforeEach(async () => {
@@ -22,7 +16,6 @@ describe('FilePersistence', () => {
 
   it('should save and load a wallet', async () => {
     const persistence = new FilePersistence(TEST_DATA_DIR);
-    const mockBitcoinWallet = mock<BitcoinWallet>();
 
     // Create a simplified, serializable wallet object for testing.
     const walletToSave = {

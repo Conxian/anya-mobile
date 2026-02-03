@@ -11,3 +11,7 @@ This journal is for CRITICAL, non-routine performance learnings that will help a
 ## 2025-02-01 - [BIP32 Node Caching]
 **Learning:** Even with worker reuse and seed caching, re-deriving the root BIP32 node from a seed (HMAC-SHA512) and deriving long path prefixes (e.g., `m/84'/0'/0'/0`) repeatedly is a measurable overhead. Caching the `root` node and common path `chainNode` objects in the worker reduces sequential address derivation time by >90%.
 **Action:** Cache intermediate BIP32 `root` and `chainNode` (prefix) objects in the worker. Ensure these are invalidated whenever the underlying mnemonic or seed changes.
+
+## 2025-02-02 - [Parallel Raw Transaction Fetching]
+**Learning:** Sequential `await` calls inside loops, especially for network-bound operations like fetching raw transactions for Legacy (P2PKH) inputs, cause unnecessary linear latency growth.
+**Action:** Deduplicate required resources (using `Set`) and parallelize fetching using `Promise.all` before entering the processing loop. This transforms $O(N)$ sequential latency into $O(1)$ parallel latency (limited by unique parent transactions and network concurrency).

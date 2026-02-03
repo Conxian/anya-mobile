@@ -71,6 +71,26 @@ function setupCopyButton(buttonId: string, textToCopy: string) {
   }
 }
 
+/**
+ * 🎨 Palette: Keyboard accessibility - trigger primary actions on Enter key.
+ */
+document.getElementById('pinInput')?.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    (e.target as HTMLElement).blur();
+    document.getElementById('createWallet')?.click();
+  }
+});
+
+document.getElementById('cidInput')?.addEventListener('keypress', (e) => {
+  const loadWalletButton = document.getElementById(
+    'loadWallet'
+  ) as HTMLButtonElement;
+  if (e.key === 'Enter' && loadWalletButton && !loadWalletButton.disabled) {
+    (e.target as HTMLElement).blur();
+    loadWalletButton.click();
+  }
+});
+
 document.getElementById('createWallet')?.addEventListener('click', async () => {
   const walletInfo = document.getElementById('walletInfo');
   const pinInput = document.getElementById('pinInput') as HTMLInputElement;

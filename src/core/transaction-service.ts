@@ -43,6 +43,21 @@ export class TransactionServiceImpl implements TransactionService {
       this.network
     );
 
+    // ⚡ Bolt: Parallelize and deduplicate raw transaction fetching for Legacy inputs.
+    // By pre-fetching all required raw transactions in parallel and caching the
+    // results, we significantly reduce network latency (especially for consolidation
+    // transactions with many inputs) and avoid redundant Buffer allocations.
+    const rawTxs = new Map<string, Buffer>();
+    if (sourceAccount.addressType === AddressType.Legacy) {
+      const uniqueTxids = Array.from(new Set(inputs.map((i) => i.txid)));
+      const rawTxHexes = await Promise.all(
+        uniqueTxids.map((txid) => this.blockchainClient.getRawTransaction(txid))
+      );
+      uniqueTxids.forEach((txid, index) => {
+        rawTxs.set(txid, Buffer.from(rawTxHexes[index], 'hex'));
+      });
+    }
+
     for (const input of inputs) {
       const inputData: any = {
         hash: input.txid,
@@ -50,9 +65,7 @@ export class TransactionServiceImpl implements TransactionService {
       };
 
       if (sourceAccount.addressType === AddressType.Legacy) {
-        // Legacy (P2PKH) requires the full previous transaction to be provided as nonWitnessUtxo.
-        const rawTxHex = await this.blockchainClient.getRawTransaction(input.txid);
-        inputData.nonWitnessUtxo = Buffer.from(rawTxHex, 'hex');
+        inputData.nonWitnessUtxo = rawTxs.get(input.txid);
       } else {
         inputData.witnessUtxo = {
           script: paymentScript,

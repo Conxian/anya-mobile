@@ -145,6 +145,44 @@ describe('TransactionServiceImpl', () => {
           )
         ).rejects.toThrow('Insufficient funds to cover the transaction amount and network fee.');
       });
+
+      it('should deduplicate and parallelize raw transaction fetching for Legacy accounts', async () => {
+        const legacyAccount = new Account(
+          'legacy-id',
+          'legacy-account',
+          bip32.fromSeed(Buffer.alloc(64)),
+          bitcoin.networks.testnet,
+          AddressType.Legacy
+        );
+
+        const txid1 = 'a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1';
+        const txid2 = 'b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1';
+        const utxos = [
+          { txid: txid1, vout: 0, value: 100000n },
+          { txid: txid1, vout: 1, value: 100000n }, // Same txid
+          { txid: txid2, vout: 0, value: 100000n },
+        ];
+        const feeEstimates: FeeEstimates = { slow: 5, medium: 10, fast: 15 };
+        blockchainClient.getUTXOs.mockResolvedValue(utxos);
+        blockchainClient.getFeeEstimates.mockResolvedValue(feeEstimates);
+        blockchainClient.getRawTransaction.mockResolvedValue('01000000000000000000');
+
+        const destinationAddress = 'tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7';
+        const amount = { value: '250000', asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 } };
+
+        await transactionService.createTransaction(
+          legacyAccount,
+          destinationAddress,
+          amount.asset,
+          amount,
+          'fast'
+        );
+
+        // Verify that getRawTransaction was called only once per unique txid
+        expect(blockchainClient.getRawTransaction).toHaveBeenCalledTimes(2);
+        expect(blockchainClient.getRawTransaction).toHaveBeenCalledWith(txid1);
+        expect(blockchainClient.getRawTransaction).toHaveBeenCalledWith(txid2);
+      });
     });
 
     describe('signTransaction', () => {

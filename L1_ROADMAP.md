@@ -17,17 +17,13 @@ The following is a prioritized list of features required to move from an MVP to 
 
 ### 3.1. **Priority 1: Multi-Address Type Signing Support**
 
-While we can generate various address types, the `TransactionService` needs to be updated to sign them correctly.
-
-*   **Implement Taproot (P2TR) Signing:** Add support for signing Schnorr-based Taproot inputs.
-*   **Implement Legacy (P2PKH) Signing:** Ensure full backward compatibility.
+*   **Implement Taproot (P2TR) Signing:** [DONE] Support for Schnorr-based Taproot Key-path spending is implemented in `TransactionServiceImpl`.
+*   **Implement Legacy (P2PKH) Signing:** [DONE] Full backward compatibility with optimized raw transaction pre-fetching.
 
 ### 3.2. **Priority 2: Robust Infrastructure (Electrum)**
 
-Move away from centralized APIs to improve privacy and reliability.
-
-*   **Implement `ElectrumClient`:** A new adapter for the Electrum protocol.
-*   **User-Configurable Nodes:** Allow users to specify their own Electrum server.
+*   **Implement `ElectrumClient`:** [INITIAL IMPLEMENTATION] Functional `ElectrumBlockchainClient` using `@mempool/electrum-client` in `src/adapters/electrum-client.ts`. Supports balance, UTXOs, and broadcasting.
+*   **User-Configurable Nodes:** Supported by the `ElectrumBlockchainClient` constructor.
 
 ### 3.3. **Priority 3: Advanced Logic (BDK Integration)**
 

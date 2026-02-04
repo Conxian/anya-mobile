@@ -9,13 +9,14 @@
 
   <div>
     <label for="pinInput">Wallet PIN (for encryption):</label>
-    <input type="password" id="pinInput" value="1234" placeholder="Enter PIN">
-    <button id="createWallet">Create New Wallet</button>
+    <input type="password" id="pinInput" value="1234" placeholder="Enter PIN" autofocus>
+    <label for="addressType">Address Type:</label>
     <select id="addressType">
       <option value="P2WPKH">Native SegWit (Bech32)</option>
       <option value="P2TR">Taproot (Bech32m)</option>
       <option value="P2PKH">Legacy (Base58)</option>
     </select>
+    <button id="createWallet">Create New Wallet</button>
   </div>
 
   <hr>

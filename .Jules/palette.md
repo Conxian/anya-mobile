@@ -12,3 +12,7 @@
 ## 2024-08-18 - Hiding Empty Containers for Cleaner Initial State
 **Learning:** Containers with borders, padding, or background colors can appear as distracting "empty boxes" when they don't have content yet. This can look like a UI bug or incomplete state to the user.
 **Action:** Use the `:empty` CSS pseudo-class to hide these containers when they have no content, ensuring a cleaner and more professional initial interface state.
+
+## 2024-08-19 - Consistent Styling and Focus States for All Input Types
+**Learning:** Developers often target only `input[type="text"]` when styling forms, inadvertently leaving `password` inputs and `select` elements with default browser styles. This leads to a fragmented UI and, more critically, can break keyboard accessibility if `:focus-visible` styles are not also broadly applied.
+**Action:** Always ensure form styles (borders, padding, margins) and accessibility enhancements (like custom focus rings) are applied to all relevant interactive elements, including `password` inputs and `select` boxes, to maintain a cohesive and inclusive user experience.

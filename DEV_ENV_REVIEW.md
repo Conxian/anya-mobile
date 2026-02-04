@@ -14,31 +14,31 @@ To achieve the goal of being the best full Bitcoin wallet, we must support:
 ### 2.1. Layer 1 (Base Layer)
 *   **Current Tool:** `bitcoinjs-lib`
 *   **Status:** Excellent for JS-based environments. Mature, stable, and widely used.
-*   **Recommendation:** Continue using `bitcoinjs-lib` for core transaction construction and signing. For more advanced features like Descriptor-based wallets and robust UTXO management, consider integrating **BDK (Bitcoin Development Kit)** via WASM.
-*   **Reasoning:** `bitcoinjs-lib` provides the flexibility needed for custom script construction, while BDK offers a higher-level API for complex wallet logic.
+*   **Integration:** Integrated `bitcoinjs-lib` for core transaction construction and signing, including full Taproot Key-path spending support.
+*   **Recommendation:** For more advanced features like Descriptor-based wallets and robust UTXO management, consider integrating **BDK (Bitcoin Development Kit)** via WASM.
 
 ### 2.2. Layer 2 (Lightning Network)
-*   **Tool:** **LDK (Lightning Development Kit)**
-*   **Recommendation:** Use LDK-WASM for a non-custodial Lightning implementation in the browser.
-*   **Reasoning:** LDK is designed to be integrated into wallets, providing full control over the Lightning node's behavior while abstracting the complexity of the protocol.
+*   **Tool:** **lightningdevkit (LDK)**
+*   **Status:** Installed and ready for integration.
+*   **Recommendation:** Use LDK for a non-custodial Lightning implementation. It is designed to be integrated into wallets, providing full control over the Lightning node's behavior.
 
 ### 2.3. Sidechains (Liquid Network)
 *   **Tool:** **liquidjs-lib**
-*   **Recommendation:** Integrate `liquidjs-lib` for native Liquid support.
-*   **Reasoning:** It is the official JS library for Liquid, supporting confidential transactions and issued assets (L-BTC, USDT, etc.).
+*   **Status:** Installed.
+*   **Reasoning:** Official JS library for Liquid, supporting confidential transactions and issued assets.
 
-### 2.4. State Chains
-*   **Tool:** **Mercury Layer SDK**
-*   **Recommendation:** Integrate the Mercury Layer protocol for instant, private, and low-fee transfers of UTXOs.
-*   **Reasoning:** Mercury Layer is the leading implementation of State Chains, offering a unique middle ground between L1 and Lightning.
+### 2.4. State Chains & Swaps
+*   **Tools:** **Mercury Layer SDK** & **boltz-core**
+*   **Status:** `boltz-core` installed for trustless swaps between layers.
+*   **Reasoning:** Boltz enables seamless interoperability between L1, Lightning, and Liquid.
 
 ### 2.5. Stacks & Smart Contracts
 *   **Tool:** **@stacks/transactions**
-*   **Recommendation:** Use `@stacks/transactions` for interacting with the Stacks layer and sBTC.
-*   **Reasoning:** It provides the necessary tools for Clarity smart contract interaction and Stacks-specific transaction signing.
+*   **Status:** Installed.
+*   **Reasoning:** Essential for interacting with the Stacks layer and sBTC, providing tools for Clarity smart contract interaction.
 
 ## 3. Infrastructure & Privacy
-*   **Electrum Protocol:** Replace centralized APIs (like Blockstream.info) with an Electrum client. This allows users to connect to their own nodes (e.g., Electrs, Fulcrum), significantly improving privacy and reliability.
+*   **Electrum Protocol:** Integrated `@mempool/electrum-client` in `src/adapters/electrum-client.ts`. This allows the wallet to connect to any Electrum server, enhancing privacy and decentralization.
 *   **Web Workers:** Use Web Workers for all cryptographic operations to keep the UI responsive (implemented via `CryptoWorkerClient`).
 *   **Secure Storage:** Use Web Crypto API (AES-GCM) for encrypting sensitive data with a user-defined PIN (implemented via `SecureStorageService`).
 

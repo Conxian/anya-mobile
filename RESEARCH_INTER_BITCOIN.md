@@ -59,12 +59,12 @@ This document outlines the findings for achieving "best-in-class" full Bitcoin f
 
 | Feature | Primary SDK | Alternative | Anya-Core Status |
 | :--- | :--- | :--- | :--- |
-| **L1 Core** | `bitcoinjs-lib` | BDK (WASM) | ✅ Implemented / Migrating |
-| **Lightning** | LDK-WASM | Breez SDK | 📅 Planned (Phase 3) |
-| **Liquid** | `liquidjs-lib` | Vulpem Tools | ✅ Initial Support |
+| **L1 Core** | `bitcoinjs-lib` | BDK (WASM) | ✅ Implemented (w/ Taproot) |
+| **Lightning** | `lightningdevkit` (LDK) | Breez SDK | ✅ Installed / Ready |
+| **Liquid** | `liquidjs-lib` | Vulpem Tools | ✅ Installed / Ready |
 | **State Chains** | Mercury Layer | - | 📅 Planned (Phase 3) |
-| **Smart Contracts** | Stacks (sBTC) | Rootstock | 📅 Strategic Roadmapped |
-| **Swaps** | Boltz SDK | Deezy | 📅 Evaluation |
+| **Smart Contracts** | `@stacks/transactions` | Rootstock | ✅ Installed / Ready |
+| **Swaps** | `boltz-core` | Deezy | ✅ Installed / Ready |
 
 ## 6. Strategic Recommendations for Next Steps
 

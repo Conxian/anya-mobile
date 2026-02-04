@@ -15,3 +15,7 @@ This journal is for CRITICAL, non-routine performance learnings that will help a
 ## 2025-02-02 - [Parallel Raw Transaction Fetching]
 **Learning:** Sequential `await` calls inside loops, especially for network-bound operations like fetching raw transactions for Legacy (P2PKH) inputs, cause unnecessary linear latency growth.
 **Action:** Deduplicate required resources (using `Set`) and parallelize fetching using `Promise.all` before entering the processing loop. This transforms $O(N)$ sequential latency into $O(1)$ parallel latency (limited by unique parent transactions and network concurrency).
+
+## 2026-02-04 - [Network Call Caching for Slow-Changing Data]
+**Learning:** Redundant network calls to external APIs for data that changes slowly (like Bitcoin fee estimates) add unnecessary latency and risk rate-limiting.
+**Action:** Implement a simple TTL-based cache (e.g., 60 seconds) for such resources in the adapter layer. This significantly improves the responsiveness of features like transaction creation that frequently access this data.

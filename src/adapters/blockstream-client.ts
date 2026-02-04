@@ -12,8 +12,12 @@ import axios from 'axios';
 
 const BASE_URL = 'https://blockstream.info/api';
 const SATOSHIS_PER_BTC = 1e8;
+const FEE_CACHE_TTL_MS = 60 * 1000; // 60 seconds
 
 export class BlockstreamClient implements BlockchainClient {
+  private cachedFeeEstimates: FeeEstimates | null = null;
+  private lastFeeFetchTime: number = 0;
+
   async getBalance(address: Address, asset: Asset): Promise<Balance> {
     const response = await axios.get(`${BASE_URL}/address/${address}`);
     const utxos =
@@ -73,14 +77,27 @@ export class BlockstreamClient implements BlockchainClient {
   }
 
   async getFeeEstimates(): Promise<FeeEstimates> {
+    const now = Date.now();
+    if (
+      this.cachedFeeEstimates &&
+      now - this.lastFeeFetchTime < FEE_CACHE_TTL_MS
+    ) {
+      return this.cachedFeeEstimates;
+    }
+
     const response = await axios.get(`${BASE_URL}/fee-estimates`);
     const fees = response.data;
     // Blockstream returns fee estimates in sats/vB. We'll ceil to the nearest integer for safety.
-    return {
+    const estimates = {
       slow: Math.ceil(fees['6']),
       medium: Math.ceil(fees['3']),
       fast: Math.ceil(fees['1']),
     };
+
+    this.cachedFeeEstimates = estimates;
+    this.lastFeeFetchTime = now;
+
+    return estimates;
   }
 
   async getUTXOs(address: Address): Promise<UTXO[]> {

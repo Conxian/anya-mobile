@@ -33,9 +33,9 @@ export class SecureStorageService implements ISecureStorageService {
   async decrypt(encryptedHexString: string, pin: string): Promise<string> {
     const encryptedDataBytes = Buffer.from(encryptedHexString, 'hex');
 
-    const salt = encryptedDataBytes.slice(0, this.SALT_LENGTH);
-    const iv = encryptedDataBytes.slice(this.SALT_LENGTH, this.SALT_LENGTH + this.IV_LENGTH);
-    const data = encryptedDataBytes.slice(this.SALT_LENGTH + this.IV_LENGTH);
+    const salt = Uint8Array.from(encryptedDataBytes.slice(0, this.SALT_LENGTH));
+    const iv = Uint8Array.from(encryptedDataBytes.slice(this.SALT_LENGTH, this.SALT_LENGTH + this.IV_LENGTH));
+    const data = Uint8Array.from(encryptedDataBytes.slice(this.SALT_LENGTH + this.IV_LENGTH));
 
     const key = await this.deriveKey(pin, salt);
 

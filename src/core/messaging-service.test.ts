@@ -10,8 +10,8 @@ const generateTestAccount = (id: string, name: string): Account => {
   const publicKey = Buffer.from(getPublicKey(privateKey, true));
 
   const mockNode = mock<BIP32Interface>();
-  mockNode.privateKey = Buffer.from(privateKey);
-  mockNode.publicKey = publicKey;
+  mockNode.privateKey = Uint8Array.from(Buffer.from(privateKey));
+  mockNode.publicKey = Uint8Array.from(publicKey);
 
   const account = new Account(id, name, mockNode, bitcoin.networks.testnet);
 

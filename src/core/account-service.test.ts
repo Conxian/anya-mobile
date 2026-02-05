@@ -7,10 +7,10 @@ import { BitcoinWallet } from './wallet';
 import { Crypto } from '@peculiar/webcrypto';
 import { SecureWallet } from './secure-bitcoin-lib';
 import { BIP32Factory } from 'bip32';
-import * as ecc from 'tiny-secp256k1';
+import ecc from './ecc';
 import * as bitcoin from 'bitcoinjs-lib';
 
-const bip32 = BIP32Factory(ecc);
+const bip32 = BIP32Factory(ecc as any);
 
 // Set up webcrypto environment
 global.crypto = new Crypto();
@@ -24,7 +24,7 @@ class MockWorker {
     if (message.type === 'getNode') {
       const seed = Buffer.alloc(32);
       seed.fill(1);
-      const root = bip32.fromSeed(seed);
+      const root = bip32.fromSeed(Uint8Array.from(seed));
       const child = root.derivePath(`m/84'/0'/0'/0/${message.payload.index}`);
       this.onmessage({
         data: {

@@ -10,6 +10,6 @@ module.exports = {
     // dependencies @noble/hashes and @scure/base which are ES modules and
     // need to be transformed. The '.*' is added to handle pnpm's nested
     // node_modules structure.
-    'node_modules/(?!.*@noble/secp256k1|.*@scure/bip39|.*@noble/hashes|.*@scure/base)',
+    'node_modules/(?!.*@noble/secp256k1|.*@noble/curves|.*@scure/bip39|.*@noble/hashes|.*@scure/base)',
   ],
 };

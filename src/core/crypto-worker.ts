@@ -9,9 +9,9 @@ import { generateMnemonic, mnemonicToSeed, mnemonicToSeedSync } from '@scure/bip
 import { wordlist } from '@scure/bip39/wordlists/english.js';
 import * as bitcoin from 'bitcoinjs-lib';
 import { BIP32Factory, BIP32Interface } from 'bip32';
-import * as ecc from 'tiny-secp256k1';
+import ecc from './ecc';
 
-const bip32 = BIP32Factory(ecc);
+const bip32 = BIP32Factory(ecc as any);
 
 // --- Inlined SecureStorageService Logic ---
 const SALT_LENGTH = 16;
@@ -122,7 +122,7 @@ self.onmessage = async (
         lastPin = pin;
         lastMnemonic = mnemonic;
         lastSeed = seed;
-        root = bip32.fromSeed(Buffer.from(seed));
+        root = bip32.fromSeed(Uint8Array.from(seed));
         lastRoot = root;
         lastChainNode = null;
         lastPathPrefix = null;
@@ -145,8 +145,8 @@ self.onmessage = async (
         if (addressType === 'P2PKH') {
           result = bitcoin.payments.p2pkh({ pubkey: child.publicKey });
         } else if (addressType === 'P2TR') {
-          const internalPubkey = Buffer.from(child.publicKey.slice(1, 33));
-          result = bitcoin.payments.p2tr({ internalPubkey: internalPubkey as any });
+          const internalPubkey = Uint8Array.from(child.publicKey.slice(1, 33));
+          result = bitcoin.payments.p2tr({ internalPubkey });
         } else {
           result = bitcoin.payments.p2wpkh({ pubkey: child.publicKey });
         }

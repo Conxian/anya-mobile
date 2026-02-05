@@ -1,10 +1,10 @@
 import { BitcoinWallet } from './wallet';
 import * as bitcoin from 'bitcoinjs-lib';
 import { BIP32Interface } from 'bip32';
-import * as ecc from 'tiny-secp256k1';
+import ecc from './ecc';
 
 // Initialize ECC library for Taproot support
-bitcoin.initEccLib(ecc);
+bitcoin.initEccLib(ecc as any);
 
 export interface Wallet {
   id: string;
@@ -62,7 +62,7 @@ export class Account {
           break;
         case AddressType.Taproot: {
           // X-only pubkey for Taproot
-          const internalPubkey = Buffer.from(this.node.publicKey.slice(1, 33));
+          const internalPubkey = Uint8Array.from(this.node.publicKey.slice(1, 33));
           result = bitcoin.payments.p2tr({
             internalPubkey,
             network: this.network,

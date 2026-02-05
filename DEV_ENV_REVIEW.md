@@ -50,17 +50,19 @@ To achieve the goal of being the best full Bitcoin wallet, we must support:
 - [x] Basic L1 Support (P2WPKH)
 
 ### Phase 2: Multi-Layer Expansion
-- [ ] Implement `LightningService` and `SidechainService` ports.
-- [ ] Add Taproot (P2TR) support to L1.
-- [ ] Integrate `liquidjs-lib`.
+- [x] Implement `LightningService` and `SidechainService` ports.
+- [x] Add Taproot (P2TR) support to L1 (Key-path spending).
+- [x] Integrate `liquidjs-lib` (via `LiquidBlockchainClient`).
+- [x] Robust pure-JS ECC engine (replacement for WASM-based tiny-secp256k1).
 
-### Phase 3: Lightning & State Chains
+### Phase 3: Lightning & State Chains (Next Session)
 - [ ] Integrate LDK-WASM for Lightning channels.
 - [ ] Integrate Mercury Layer for State Chain coins.
+- [ ] Implement multi-layer transaction history.
 
 ### Phase 4: Advanced UX & Privacy
-- [ ] Implement Silent Payments.
-- [ ] Unified multi-layer balance view.
-- [ ] In-wallet swaps between layers.
+- [ ] Implement Silent Payments (BIP 352).
+- [x] Unified multi-layer balance view (via `UnifiedBalanceService`).
+- [ ] In-wallet swaps between layers (Boltz).
 
 By adhering to this manifest, we ensure that the wallet remains at the cutting edge of Bitcoin technology, providing users with the most powerful and secure tools available.

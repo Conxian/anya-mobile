@@ -2,8 +2,24 @@ import './palette-init';
 import { createWallet } from '../core/wallet';
 import { SecureStorageService } from '../services/secure-storage';
 import { uploadToIPFS, downloadFromIPFS } from '../services/ipfs';
+import { UnifiedBalanceService } from '../core/unified-balance-service';
+import { MockBlockchainClient } from '../adapters/mock-blockchain-client';
+import { MockLightningClient } from '../adapters/mock-lightning-client';
+import { LiquidBlockchainClient } from '../adapters/liquid-client';
+import { Account, AddressType } from '../core/domain';
 
 const secureStorage = new SecureStorageService();
+
+// Initialize services for the unified balance view.
+// In a production app, these would be configured based on user settings.
+const l1Client = new MockBlockchainClient();
+const l2Client = new MockLightningClient();
+const sidechainClient = new LiquidBlockchainClient();
+const balanceService = new UnifiedBalanceService(
+  l1Client,
+  l2Client,
+  sidechainClient
+);
 
 /**
  * 🎨 Palette: Standardized helper to toggle visibility of sensitive information like mnemonics.
@@ -124,16 +140,50 @@ document.getElementById('createWallet')?.addEventListener('click', async () => {
 
     if (walletInfo) {
       walletInfo.innerHTML = `
-        <p>
-          <strong>Mnemonic:</strong>
-          <span id="mnemonic-value"></span>
-          <button id="toggleMnemonic" title="Show/Hide mnemonic" aria-label="Show mnemonic">👁️</button>
-          <button id="copyMnemonic" title="Copy mnemonic to clipboard" aria-label="Copy mnemonic to clipboard">📋</button>
-        </p>
-        <p><strong>Address:</strong> ${address} <button id="copyAddress" title="Copy address to clipboard" aria-label="Copy address to clipboard">📋</button></p>
+        <div class="wallet-section">
+          <h3>Security</h3>
+          <p>
+            <strong>Mnemonic:</strong>
+            <span id="mnemonic-value"></span>
+            <button id="toggleMnemonic" title="Show/Hide mnemonic" aria-label="Show mnemonic">👁️</button>
+            <button id="copyMnemonic" title="Copy mnemonic to clipboard" aria-label="Copy mnemonic to clipboard">📋</button>
+          </p>
+        </div>
+        <div class="wallet-section">
+          <h3>L1 - Bitcoin</h3>
+          <p><strong>Address:</strong> ${address} <button id="copyAddress" title="Copy address to clipboard" aria-label="Copy address to clipboard">📋</button></p>
+        </div>
+        <div id="unified-balance" class="wallet-section">
+          <h3>Unified Balance</h3>
+          <p>Loading balances across all layers...</p>
+        </div>
         <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
       `;
     }
+
+    // Update unified balance
+    const btcAsset = { symbol: 'BTC', name: 'Bitcoin', decimals: 8 };
+    // Create a temporary account object for balance fetching.
+    const tempAccount = new Account('temp', 'Temp', null as any, undefined, addressType as AddressType);
+    // Use the derived address for the mock account
+    Object.defineProperty(tempAccount, 'address', { get: () => address });
+
+    balanceService.getUnifiedBalance(tempAccount, btcAsset).then(balances => {
+      const balanceDiv = document.getElementById('unified-balance');
+      if (balanceDiv) {
+        balanceDiv.innerHTML = `
+          <h3>Unified Balance</h3>
+          <ul>
+            <li><strong>Layer 1:</strong> ${balances.l1.amount.value} BTC</li>
+            <li><strong>Lightning (L2):</strong> ${balances.l2.amount.value} BTC</li>
+            <li><strong>Liquid (Sidechain):</strong> ${Number(balances.sidechain.amount.value) / 1e8} L-BTC</li>
+          </ul>
+          <p><strong>Total Wealth:</strong> ${Number(balances.total) / 1e8} BTC equivalent</p>
+        `;
+      }
+    }).catch(err => {
+      console.error('Failed to fetch unified balance:', err);
+    });
 
     setupMnemonicToggle('mnemonic-value', 'toggleMnemonic', mnemonic);
     setupCopyButton('copyMnemonic', mnemonic);

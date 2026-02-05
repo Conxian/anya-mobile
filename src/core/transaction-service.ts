@@ -78,7 +78,7 @@ export class TransactionServiceImpl implements TransactionService {
         // This implementation currently supports Key-path spending.
         // To support Script-path spending in the future, we would need to add
         // tapLeafScript and potentially tapMerkleRoot here.
-        inputData.tapInternalKey = Buffer.from(
+        inputData.tapInternalKey = Uint8Array.from(
           sourceAccount.getSigner().publicKey.slice(1, 33)
         );
       }
@@ -163,9 +163,9 @@ export class TransactionServiceImpl implements TransactionService {
     if (account.addressType === AddressType.Taproot) {
       // For Taproot Key-path spending, the signer must be tweaked with the taproot tweak.
       // This ensures that the signature is valid for the tweaked public key used in the P2TR output.
-      const internalPubkey = Buffer.from(signer.publicKey.slice(1, 33));
+      const internalPubkey = Uint8Array.from(signer.publicKey.slice(1, 33));
       const tweakedSigner = signer.tweak(
-        bitcoin.crypto.taggedHash('TapTweak', internalPubkey as any)
+        Uint8Array.from(bitcoin.crypto.taggedHash('TapTweak', internalPubkey))
       );
 
       for (let i = 0; i < psbt.inputCount; i++) {

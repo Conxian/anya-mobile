@@ -3,12 +3,12 @@ import { Wallet, WalletStatus } from '../core/domain';
 import { generateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
 import { BIP32Factory } from 'bip32';
-import * as ecc from 'tiny-secp256k1';
+import ecc from './ecc';
 import { mock } from 'jest-mock-extended';
 import { BitcoinWallet } from './wallet';
 import { CryptoWorkerClient } from './secure-bitcoin-lib';
 
-const bip32 = BIP32Factory(ecc);
+const bip32 = BIP32Factory(ecc as any);
 
 export class WalletServiceImpl implements WalletService {
   constructor(private readonly accountService: AccountService) {}

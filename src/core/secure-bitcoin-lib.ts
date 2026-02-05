@@ -3,10 +3,10 @@ if (typeof window !== 'undefined') (window as any).Buffer = Buffer;
 if (typeof self !== 'undefined') (self as any).Buffer = Buffer;
 import * as bitcoin from 'bitcoinjs-lib';
 import { BIP32Factory, BIP32Interface } from 'bip32';
-import * as ecc from 'tiny-secp256k1';
+import ecc from './ecc';
 import { ISecureStorageService } from '../services/secure-storage';
 
-const bip32 = BIP32Factory(ecc);
+const bip32 = BIP32Factory(ecc as any);
 
 // ⚡ Bolt: Centralized worker management.
 // The CryptoWorkerClient manages a single, shared Web Worker instance for all
@@ -92,8 +92,8 @@ export class SecureWallet {
 
     const { privateKey, chainCode } = response.node;
     return bip32.fromPrivateKey(
-      Buffer.from(privateKey),
-      Buffer.from(chainCode),
+      Uint8Array.from(Buffer.from(privateKey)),
+      Uint8Array.from(Buffer.from(chainCode)),
       bitcoin.networks.bitcoin
     );
   }

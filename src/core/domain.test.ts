@@ -12,10 +12,10 @@ describe('Domain Objects', () => {
     mockNode = mock<BIP32Interface>();
     mockBitcoinWallet = mock<BitcoinWallet>();
     // Mock the necessary properties on the node for the Account class getters
-    mockNode.publicKey = Buffer.from(
+    mockNode.publicKey = Uint8Array.from(Buffer.from(
       '0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798',
       'hex'
-    );
+    ));
   });
 
   it('should be possible to create a Wallet', () => {

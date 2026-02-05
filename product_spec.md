@@ -60,6 +60,17 @@ The wallet will provide native support for the following Bitcoin layers:
 
 ## 6. Future Roadmap
 
+### 6.1. Phase 3: Lightning & State Chains (Next Session)
+*   **LDK Integration:** Transition from mock clients to a functional Lightning Dev Kit (LDK) node within the wallet.
+*   **Mercury Layer:** Implement State Chain coin support for fast, off-chain Bitcoin transfers.
+*   **Unified History:** A consolidated view of all transaction activities across layers.
+
+### 6.2. Phase 4: Advanced Privacy & Swaps
+*   **Silent Payments:** Implementation of BIP 352 for improved privacy.
+*   **Trustless Swaps:** Integrated Boltz swaps for L1 <-> Lightning <-> Liquid interoperability.
+*   **Taproot Assets:** Support for assets issued on the Taproot Assets Protocol.
+
+### 6.3. Long-term
 *   **Hardware Wallet Integration:** Support for popular hardware wallets, such as Ledger and Trezor.
 *   **DeFi Integrations:** Deeper integration with DeFi protocols, such as lending, borrowing, and yield farming.
 *   **NFT Support:** Support for NFTs on supported layers, such as Stacks and Liquid.

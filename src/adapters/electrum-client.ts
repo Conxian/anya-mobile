@@ -8,11 +8,16 @@ import {
   FeeEstimates,
   UTXO,
 } from '../core/domain';
+// @ts-expect-error - No type definitions for @mempool/electrum-client
 import ElectrumClient from '@mempool/electrum-client';
 import * as bitcoin from 'bitcoinjs-lib';
 
+const FEE_CACHE_TTL_MS = 60 * 1000; // 60 seconds
+
 export class ElectrumBlockchainClient implements BlockchainClient {
   private client: any;
+  private cachedFeeEstimates: FeeEstimates | null = null;
+  private lastFeeFetchTime: number = 0;
 
   constructor(
     host: string,
@@ -79,6 +84,15 @@ export class ElectrumBlockchainClient implements BlockchainClient {
   }
 
   async getFeeEstimates(): Promise<FeeEstimates> {
+    const now = Date.now();
+    if (
+      this.cachedFeeEstimates &&
+      now - this.lastFeeFetchTime < FEE_CACHE_TTL_MS
+    ) {
+      // ⚡ Bolt: Return cached fee estimates to avoid redundant network requests.
+      return this.cachedFeeEstimates;
+    }
+
     const [slow, medium, fast] = await Promise.all([
       this.client.request('blockchain.estimatefee', [6]),
       this.client.request('blockchain.estimatefee', [3]),
@@ -88,11 +102,16 @@ export class ElectrumBlockchainClient implements BlockchainClient {
     // Electrum returns BTC/kvB, convert to sat/vB
     const toSatsVB = (btcPerKvB: number) => Math.ceil((btcPerKvB * 1e8) / 1000);
 
-    return {
+    const estimates = {
       slow: toSatsVB(slow),
       medium: toSatsVB(medium),
       fast: toSatsVB(fast),
     };
+
+    this.cachedFeeEstimates = estimates;
+    this.lastFeeFetchTime = now;
+
+    return estimates;
   }
 
   async getUTXOs(address: Address): Promise<UTXO[]> {

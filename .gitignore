@@ -4,6 +4,7 @@ node_modules/
 
 # Ignore build artifacts
 public/app.js
+public/crypto-worker.js
 
 # Ignore log files
 server.log

@@ -23,7 +23,7 @@ describe('TransactionServiceImpl', () => {
     blockchainClient = mock<BlockchainClient>();
     const network = bitcoin.networks.testnet;
     transactionService = new TransactionServiceImpl(blockchainClient, network);
-    const node = bip32.fromSeed(Buffer.alloc(64));
+    const node = bip32.fromSeed(Uint8Array.from(Buffer.alloc(64)));
     account = new Account('test-id', 'test-account', node, network);
   });
 
@@ -150,7 +150,7 @@ describe('TransactionServiceImpl', () => {
         const legacyAccount = new Account(
           'legacy-id',
           'legacy-account',
-          bip32.fromSeed(Buffer.alloc(64)),
+          bip32.fromSeed(Uint8Array.from(Buffer.alloc(64))),
           bitcoin.networks.testnet,
           AddressType.Legacy
         );
@@ -232,7 +232,7 @@ describe('TransactionServiceImpl', () => {
 
         it('should sign a Taproot transaction', async () => {
           const network = bitcoin.networks.testnet;
-          const node = bip32.fromSeed(Buffer.alloc(64));
+          const node = bip32.fromSeed(Uint8Array.from(Buffer.alloc(64)));
           const taprootAccount = new Account(
             'tap-id',
             'tap-account',
@@ -260,7 +260,7 @@ describe('TransactionServiceImpl', () => {
                 script: paymentScript,
                 value: utxo.value,
               },
-              tapInternalKey: Buffer.from(
+              tapInternalKey: Uint8Array.from(
                 taprootAccount.getSigner().publicKey.slice(1, 33)
               ),
             })
@@ -383,7 +383,7 @@ describe('TransactionServiceImpl', () => {
 
     it('should complete flow for Taproot account successfully', async () => {
       const network = bitcoin.networks.testnet;
-      const node = bip32.fromSeed(Buffer.alloc(64));
+      const node = bip32.fromSeed(Uint8Array.from(Buffer.alloc(64)));
       const taprootAccount = new Account(
         'tap-id',
         'tap-account',

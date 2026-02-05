@@ -10,9 +10,6 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   if (typeof require !== "undefined") return require.apply(this, arguments);
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
-var __esm = (fn, res) => function __init() {
-  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
-};
 var __commonJS = (cb, mod2) => function __require2() {
   return mod2 || (0, cb[__getOwnPropNames(cb)[0]])((mod2 = { exports: {} }).exports, mod2), mod2.exports;
 };
@@ -41,7 +38,6 @@ var __toESM = (mod2, isNodeMode, target) => (target = mod2 != null ? __create(__
 var require_base64_js = __commonJS({
   "node_modules/.pnpm/base64-js@1.5.1/node_modules/base64-js/index.js"(exports2) {
     "use strict";
-    init_polyfills();
     exports2.byteLength = byteLength;
     exports2.toByteArray = toByteArray;
     exports2.fromByteArray = fromByteArray;
@@ -142,7 +138,6 @@ var require_base64_js = __commonJS({
 // node_modules/.pnpm/ieee754@1.2.1/node_modules/ieee754/index.js
 var require_ieee754 = __commonJS({
   "node_modules/.pnpm/ieee754@1.2.1/node_modules/ieee754/index.js"(exports2) {
-    init_polyfills();
     exports2.read = function(buffer2, offset, isLE, mLen, nBytes) {
       var e, m;
       var eLen = nBytes * 8 - mLen - 1;
@@ -227,7 +222,6 @@ var require_ieee754 = __commonJS({
 var require_buffer = __commonJS({
   "node_modules/.pnpm/buffer@6.0.3/node_modules/buffer/index.js"(exports2) {
     "use strict";
-    init_polyfills();
     var base644 = require_base64_js();
     var ieee754 = require_ieee754();
     var customInspectSymbol = typeof Symbol === "function" && typeof Symbol["for"] === "function" ? Symbol["for"]("nodejs.util.inspect.custom") : null;
@@ -1816,26 +1810,10 @@ var require_buffer = __commonJS({
   }
 });
 
-// src/ui/polyfills.js
-var import_buffer;
-var init_polyfills = __esm({
-  "src/ui/polyfills.js"() {
-    "use strict";
-    import_buffer = __toESM(require_buffer());
-    if (typeof window !== "undefined") {
-      window.Buffer = import_buffer.Buffer;
-    }
-    if (typeof globalThis !== "undefined") {
-      globalThis.Buffer = import_buffer.Buffer;
-    }
-  }
-});
-
 // node_modules/.pnpm/bech32@2.0.0/node_modules/bech32/dist/index.js
 var require_dist = __commonJS({
   "node_modules/.pnpm/bech32@2.0.0/node_modules/bech32/dist/index.js"(exports2) {
     "use strict";
-    init_polyfills();
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.bech32m = exports2.bech32 = void 0;
     var ALPHABET2 = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
@@ -2001,7 +1979,6 @@ var require_dist = __commonJS({
 // node_modules/.pnpm/varint@6.0.0/node_modules/varint/encode.js
 var require_encode = __commonJS({
   "node_modules/.pnpm/varint@6.0.0/node_modules/varint/encode.js"(exports2, module2) {
-    init_polyfills();
     module2.exports = encode42;
     var MSB5 = 128;
     var REST5 = 127;
@@ -2033,7 +2010,6 @@ var require_encode = __commonJS({
 // node_modules/.pnpm/varint@6.0.0/node_modules/varint/decode.js
 var require_decode = __commonJS({
   "node_modules/.pnpm/varint@6.0.0/node_modules/varint/decode.js"(exports2, module2) {
-    init_polyfills();
     module2.exports = read4;
     var MSB5 = 128;
     var REST5 = 127;
@@ -2057,7 +2033,6 @@ var require_decode = __commonJS({
 // node_modules/.pnpm/varint@6.0.0/node_modules/varint/length.js
 var require_length = __commonJS({
   "node_modules/.pnpm/varint@6.0.0/node_modules/varint/length.js"(exports2, module2) {
-    init_polyfills();
     var N15 = Math.pow(2, 7);
     var N25 = Math.pow(2, 14);
     var N35 = Math.pow(2, 21);
@@ -2076,7 +2051,6 @@ var require_length = __commonJS({
 // node_modules/.pnpm/varint@6.0.0/node_modules/varint/index.js
 var require_varint = __commonJS({
   "node_modules/.pnpm/varint@6.0.0/node_modules/varint/index.js"(exports2, module2) {
-    init_polyfills();
     module2.exports = {
       encode: require_encode(),
       decode: require_decode(),
@@ -2089,7 +2063,6 @@ var require_varint = __commonJS({
 var require_err_code = __commonJS({
   "node_modules/.pnpm/err-code@3.0.1/node_modules/err-code/index.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     function assign(obj, props) {
       for (const key in props) {
         Object.defineProperty(obj, key, {
@@ -2133,7 +2106,6 @@ var require_err_code = __commonJS({
 // node_modules/.pnpm/is-electron@2.2.2/node_modules/is-electron/index.js
 var require_is_electron = __commonJS({
   "node_modules/.pnpm/is-electron@2.2.2/node_modules/is-electron/index.js"(exports2, module2) {
-    init_polyfills();
     function isElectron() {
       if (typeof window !== "undefined" && typeof window.process === "object" && window.process.type === "renderer") {
         return true;
@@ -2154,7 +2126,6 @@ var require_is_electron = __commonJS({
 var require_env = __commonJS({
   "node_modules/.pnpm/ipfs-utils@9.0.14_encoding@0.1.13/node_modules/ipfs-utils/src/env.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     var isElectron = require_is_electron();
     var IS_ENV_WITH_DOM = typeof window === "object" && typeof document === "object" && document.nodeType === 9;
     var IS_ELECTRON = isElectron();
@@ -2185,7 +2156,6 @@ var require_env = __commonJS({
 // node_modules/.pnpm/ms@2.1.3/node_modules/ms/index.js
 var require_ms = __commonJS({
   "node_modules/.pnpm/ms@2.1.3/node_modules/ms/index.js"(exports2, module2) {
-    init_polyfills();
     var s = 1e3;
     var m = s * 60;
     var h2 = m * 60;
@@ -2302,7 +2272,6 @@ var require_ms = __commonJS({
 // node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/common.js
 var require_common = __commonJS({
   "node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/common.js"(exports2, module2) {
-    init_polyfills();
     function setup(env) {
       createDebug.debug = createDebug;
       createDebug.default = createDebug;
@@ -2480,7 +2449,6 @@ var require_common = __commonJS({
 // node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/browser.js
 var require_browser = __commonJS({
   "node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/browser.js"(exports2, module2) {
-    init_polyfills();
     exports2.formatArgs = formatArgs;
     exports2.save = save;
     exports2.load = load;
@@ -2652,7 +2620,6 @@ var require_browser = __commonJS({
 var require_error = __commonJS({
   "node_modules/.pnpm/ipfs-utils@9.0.14_encoding@0.1.13/node_modules/ipfs-utils/src/http/error.js"(exports2) {
     "use strict";
-    init_polyfills();
     var TimeoutError = class extends Error {
       constructor(message = "Request timed out") {
         super(message);
@@ -2685,7 +2652,6 @@ var require_error = __commonJS({
 var require_browser2 = __commonJS({
   "node_modules/.pnpm/node-fetch@2.7.0_encoding@0.1.13/node_modules/node-fetch/browser.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     var getGlobal = function() {
       if (typeof self !== "undefined") {
         return self;
@@ -2713,7 +2679,6 @@ var require_browser2 = __commonJS({
 var require_src = __commonJS({
   "node_modules/.pnpm/native-fetch@3.0.0_node-fetch@2.7.0_encoding@0.1.13_/node_modules/native-fetch/src/index.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     if (globalThis.fetch && globalThis.Headers && globalThis.Request && globalThis.Response) {
       module2.exports = {
         default: globalThis.fetch,
@@ -2736,7 +2701,6 @@ var require_src = __commonJS({
 var require_fetch_browser = __commonJS({
   "node_modules/.pnpm/ipfs-utils@9.0.14_encoding@0.1.13/node_modules/ipfs-utils/src/fetch.browser.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     module2.exports = require_src();
   }
 });
@@ -2745,7 +2709,6 @@ var require_fetch_browser = __commonJS({
 var require_fetch_browser2 = __commonJS({
   "node_modules/.pnpm/ipfs-utils@9.0.14_encoding@0.1.13/node_modules/ipfs-utils/src/http/fetch.browser.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     var { TimeoutError, AbortError } = require_error();
     var { Response: Response2, Request, Headers, default: fetch2 } = require_fetch_browser();
     var fetchWithProgress = (url, options = {}) => {
@@ -2842,7 +2805,6 @@ var require_fetch_browser2 = __commonJS({
 var require_is_plain_obj = __commonJS({
   "node_modules/.pnpm/is-plain-obj@2.1.0/node_modules/is-plain-obj/index.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     module2.exports = (value2) => {
       if (Object.prototype.toString.call(value2) !== "[object Object]") {
         return false;
@@ -2857,7 +2819,6 @@ var require_is_plain_obj = __commonJS({
 var require_merge_options = __commonJS({
   "node_modules/.pnpm/merge-options@3.0.4/node_modules/merge-options/index.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     var isOptionObject = require_is_plain_obj();
     var { hasOwnProperty } = Object.prototype;
     var { propertyIsEnumerable } = Object;
@@ -2975,7 +2936,6 @@ var require_merge_options = __commonJS({
 var require_url_browser = __commonJS({
   "node_modules/.pnpm/iso-url@1.2.1/node_modules/iso-url/src/url-browser.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     var isReactNative = typeof navigator !== "undefined" && navigator.product === "ReactNative";
     function getDefaultBase() {
       if (isReactNative) {
@@ -3118,7 +3078,6 @@ var require_url_browser = __commonJS({
 var require_relative = __commonJS({
   "node_modules/.pnpm/iso-url@1.2.1/node_modules/iso-url/src/relative.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     var { URLWithLegacySupport, format: format5 } = require_url_browser();
     module2.exports = (url, location2 = {}, protocolMap = {}, defaultProtocol) => {
       let protocol = location2.protocol ? location2.protocol.replace(":", "") : "http";
@@ -3142,7 +3101,6 @@ var require_relative = __commonJS({
 var require_iso_url = __commonJS({
   "node_modules/.pnpm/iso-url@1.2.1/node_modules/iso-url/index.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     var {
       URLWithLegacySupport,
       format: format5,
@@ -3163,7 +3121,6 @@ var require_iso_url = __commonJS({
 // node_modules/.pnpm/any-signal@3.0.1/node_modules/any-signal/index.js
 var require_any_signal = __commonJS({
   "node_modules/.pnpm/any-signal@3.0.1/node_modules/any-signal/index.js"(exports2, module2) {
-    init_polyfills();
     function anySignal2(signals) {
       const controller = new globalThis.AbortController();
       function onAbort() {
@@ -3192,7 +3149,6 @@ var require_any_signal = __commonJS({
 var require_browser_readablestream_to_it = __commonJS({
   "node_modules/.pnpm/browser-readablestream-to-it@1.0.3/node_modules/browser-readablestream-to-it/index.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     async function* browserReadableStreamToIt2(stream, options = {}) {
       const reader = stream.getReader();
       try {
@@ -3218,7 +3174,6 @@ var require_browser_readablestream_to_it = __commonJS({
 var require_it_all = __commonJS({
   "node_modules/.pnpm/it-all@1.0.6/node_modules/it-all/index.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     var all2 = async (source) => {
       const arr = [];
       for await (const entry of source) {
@@ -3234,7 +3189,6 @@ var require_it_all = __commonJS({
 var require_http = __commonJS({
   "node_modules/.pnpm/ipfs-utils@9.0.14_encoding@0.1.13/node_modules/ipfs-utils/src/http.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     var { fetch: fetch2, Request, Headers } = require_fetch_browser2();
     var { TimeoutError, HTTPError: HTTPError2 } = require_error();
     var merge2 = require_merge_options().bind({ ignoreUndefined: true });
@@ -3477,7 +3431,6 @@ var require_http = __commonJS({
 var require_aspromise = __commonJS({
   "node_modules/.pnpm/@protobufjs+aspromise@1.1.2/node_modules/@protobufjs/aspromise/index.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     module2.exports = asPromise;
     function asPromise(fn, ctx) {
       var params = new Array(arguments.length - 1), offset = 0, index = 2, pending = true;
@@ -3514,7 +3467,6 @@ var require_aspromise = __commonJS({
 var require_base64 = __commonJS({
   "node_modules/.pnpm/@protobufjs+base64@1.1.2/node_modules/@protobufjs/base64/index.js"(exports2) {
     "use strict";
-    init_polyfills();
     var base644 = exports2;
     base644.length = function length6(string5) {
       var p = string5.length;
@@ -3615,7 +3567,6 @@ var require_base64 = __commonJS({
 var require_eventemitter = __commonJS({
   "node_modules/.pnpm/@protobufjs+eventemitter@1.1.0/node_modules/@protobufjs/eventemitter/index.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     module2.exports = EventEmitter;
     function EventEmitter() {
       this._listeners = {};
@@ -3662,7 +3613,6 @@ var require_eventemitter = __commonJS({
 var require_float = __commonJS({
   "node_modules/.pnpm/@protobufjs+float@1.0.2/node_modules/@protobufjs/float/index.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     module2.exports = factory(factory);
     function factory(exports3) {
       if (typeof Float32Array !== "undefined") (function() {
@@ -3857,7 +3807,6 @@ var require_float = __commonJS({
 var require_inquire = __commonJS({
   "node_modules/.pnpm/@protobufjs+inquire@1.1.0/node_modules/@protobufjs/inquire/index.js"(exports, module) {
     "use strict";
-    init_polyfills();
     module.exports = inquire;
     function inquire(moduleName) {
       try {
@@ -3875,7 +3824,6 @@ var require_inquire = __commonJS({
 var require_utf8 = __commonJS({
   "node_modules/.pnpm/@protobufjs+utf8@1.1.0/node_modules/@protobufjs/utf8/index.js"(exports2) {
     "use strict";
-    init_polyfills();
     var utf8 = exports2;
     utf8.length = function utf8_length(string5) {
       var len = 0, c = 0;
@@ -3953,7 +3901,6 @@ var require_utf8 = __commonJS({
 var require_pool = __commonJS({
   "node_modules/.pnpm/@protobufjs+pool@1.1.0/node_modules/@protobufjs/pool/index.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     module2.exports = pool;
     function pool(alloc2, slice2, size) {
       var SIZE = size || 8192;
@@ -3980,7 +3927,6 @@ var require_pool = __commonJS({
 var require_longbits = __commonJS({
   "node_modules/.pnpm/protobufjs@7.5.4/node_modules/protobufjs/src/util/longbits.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     module2.exports = LongBits;
     var util = require_minimal();
     function LongBits(lo, hi) {
@@ -4083,7 +4029,6 @@ var require_longbits = __commonJS({
 var require_minimal = __commonJS({
   "node_modules/.pnpm/protobufjs@7.5.4/node_modules/protobufjs/src/util/minimal.js"(exports2) {
     "use strict";
-    init_polyfills();
     var util = exports2;
     util.asPromise = require_aspromise();
     util.base64 = require_base64();
@@ -4259,7 +4204,6 @@ var require_minimal = __commonJS({
 var require_writer = __commonJS({
   "node_modules/.pnpm/protobufjs@7.5.4/node_modules/protobufjs/src/writer.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     module2.exports = Writer;
     var util = require_minimal();
     var BufferWriter2;
@@ -4451,7 +4395,6 @@ var require_writer = __commonJS({
 var require_writer_buffer = __commonJS({
   "node_modules/.pnpm/protobufjs@7.5.4/node_modules/protobufjs/src/writer_buffer.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     module2.exports = BufferWriter2;
     var Writer = require_writer();
     (BufferWriter2.prototype = Object.create(Writer.prototype)).constructor = BufferWriter2;
@@ -4502,7 +4445,6 @@ var require_writer_buffer = __commonJS({
 var require_reader = __commonJS({
   "node_modules/.pnpm/protobufjs@7.5.4/node_modules/protobufjs/src/reader.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     module2.exports = Reader;
     var util = require_minimal();
     var BufferReader2;
@@ -4727,7 +4669,6 @@ var require_reader = __commonJS({
 var require_reader_buffer = __commonJS({
   "node_modules/.pnpm/protobufjs@7.5.4/node_modules/protobufjs/src/reader_buffer.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     module2.exports = BufferReader2;
     var Reader = require_reader();
     (BufferReader2.prototype = Object.create(Reader.prototype)).constructor = BufferReader2;
@@ -4751,7 +4692,6 @@ var require_reader_buffer = __commonJS({
 var require_service = __commonJS({
   "node_modules/.pnpm/protobufjs@7.5.4/node_modules/protobufjs/src/rpc/service.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     module2.exports = Service;
     var util = require_minimal();
     (Service.prototype = Object.create(util.EventEmitter.prototype)).constructor = Service;
@@ -4827,7 +4767,6 @@ var require_service = __commonJS({
 var require_rpc = __commonJS({
   "node_modules/.pnpm/protobufjs@7.5.4/node_modules/protobufjs/src/rpc.js"(exports2) {
     "use strict";
-    init_polyfills();
     var rpc = exports2;
     rpc.Service = require_service();
   }
@@ -4837,7 +4776,6 @@ var require_rpc = __commonJS({
 var require_roots = __commonJS({
   "node_modules/.pnpm/protobufjs@7.5.4/node_modules/protobufjs/src/roots.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     module2.exports = {};
   }
 });
@@ -4846,7 +4784,6 @@ var require_roots = __commonJS({
 var require_index_minimal = __commonJS({
   "node_modules/.pnpm/protobufjs@7.5.4/node_modules/protobufjs/src/index-minimal.js"(exports2) {
     "use strict";
-    init_polyfills();
     var protobuf = exports2;
     protobuf.build = "minimal";
     protobuf.Writer = require_writer();
@@ -4870,7 +4807,6 @@ var require_index_minimal = __commonJS({
 var require_minimal2 = __commonJS({
   "node_modules/.pnpm/protobufjs@7.5.4/node_modules/protobufjs/minimal.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     module2.exports = require_index_minimal();
   }
 });
@@ -4878,7 +4814,6 @@ var require_minimal2 = __commonJS({
 // node_modules/.pnpm/stream-to-it@0.2.4/node_modules/stream-to-it/source.js
 var require_source = __commonJS({
   "node_modules/.pnpm/stream-to-it@0.2.4/node_modules/stream-to-it/source.js"(exports2, module2) {
-    init_polyfills();
     module2.exports = (readable) => {
       if (readable[Symbol.asyncIterator]) return readable;
       if (readable.getReader) {
@@ -4900,18 +4835,10 @@ var require_source = __commonJS({
   }
 });
 
-// (disabled):node_modules/.pnpm/ipfs-utils@9.0.14_encoding@0.1.13/node_modules/ipfs-utils/src/files/glob-source.js
-var require_glob_source = __commonJS({
-  "(disabled):node_modules/.pnpm/ipfs-utils@9.0.14_encoding@0.1.13/node_modules/ipfs-utils/src/files/glob-source.js"() {
-    init_polyfills();
-  }
-});
-
 // node_modules/.pnpm/ipfs-utils@9.0.14_encoding@0.1.13/node_modules/ipfs-utils/src/files/url-source.js
 var require_url_source = __commonJS({
   "node_modules/.pnpm/ipfs-utils@9.0.14_encoding@0.1.13/node_modules/ipfs-utils/src/files/url-source.js"(exports2, module2) {
     "use strict";
-    init_polyfills();
     var HTTP3 = require_http();
     var urlSource = (url, options) => {
       return {
@@ -4928,22 +4855,38 @@ var require_url_source = __commonJS({
   }
 });
 
-// src/ui/app.ts
-init_polyfills();
-var import_buffer4 = __toESM(require_buffer());
-
-// src/core/wallet.ts
-init_polyfills();
+// src/ui/palette-init.ts
+var import_buffer = __toESM(require_buffer());
+if (typeof window !== "undefined") window.Buffer = import_buffer.Buffer;
+if (typeof globalThis !== "undefined") globalThis.Buffer = import_buffer.Buffer;
+function setupPasswordToggle(inputId, buttonId) {
+  const input = document.getElementById(inputId);
+  const button = document.getElementById(buttonId);
+  if (input && button) {
+    button.addEventListener("click", () => {
+      const isPassword = input.type === "password";
+      input.type = isPassword ? "text" : "password";
+      button.innerText = isPassword ? "\u{1F648}" : "\u{1F441}\uFE0F";
+      button.setAttribute(
+        "aria-label",
+        isPassword ? "Hide PIN" : "Show PIN"
+      );
+    });
+  }
+}
+function initPalette() {
+  setupPasswordToggle("pinInput", "togglePin");
+}
+if (typeof document !== "undefined") {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initPalette);
+  } else {
+    initPalette();
+  }
+}
 
 // src/core/secure-bitcoin-lib.ts
-init_polyfills();
 var import_buffer2 = __toESM(require_buffer());
-
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/index.js
-init_polyfills();
-
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/address.js
-init_polyfills();
 
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/networks.js
 var networks_exports = {};
@@ -4952,7 +4895,6 @@ __export(networks_exports, {
   regtest: () => regtest,
   testnet: () => testnet
 });
-init_polyfills();
 var bitcoin = {
   /**
    * The message prefix used for signing Bitcoin messages.
@@ -5011,17 +4953,7 @@ var testnet = {
   wif: 239
 };
 
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/payments/index.js
-init_polyfills();
-
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/payments/embed.js
-init_polyfills();
-
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/script.js
-init_polyfills();
-
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/bip66.js
-init_polyfills();
 function check(buffer2) {
   if (buffer2.length < 8) return false;
   if (buffer2.length > 72) return false;
@@ -5044,7 +4976,6 @@ function check(buffer2) {
 }
 
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/ops.js
-init_polyfills();
 var OPS;
 (function(OPS9) {
   OPS9[OPS9["OP_FALSE"] = 0] = "OP_FALSE";
@@ -5168,11 +5099,7 @@ var OPS;
   OPS9[OPS9["OP_INVALIDOPCODE"] = 255] = "OP_INVALIDOPCODE";
 })(OPS || (OPS = {}));
 
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/push_data.js
-init_polyfills();
-
 // node_modules/.pnpm/uint8array-tools@0.0.9/node_modules/uint8array-tools/src/mjs/browser.js
-init_polyfills();
 var HEX_STRINGS = "0123456789abcdefABCDEF";
 var HEX_CODES = HEX_STRINGS.split("").map((c) => c.codePointAt(0));
 var HEX_CODEPOINTS = Array(256).fill(true).map((_, i) => {
@@ -5441,7 +5368,6 @@ function decode(buffer2, offset) {
 }
 
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/script_number.js
-init_polyfills();
 function decode2(buffer2, maxLength, minimal) {
   maxLength = maxLength || 4;
   minimal = minimal === void 0 ? true : minimal;
@@ -5488,11 +5414,7 @@ function encode2(_number) {
   return buffer2;
 }
 
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/script_signature.js
-init_polyfills();
-
 // node_modules/.pnpm/valibot@1.2.0_typescript@5.9.3/node_modules/valibot/dist/index.mjs
-init_polyfills();
 var store$4;
 // @__NO_SIDE_EFFECTS__
 function getGlobalConfig(config$1) {
@@ -6049,7 +5971,6 @@ function pipe(...pipe$1) {
 }
 
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/types.js
-init_polyfills();
 var ZERO32 = new Uint8Array(32);
 var EC_P = fromHex(
   "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f"
@@ -6232,7 +6153,6 @@ function isCanonicalScriptSignature(buffer2) {
 }
 
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/payments/lazy.js
-init_polyfills();
 function prop(object3, name10, f) {
   Object.defineProperty(object3, name10, {
     configurable: true,
@@ -6262,7 +6182,6 @@ function value(f) {
 }
 
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/payments/p2ms.js
-init_polyfills();
 var OPS2 = OPS;
 var OP_INT_BASE2 = OPS2.OP_RESERVED;
 function encodeSmallOrScriptNum(n) {
@@ -6405,7 +6324,6 @@ function p2ms(a, opts) {
 }
 
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/payments/p2pk.js
-init_polyfills();
 var OPS3 = OPS;
 function p2pk(a, opts) {
   if (!a.input && !a.output && !a.pubkey && !a.input && !a.signature)
@@ -6472,23 +6390,7 @@ function p2pk(a, opts) {
   return Object.assign(o, a);
 }
 
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/payments/p2pkh.js
-init_polyfills();
-
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/crypto.js
-init_polyfills();
-
-// node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/ripemd160.js
-init_polyfills();
-
-// node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/legacy.js
-init_polyfills();
-
-// node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/_md.js
-init_polyfills();
-
 // node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/utils.js
-init_polyfills();
 function isBytes(a) {
   return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
 }
@@ -6816,14 +6718,7 @@ var ripemd160 = /* @__PURE__ */ createHasher(() => new RIPEMD160());
 // node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/ripemd160.js
 var ripemd1602 = ripemd160;
 
-// node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/sha256.js
-init_polyfills();
-
-// node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/sha2.js
-init_polyfills();
-
 // node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/_u64.js
-init_polyfills();
 var U32_MASK64 = /* @__PURE__ */ BigInt(2 ** 32 - 1);
 var _32n = /* @__PURE__ */ BigInt(32);
 function fromBig(n, le = false) {
@@ -7803,17 +7698,7 @@ function taggedHash(prefix, data) {
   return sha2562(concat([TAGGED_HASH_PREFIXES[prefix], data]));
 }
 
-// node_modules/.pnpm/bs58check@4.0.0/node_modules/bs58check/src/esm/index.js
-init_polyfills();
-
-// node_modules/.pnpm/bs58check@4.0.0/node_modules/bs58check/src/esm/base.js
-init_polyfills();
-
-// node_modules/.pnpm/bs58@6.0.0/node_modules/bs58/src/esm/index.js
-init_polyfills();
-
 // node_modules/.pnpm/base-x@5.0.1/node_modules/base-x/src/esm/index.js
-init_polyfills();
 function base(ALPHABET2) {
   if (ALPHABET2.length >= 255) {
     throw new TypeError("Alphabet too long");
@@ -8109,7 +7994,6 @@ function p2pkh(a, opts) {
 }
 
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/payments/p2sh.js
-init_polyfills();
 var OPS5 = OPS;
 function p2sh(a, opts) {
   if (!a.address && !a.hash && !a.output && !a.redeem && !a.input)
@@ -8276,7 +8160,6 @@ function p2sh(a, opts) {
 }
 
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/payments/p2wpkh.js
-init_polyfills();
 var import_bech32 = __toESM(require_dist(), 1);
 var OPS6 = OPS;
 var EMPTY_BUFFER = new Uint8Array(0);
@@ -8394,7 +8277,6 @@ function p2wpkh(a, opts) {
 }
 
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/payments/p2wsh.js
-init_polyfills();
 var import_bech322 = __toESM(require_dist(), 1);
 var OPS7 = OPS;
 var EMPTY_BUFFER2 = new Uint8Array(0);
@@ -8558,11 +8440,7 @@ function p2wsh(a, opts) {
   return Object.assign(o, a);
 }
 
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/payments/p2tr.js
-init_polyfills();
-
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/ecc_lib.js
-init_polyfills();
 var _ECCLIB_CACHE = {};
 function getEccLib() {
   if (!_ECCLIB_CACHE.eccLib)
@@ -8572,12 +8450,6 @@ function getEccLib() {
   return _ECCLIB_CACHE.eccLib;
 }
 
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/payments/bip341.js
-init_polyfills();
-
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/bufferutils.js
-init_polyfills();
-
 // node_modules/.pnpm/varuint-bitcoin@2.0.0/node_modules/varuint-bitcoin/src/esm/index.js
 var esm_exports = {};
 __export(esm_exports, {
@@ -8585,10 +8457,8 @@ __export(esm_exports, {
   encode: () => encode4,
   encodingLength: () => encodingLength2
 });
-init_polyfills();
 
 // node_modules/.pnpm/uint8array-tools@0.0.8/node_modules/uint8array-tools/src/mjs/browser.js
-init_polyfills();
 var HEX_STRINGS2 = "0123456789abcdefABCDEF";
 var HEX_CODES2 = HEX_STRINGS2.split("").map((c) => c.codePointAt(0));
 var HEX_CODEPOINTS2 = Array(256).fill(true).map((_, i) => {
@@ -9195,14 +9065,7 @@ function fromBech32(address) {
   };
 }
 
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/block.js
-init_polyfills();
-
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/merkle.js
-init_polyfills();
-
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/transaction.js
-init_polyfills();
 var EMPTY_BUFFER3 = new Uint8Array(0);
 var ZERO2 = fromHex(
   "0000000000000000000000000000000000000000000000000000000000000000"
@@ -9220,21 +9083,6 @@ var errorWitnessNotSegwit = new TypeError(
   "Cannot compute witness commit for non-segwit block"
 );
 
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/psbt.js
-init_polyfills();
-
-// node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/psbt.js
-init_polyfills();
-
-// node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/combiner/index.js
-init_polyfills();
-
-// node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/parser/index.js
-init_polyfills();
-
-// node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/parser/fromBuffer.js
-init_polyfills();
-
 // node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/converter/index.js
 var converter_exports = {};
 __export(converter_exports, {
@@ -9242,10 +9090,8 @@ __export(converter_exports, {
   inputs: () => inputs,
   outputs: () => outputs
 });
-init_polyfills();
 
 // node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/typeFields.js
-init_polyfills();
 var GlobalTypes;
 (function(GlobalTypes2) {
   GlobalTypes2[GlobalTypes2["UNSIGNED_TX"] = 0] = "UNSIGNED_TX";
@@ -9289,7 +9135,6 @@ __export(globalXpub_exports, {
   encode: () => encode5,
   expected: () => expected
 });
-init_polyfills();
 var range = (n) => [...Array(n).keys()];
 function decode5(keyVal) {
   if (keyVal.key[0] !== GlobalTypes.GLOBAL_XPUB) {
@@ -9359,7 +9204,6 @@ var unsignedTx_exports = {};
 __export(unsignedTx_exports, {
   encode: () => encode6
 });
-init_polyfills();
 function encode6(data) {
   return {
     key: new Uint8Array([GlobalTypes.UNSIGNED_TX]),
@@ -9376,7 +9220,6 @@ __export(finalScriptSig_exports, {
   encode: () => encode7,
   expected: () => expected2
 });
-init_polyfills();
 function decode6(keyVal) {
   if (keyVal.key[0] !== InputTypes.FINAL_SCRIPTSIG) {
     throw new Error(
@@ -9409,7 +9252,6 @@ __export(finalScriptWitness_exports, {
   encode: () => encode8,
   expected: () => expected3
 });
-init_polyfills();
 function decode7(keyVal) {
   if (keyVal.key[0] !== InputTypes.FINAL_SCRIPTWITNESS) {
     throw new Error(
@@ -9442,7 +9284,6 @@ __export(nonWitnessUtxo_exports, {
   encode: () => encode9,
   expected: () => expected4
 });
-init_polyfills();
 function decode8(keyVal) {
   if (keyVal.key[0] !== InputTypes.NON_WITNESS_UTXO) {
     throw new Error(
@@ -9474,7 +9315,6 @@ __export(partialSig_exports, {
   encode: () => encode10,
   expected: () => expected5
 });
-init_polyfills();
 function decode9(keyVal) {
   if (keyVal.key[0] !== InputTypes.PARTIAL_SIG) {
     throw new Error(
@@ -9532,7 +9372,6 @@ __export(porCommitment_exports, {
   encode: () => encode11,
   expected: () => expected6
 });
-init_polyfills();
 function decode10(keyVal) {
   if (keyVal.key[0] !== InputTypes.POR_COMMITMENT) {
     throw new Error(
@@ -9565,7 +9404,6 @@ __export(sighashType_exports, {
   encode: () => encode12,
   expected: () => expected7
 });
-init_polyfills();
 function decode11(keyVal) {
   if (keyVal.key[0] !== InputTypes.SIGHASH_TYPE) {
     throw new Error(
@@ -9600,7 +9438,6 @@ __export(tapKeySig_exports, {
   encode: () => encode13,
   expected: () => expected8
 });
-init_polyfills();
 function decode12(keyVal) {
   if (keyVal.key[0] !== InputTypes.TAP_KEY_SIG || keyVal.key.length !== 1) {
     throw new Error(
@@ -9635,7 +9472,6 @@ __export(tapLeafScript_exports, {
   encode: () => encode14,
   expected: () => expected9
 });
-init_polyfills();
 function decode13(keyVal) {
   if (keyVal.key[0] !== InputTypes.TAP_LEAF_SCRIPT) {
     throw new Error(
@@ -9685,7 +9521,6 @@ __export(tapMerkleRoot_exports, {
   encode: () => encode15,
   expected: () => expected10
 });
-init_polyfills();
 function decode14(keyVal) {
   if (keyVal.key[0] !== InputTypes.TAP_MERKLE_ROOT || keyVal.key.length !== 1) {
     throw new Error(
@@ -9718,7 +9553,6 @@ __export(tapScriptSig_exports, {
   encode: () => encode16,
   expected: () => expected11
 });
-init_polyfills();
 function decode15(keyVal) {
   if (keyVal.key[0] !== InputTypes.TAP_SCRIPT_SIG) {
     throw new Error(
@@ -9772,7 +9606,6 @@ __export(witnessUtxo_exports, {
   encode: () => encode17,
   expected: () => expected12
 });
-init_polyfills();
 function decode16(keyVal) {
   if (keyVal.key[0] !== InputTypes.WITNESS_UTXO) {
     throw new Error(
@@ -9824,7 +9657,6 @@ __export(tapTree_exports, {
   encode: () => encode18,
   expected: () => expected13
 });
-init_polyfills();
 function decode17(keyVal) {
   if (keyVal.key[0] !== OutputTypes.TAP_TREE || keyVal.key.length !== 1) {
     throw new Error(
@@ -9875,7 +9707,6 @@ function canAdd9(currentData, newData) {
 }
 
 // node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/converter/shared/bip32Derivation.js
-init_polyfills();
 var range2 = (n) => [...Array(n).keys()];
 var isValidDERKey = (pubkey) => pubkey.length === 33 && [2, 3].includes(pubkey[0]) || pubkey.length === 65 && 4 === pubkey[0];
 function makeConverter(TYPE_BYTE, isValidPubkey = isValidDERKey) {
@@ -9948,7 +9779,6 @@ function makeConverter(TYPE_BYTE, isValidPubkey = isValidDERKey) {
 }
 
 // node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/converter/shared/checkPubkey.js
-init_polyfills();
 function makeChecker(pubkeyTypes) {
   return checkPubkey;
   function checkPubkey(keyVal) {
@@ -9966,7 +9796,6 @@ function makeChecker(pubkeyTypes) {
 }
 
 // node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/converter/shared/redeemScript.js
-init_polyfills();
 function makeConverter2(TYPE_BYTE) {
   function decode44(keyVal) {
     if (keyVal.key[0] !== TYPE_BYTE) {
@@ -10000,7 +9829,6 @@ function makeConverter2(TYPE_BYTE) {
 }
 
 // node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/converter/shared/tapBip32Derivation.js
-init_polyfills();
 var isValidBIP340Key = (pubkey) => pubkey.length === 32;
 function makeConverter3(TYPE_BYTE) {
   const parent = makeConverter(TYPE_BYTE, isValidBIP340Key);
@@ -10042,7 +9870,6 @@ function makeConverter3(TYPE_BYTE) {
 }
 
 // node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/converter/shared/tapInternalKey.js
-init_polyfills();
 function makeConverter4(TYPE_BYTE) {
   function decode44(keyVal) {
     if (keyVal.key[0] !== TYPE_BYTE || keyVal.key.length !== 1) {
@@ -10078,7 +9905,6 @@ function makeConverter4(TYPE_BYTE) {
 }
 
 // node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/converter/shared/witnessScript.js
-init_polyfills();
 function makeConverter5(TYPE_BYTE) {
   function decode44(keyVal) {
     if (keyVal.key[0] !== TYPE_BYTE) {
@@ -10154,14 +9980,7 @@ var outputs = {
   tapInternalKey: makeConverter4(OutputTypes.TAP_INTERNAL_KEY)
 };
 
-// node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/converter/tools.js
-init_polyfills();
-
-// node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/parser/toBuffer.js
-init_polyfills();
-
 // node_modules/.pnpm/bip174@3.0.0/node_modules/bip174/src/esm/lib/utils.js
-init_polyfills();
 function throwForUpdateMaker(typeName, name10, expected14, data) {
   throw new Error(
     `Data for ${typeName} key ${name10} is incorrect: Expected ${expected14} and got ${JSON.stringify(data)}`
@@ -10208,11 +10027,7 @@ var updateGlobal = updateMaker("global");
 var updateInput = updateMaker("input");
 var updateOutput = updateMaker("output");
 
-// node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/psbt/bip371.js
-init_polyfills();
-
 // node_modules/.pnpm/bitcoinjs-lib@7.0.1_typescript@5.9.3/node_modules/bitcoinjs-lib/src/esm/psbt/psbtutils.js
-init_polyfills();
 function isPaymentFactory(payment) {
   return (script) => {
     try {
@@ -10250,17 +10065,7 @@ var checkWitnessScript = scriptCheckerFactory(
   "Witness script"
 );
 
-// node_modules/.pnpm/bip32@5.0.0_typescript@5.9.3/node_modules/bip32/src/esm/index.js
-init_polyfills();
-
-// node_modules/.pnpm/bip32@5.0.0_typescript@5.9.3/node_modules/bip32/src/esm/bip32.js
-init_polyfills();
-
-// node_modules/.pnpm/bip32@5.0.0_typescript@5.9.3/node_modules/bip32/src/esm/crypto.js
-init_polyfills();
-
 // node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/hmac.js
-init_polyfills();
 var HMAC = class extends Hash {
   constructor(hash, _key) {
     super();
@@ -10329,7 +10134,6 @@ var hmac = (hash, key, message) => new HMAC(hash, key).update(message).digest();
 hmac.create = (hash, key) => new HMAC(hash, key);
 
 // node_modules/.pnpm/@noble+hashes@1.8.0/node_modules/@noble/hashes/esm/sha512.js
-init_polyfills();
 var sha5122 = sha512;
 
 // node_modules/.pnpm/bip32@5.0.0_typescript@5.9.3/node_modules/bip32/src/esm/crypto.js
@@ -10341,7 +10145,6 @@ function hmacSHA512(key, data) {
 }
 
 // node_modules/.pnpm/bip32@5.0.0_typescript@5.9.3/node_modules/bip32/src/esm/testecc.js
-init_polyfills();
 var h = (hex) => fromHex2(hex);
 function testEcc(ecc) {
   assert(ecc.isPoint(h("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")));
@@ -10380,7 +10183,6 @@ function assert(bool) {
 }
 
 // node_modules/.pnpm/@scure+base@1.2.6/node_modules/@scure/base/lib/esm/index.js
-init_polyfills();
 function isBytes2(a) {
   return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
 }
@@ -10566,7 +10368,6 @@ var createBase58check = (sha2566) => /* @__PURE__ */ chain(checksum(4, (data) =>
 var base58check = createBase58check;
 
 // node_modules/.pnpm/valibot@0.37.0_typescript@5.9.3/node_modules/valibot/dist/index.js
-init_polyfills();
 var store;
 function getGlobalConfig2(config2) {
   return {
@@ -10887,7 +10688,6 @@ function pipe2(...pipe22) {
 }
 
 // node_modules/.pnpm/bip32@5.0.0_typescript@5.9.3/node_modules/bip32/src/esm/types.js
-init_polyfills();
 var Uint32Schema = pipe2(number2(), integer2(), minValue2(0), maxValue2(4294967295));
 var Uint31Schema = pipe2(number2(), integer2(), minValue2(0), maxValue2(2147483647));
 var Uint8Schema = pipe2(number2(), integer2(), minValue2(0), maxValue2(255));
@@ -10903,7 +10703,6 @@ var NetworkSchema = object2({
 var Bip32PathSchema = pipe2(string2(), regex2(/^(m\/)?(\d+'?\/)*\d+'?$/));
 
 // node_modules/.pnpm/wif@5.0.0/node_modules/wif/src/esm/index.js
-init_polyfills();
 function encodeRaw(version, privateKey, compressed) {
   if (privateKey.length !== 32)
     throw new TypeError("Invalid privateKey length");
@@ -11255,10 +11054,8 @@ __export(lib_exports, {
   xOnlyPointFromPoint: () => xOnlyPointFromPoint,
   xOnlyPointFromScalar: () => xOnlyPointFromScalar
 });
-init_polyfills();
 
 // node_modules/.pnpm/uint8array-tools@0.0.7/node_modules/uint8array-tools/src/mjs/browser.js
-init_polyfills();
 var HEX_STRINGS3 = "0123456789abcdefABCDEF";
 var HEX_CODES3 = HEX_STRINGS3.split("").map((c) => c.codePointAt(0));
 var HEX_CODEPOINTS3 = Array(256).fill(true).map((_, i) => {
@@ -11278,11 +11075,7 @@ function compare3(v1, v2) {
   return v1.length === v2.length ? 0 : v1.length > v2.length ? 1 : -1;
 }
 
-// node_modules/.pnpm/tiny-secp256k1@2.2.4/node_modules/tiny-secp256k1/lib/validate.js
-init_polyfills();
-
 // node_modules/.pnpm/tiny-secp256k1@2.2.4/node_modules/tiny-secp256k1/lib/validate_error.js
-init_polyfills();
 var ERROR_BAD_PRIVATE = 0;
 var ERROR_BAD_POINT = 1;
 var ERROR_BAD_TWEAK = 2;
@@ -11474,9 +11267,6 @@ function validateSigrPMinusN(signature2) {
   if (!isSigrLessThanPMinusN(signature2))
     throwError(ERROR_BAD_RECOVERY_ID);
 }
-
-// node_modules/.pnpm/tiny-secp256k1@2.2.4/node_modules/tiny-secp256k1/lib/wasm_loader.browser.js
-init_polyfills();
 
 // node_modules/.pnpm/tiny-secp256k1@2.2.4/node_modules/tiny-secp256k1/lib/secp256k1.wasm
 var secp256k1_exports = {};
@@ -11917,7 +11707,6 @@ async function createWallet(secureStorage2, pin) {
 }
 
 // src/services/secure-storage.ts
-init_polyfills();
 var SecureStorageService = class {
   constructor() {
     this.SALT_LENGTH = 16;
@@ -11939,10 +11728,10 @@ var SecureStorageService = class {
     result.set(salt, 0);
     result.set(iv, salt.length);
     result.set(encryptedBytes, salt.length + iv.length);
-    return import_buffer.Buffer.from(result).toString("hex");
+    return Buffer.from(result).toString("hex");
   }
   async decrypt(encryptedHexString, pin) {
-    const encryptedDataBytes = import_buffer.Buffer.from(encryptedHexString, "hex");
+    const encryptedDataBytes = Buffer.from(encryptedHexString, "hex");
     const salt = encryptedDataBytes.slice(0, this.SALT_LENGTH);
     const iv = encryptedDataBytes.slice(this.SALT_LENGTH, this.SALT_LENGTH + this.IV_LENGTH);
     const data = encryptedDataBytes.slice(this.SALT_LENGTH + this.IV_LENGTH);
@@ -11977,14 +11766,7 @@ var SecureStorageService = class {
   }
 };
 
-// src/services/ipfs.ts
-init_polyfills();
-
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/multibases.js
-init_polyfills();
 var LOAD_BASE = (name10) => Promise.reject(new Error(`No base found for "${name10}"`));
 var Multibases = class {
   /**
@@ -12043,7 +11825,6 @@ var Multibases = class {
 };
 
 // node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/multicodecs.js
-init_polyfills();
 var LOAD_CODEC = (codeOrName) => Promise.reject(new Error(`No codec found for "${codeOrName}"`));
 var Multicodecs = class {
   /**
@@ -12100,7 +11881,6 @@ var Multicodecs = class {
 };
 
 // node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/multihashes.js
-init_polyfills();
 var LOAD_HASHER = (codeOrName) => Promise.reject(new Error(`No hasher found for "${codeOrName}"`));
 var Multihashes = class {
   /**
@@ -12168,10 +11948,6 @@ __export(src_exports, {
   prepare: () => prepare,
   validate: () => validate
 });
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/cid.js
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/bases/base32.js
 var base32_exports = {};
@@ -12186,13 +11962,8 @@ __export(base32_exports, {
   base32upper: () => base32upper,
   base32z: () => base32z
 });
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/bases/base.js
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/bytes.js
-init_polyfills();
 var empty = new Uint8Array(0);
 function equals(aa, bb) {
   if (aa === bb) {
@@ -12228,7 +11999,6 @@ function toString(b) {
 }
 
 // node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/vendor/base-x.js
-init_polyfills();
 function base2(ALPHABET2, name10) {
   if (ALPHABET2.length >= 255) {
     throw new TypeError("Alphabet too long");
@@ -12602,7 +12372,6 @@ __export(base36_exports, {
   base36: () => base36,
   base36upper: () => base36upper
 });
-init_polyfills();
 var base36 = baseX({
   prefix: "k",
   name: "base36",
@@ -12620,7 +12389,6 @@ __export(base58_exports, {
   base58btc: () => base58btc,
   base58flickr: () => base58flickr
 });
-init_polyfills();
 var base58btc = baseX({
   name: "base58btc",
   prefix: "z",
@@ -12632,14 +12400,7 @@ var base58flickr = baseX({
   alphabet: "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
 });
 
-// node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/hashes/digest.js
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/varint.js
-init_polyfills();
-
 // node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/vendor/varint.js
-init_polyfills();
 var encode_1 = encode21;
 var MSB = 128;
 var REST = 127;
@@ -12755,9 +12516,6 @@ var Digest = class {
     this.bytes = bytes;
   }
 };
-
-// node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/link/interface.js
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/cid.js
 function format(link, base5) {
@@ -13096,7 +12854,6 @@ function encodeCID(version, code10, multihash) {
 var cidSymbol = /* @__PURE__ */ Symbol.for("@ipld/js-cid/CID");
 
 // node_modules/.pnpm/@ipld+dag-pb@4.1.5/node_modules/@ipld/dag-pb/src/pb-decode.js
-init_polyfills();
 var textDecoder = new TextDecoder();
 function decodeVarint(bytes, offset) {
   let v = 0;
@@ -13228,7 +12985,6 @@ function decodeNode(bytes) {
 }
 
 // node_modules/.pnpm/@ipld+dag-pb@4.1.5/node_modules/@ipld/dag-pb/src/pb-encode.js
-init_polyfills();
 var textEncoder = new TextEncoder();
 var maxInt32 = 2 ** 32;
 var maxUInt32 = 2 ** 31;
@@ -13604,7 +13360,6 @@ var len8tab = [
 ];
 
 // node_modules/.pnpm/@ipld+dag-pb@4.1.5/node_modules/@ipld/dag-pb/src/util.js
-init_polyfills();
 var pbNodeProperties = ["Data", "Links"];
 var pbLinkProperties = ["Hash", "Name", "Tsize"];
 var textEncoder2 = new TextEncoder();
@@ -13819,16 +13574,8 @@ __export(src_exports2, {
   name: () => name2,
   toByteView: () => toByteView2
 });
-init_polyfills();
-
-// node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/cborg.js
-init_polyfills();
-
-// node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/encode.js
-init_polyfills();
 
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/is.js
-init_polyfills();
 var typeofs = [
   "string",
   "number",
@@ -13912,7 +13659,6 @@ function getObjectType(value2) {
 }
 
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/token.js
-init_polyfills();
 var Type = class {
   /**
    * @param {number} major
@@ -13969,11 +13715,7 @@ var Token = class {
   }
 };
 
-// node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/bl.js
-init_polyfills();
-
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/byte-utils.js
-init_polyfills();
 var useBuffer = globalThis.process && // @ts-ignore
 !globalThis.process.browser && // @ts-ignore
 globalThis.Buffer && // @ts-ignore
@@ -14309,7 +14051,6 @@ var Bl = class {
 };
 
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/common.js
-init_polyfills();
 var decodeErrPrefix = "CBOR decode error:";
 var encodeErrPrefix = "CBOR encode error:";
 var uintMinorPrefixBytes = [];
@@ -14324,11 +14065,7 @@ function assertEnoughData(data, pos, need) {
   }
 }
 
-// node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/jump.js
-init_polyfills();
-
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/0uint.js
-init_polyfills();
 var uintBoundaries = [24, 256, 65536, 4294967296, BigInt("18446744073709551616")];
 function readUint8(data, offset, options) {
   assertEnoughData(data, offset, 1);
@@ -14450,7 +14187,6 @@ encodeUint.compareTokens = function compareTokens(tok1, tok2) {
 };
 
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/1negint.js
-init_polyfills();
 function decodeNegint8(data, pos, _minor, options) {
   return new Token(Type.negint, -1 - readUint8(data, pos + 1, options), 2);
 }
@@ -14505,7 +14241,6 @@ encodeNegint.compareTokens = function compareTokens2(tok1, tok2) {
 };
 
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/2bytes.js
-init_polyfills();
 function toToken(data, pos, prefix, length6) {
   assertEnoughData(data, pos, prefix + length6);
   const buf2 = slice(data, pos + prefix, pos + prefix + length6);
@@ -14553,7 +14288,6 @@ function compareBytes(b1, b2) {
 }
 
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/3string.js
-init_polyfills();
 function toToken2(data, pos, prefix, length6, options) {
   const totLength = prefix + length6;
   assertEnoughData(data, pos, totLength);
@@ -14585,7 +14319,6 @@ function decodeString64(data, pos, _minor, options) {
 var encodeString = encodeBytes;
 
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/4array.js
-init_polyfills();
 function toToken3(_data, _pos, prefix, length6) {
   return new Token(Type.array, length6, prefix);
 }
@@ -14623,7 +14356,6 @@ encodeArray.encodedSize = function encodedSize5(token) {
 };
 
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/5map.js
-init_polyfills();
 function toToken4(_data, _pos, prefix, length6) {
   return new Token(Type.map, length6, prefix);
 }
@@ -14661,7 +14393,6 @@ encodeMap.encodedSize = function encodedSize6(token) {
 };
 
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/6tag.js
-init_polyfills();
 function decodeTagCompact(_data, _pos, minor, _options) {
   return new Token(Type.tag, minor, 1);
 }
@@ -14686,7 +14417,6 @@ encodeTag.encodedSize = function encodedSize7(token) {
 };
 
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/7float.js
-init_polyfills();
 var MINOR_FALSE = 20;
 var MINOR_TRUE = 21;
 var MINOR_NULL = 22;
@@ -15343,7 +15073,6 @@ function encode23(data, options) {
 }
 
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/decode.js
-init_polyfills();
 var defaultDecodeOptions = {
   strict: false,
   allowIndefinite: true,
@@ -15583,13 +15312,8 @@ __export(src_exports3, {
   parse: () => parse3,
   stringify: () => format2
 });
-init_polyfills();
-
-// node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/json/json.js
-init_polyfills();
 
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/json/encode.js
-init_polyfills();
 var JSONEncoder = class extends Array {
   constructor() {
     super();
@@ -15752,7 +15476,6 @@ function encode25(data, options) {
 }
 
 // node_modules/.pnpm/cborg@4.3.2/node_modules/cborg/lib/json/decode.js
-init_polyfills();
 var Tokenizer = class {
   /**
    * @param {Uint8Array} data
@@ -16152,11 +15875,7 @@ function decode25(data, options) {
   return decode23(data, options);
 }
 
-// node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/index.js
-init_polyfills();
-
 // node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/hashes/hasher.js
-init_polyfills();
 var DEFAULT_MIN_DIGEST_LENGTH = 20;
 function from2({ name: name10, code: code10, encode: encode42, minDigestLength, maxDigestLength }) {
   return new Hasher(name10, code10, encode42, minDigestLength, maxDigestLength);
@@ -16204,21 +15923,6 @@ function createDigest(digest4, code10, truncate) {
   return create(code10, digest4);
 }
 
-// node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/interface.js
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/bases/interface.js
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/hashes/interface.js
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/codecs/interface.js
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/block/interface.js
-init_polyfills();
-
 // node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/bases/base64.js
 var base64_exports = {};
 __export(base64_exports, {
@@ -16227,7 +15931,6 @@ __export(base64_exports, {
   base64url: () => base64url,
   base64urlpad: () => base64urlpad
 });
-init_polyfills();
 var base64 = rfc4648({
   prefix: "m",
   name: "base64",
@@ -16438,13 +16141,6 @@ __export(lib_exports2, {
   name: () => name4,
   toGeneral: () => toGeneral
 });
-init_polyfills();
-
-// node_modules/.pnpm/dag-jose@4.0.0/node_modules/dag-jose/lib/signing.js
-init_polyfills();
-
-// node_modules/.pnpm/dag-jose@4.0.0/node_modules/dag-jose/lib/utils.js
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/bases/base64.js
 var base64_exports2 = {};
@@ -16454,13 +16150,8 @@ __export(base64_exports2, {
   base64url: () => base64url2,
   base64urlpad: () => base64urlpad2
 });
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/bases/base.js
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/vendor/base-x.js
-init_polyfills();
 function base3(ALPHABET2, name10) {
   if (ALPHABET2.length >= 255) {
     throw new TypeError("Alphabet too long");
@@ -16596,7 +16287,6 @@ var _brrp__multiformats_scope_baseX2 = src2;
 var base_x_default2 = _brrp__multiformats_scope_baseX2;
 
 // node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/bytes.js
-init_polyfills();
 var empty2 = new Uint8Array(0);
 var equals3 = (aa, bb) => {
   if (aa === bb) return true;
@@ -16620,9 +16310,6 @@ var coerce2 = (o) => {
 };
 var fromString3 = (str) => new TextEncoder().encode(str);
 var toString3 = (b) => new TextDecoder().decode(b);
-
-// node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/bases/interface.js
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/bases/base.js
 var Encoder2 = class {
@@ -16873,14 +16560,7 @@ function fromBase64url(s) {
   return base64url2.decode(`u${s}`);
 }
 
-// node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/cid.js
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/varint.js
-init_polyfills();
-
 // node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/vendor/varint.js
-init_polyfills();
 var encode_12 = encode28;
 var MSB2 = 128;
 var REST2 = 127;
@@ -16953,7 +16633,6 @@ var encodingLength4 = (int) => {
 };
 
 // node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/hashes/digest.js
-init_polyfills();
 var create2 = (code10, digest4) => {
   const size = digest4.byteLength;
   const sizeOffset = encodingLength4(code10);
@@ -17008,7 +16687,6 @@ __export(base58_exports2, {
   base58btc: () => base58btc2,
   base58flickr: () => base58flickr2
 });
-init_polyfills();
 var base58btc2 = baseX2({
   name: "base58btc",
   prefix: "z",
@@ -17033,7 +16711,6 @@ __export(base32_exports2, {
   base32upper: () => base32upper2,
   base32z: () => base32z2
 });
-init_polyfills();
 var base322 = rfc46482({
   prefix: "b",
   name: "base32",
@@ -17088,9 +16765,6 @@ var base32z2 = rfc46482({
   alphabet: "ybndrfg8ejkmcpqxot1uwisza345h769",
   bitsPerChar: 5
 });
-
-// node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/link/interface.js
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/cid.js
 var format3 = (link, base5) => {
@@ -17640,7 +17314,6 @@ function decode31(encoded) {
 }
 
 // node_modules/.pnpm/dag-jose@4.0.0/node_modules/dag-jose/lib/encryption.js
-init_polyfills();
 function fromSplit2(split2) {
   const [protectedHeader, encrypted_key, iv, ciphertext, tag] = split2;
   const jwe = {
@@ -17765,22 +17438,17 @@ var identity_exports = {};
 __export(identity_exports, {
   identity: () => identity
 });
-init_polyfills();
 var code5 = 0;
 var name5 = "identity";
 var encode32 = coerce2;
 var digest = (input) => create2(code5, encode32(input));
 var identity = { code: code5, name: name5, encode: encode32, digest };
 
-// node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/basics.js
-init_polyfills();
-
 // node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/bases/identity.js
 var identity_exports2 = {};
 __export(identity_exports2, {
   identity: () => identity2
 });
-init_polyfills();
 var identity2 = from3({
   prefix: "\0",
   name: "identity",
@@ -17793,7 +17461,6 @@ var base2_exports = {};
 __export(base2_exports, {
   base2: () => base22
 });
-init_polyfills();
 var base22 = rfc46482({
   prefix: "0",
   name: "base2",
@@ -17806,7 +17473,6 @@ var base8_exports = {};
 __export(base8_exports, {
   base8: () => base8
 });
-init_polyfills();
 var base8 = rfc46482({
   prefix: "7",
   name: "base8",
@@ -17819,7 +17485,6 @@ var base10_exports = {};
 __export(base10_exports, {
   base10: () => base10
 });
-init_polyfills();
 var base10 = baseX2({
   prefix: "9",
   name: "base10",
@@ -17832,7 +17497,6 @@ __export(base16_exports, {
   base16: () => base16,
   base16upper: () => base16upper
 });
-init_polyfills();
 var base16 = rfc46482({
   prefix: "f",
   name: "base16",
@@ -17852,7 +17516,6 @@ __export(base36_exports2, {
   base36: () => base362,
   base36upper: () => base36upper2
 });
-init_polyfills();
 var base362 = baseX2({
   prefix: "k",
   name: "base36",
@@ -17869,7 +17532,6 @@ var base256emoji_exports = {};
 __export(base256emoji_exports, {
   base256emoji: () => base256emoji
 });
-init_polyfills();
 var alphabet2 = Array.from("\u{1F680}\u{1FA90}\u2604\u{1F6F0}\u{1F30C}\u{1F311}\u{1F312}\u{1F313}\u{1F314}\u{1F315}\u{1F316}\u{1F317}\u{1F318}\u{1F30D}\u{1F30F}\u{1F30E}\u{1F409}\u2600\u{1F4BB}\u{1F5A5}\u{1F4BE}\u{1F4BF}\u{1F602}\u2764\u{1F60D}\u{1F923}\u{1F60A}\u{1F64F}\u{1F495}\u{1F62D}\u{1F618}\u{1F44D}\u{1F605}\u{1F44F}\u{1F601}\u{1F525}\u{1F970}\u{1F494}\u{1F496}\u{1F499}\u{1F622}\u{1F914}\u{1F606}\u{1F644}\u{1F4AA}\u{1F609}\u263A\u{1F44C}\u{1F917}\u{1F49C}\u{1F614}\u{1F60E}\u{1F607}\u{1F339}\u{1F926}\u{1F389}\u{1F49E}\u270C\u2728\u{1F937}\u{1F631}\u{1F60C}\u{1F338}\u{1F64C}\u{1F60B}\u{1F497}\u{1F49A}\u{1F60F}\u{1F49B}\u{1F642}\u{1F493}\u{1F929}\u{1F604}\u{1F600}\u{1F5A4}\u{1F603}\u{1F4AF}\u{1F648}\u{1F447}\u{1F3B6}\u{1F612}\u{1F92D}\u2763\u{1F61C}\u{1F48B}\u{1F440}\u{1F62A}\u{1F611}\u{1F4A5}\u{1F64B}\u{1F61E}\u{1F629}\u{1F621}\u{1F92A}\u{1F44A}\u{1F973}\u{1F625}\u{1F924}\u{1F449}\u{1F483}\u{1F633}\u270B\u{1F61A}\u{1F61D}\u{1F634}\u{1F31F}\u{1F62C}\u{1F643}\u{1F340}\u{1F337}\u{1F63B}\u{1F613}\u2B50\u2705\u{1F97A}\u{1F308}\u{1F608}\u{1F918}\u{1F4A6}\u2714\u{1F623}\u{1F3C3}\u{1F490}\u2639\u{1F38A}\u{1F498}\u{1F620}\u261D\u{1F615}\u{1F33A}\u{1F382}\u{1F33B}\u{1F610}\u{1F595}\u{1F49D}\u{1F64A}\u{1F639}\u{1F5E3}\u{1F4AB}\u{1F480}\u{1F451}\u{1F3B5}\u{1F91E}\u{1F61B}\u{1F534}\u{1F624}\u{1F33C}\u{1F62B}\u26BD\u{1F919}\u2615\u{1F3C6}\u{1F92B}\u{1F448}\u{1F62E}\u{1F646}\u{1F37B}\u{1F343}\u{1F436}\u{1F481}\u{1F632}\u{1F33F}\u{1F9E1}\u{1F381}\u26A1\u{1F31E}\u{1F388}\u274C\u270A\u{1F44B}\u{1F630}\u{1F928}\u{1F636}\u{1F91D}\u{1F6B6}\u{1F4B0}\u{1F353}\u{1F4A2}\u{1F91F}\u{1F641}\u{1F6A8}\u{1F4A8}\u{1F92C}\u2708\u{1F380}\u{1F37A}\u{1F913}\u{1F619}\u{1F49F}\u{1F331}\u{1F616}\u{1F476}\u{1F974}\u25B6\u27A1\u2753\u{1F48E}\u{1F4B8}\u2B07\u{1F628}\u{1F31A}\u{1F98B}\u{1F637}\u{1F57A}\u26A0\u{1F645}\u{1F61F}\u{1F635}\u{1F44E}\u{1F932}\u{1F920}\u{1F927}\u{1F4CC}\u{1F535}\u{1F485}\u{1F9D0}\u{1F43E}\u{1F352}\u{1F617}\u{1F911}\u{1F30A}\u{1F92F}\u{1F437}\u260E\u{1F4A7}\u{1F62F}\u{1F486}\u{1F446}\u{1F3A4}\u{1F647}\u{1F351}\u2744\u{1F334}\u{1F4A3}\u{1F438}\u{1F48C}\u{1F4CD}\u{1F940}\u{1F922}\u{1F445}\u{1F4A1}\u{1F4A9}\u{1F450}\u{1F4F8}\u{1F47B}\u{1F910}\u{1F92E}\u{1F3BC}\u{1F975}\u{1F6A9}\u{1F34E}\u{1F34A}\u{1F47C}\u{1F48D}\u{1F4E3}\u{1F942}");
 var alphabetBytesToChars = (
   /** @type {string[]} */
@@ -17929,10 +17591,8 @@ __export(sha2_browser_exports, {
   sha256: () => sha2563,
   sha512: () => sha5123
 });
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/hashes/hasher.js
-init_polyfills();
 var from4 = ({ name: name10, code: code10, encode: encode42 }) => new Hasher2(name10, code10, encode42);
 var Hasher2 = class {
   /**
@@ -17986,7 +17646,6 @@ __export(raw_exports, {
   encode: () => encode34,
   name: () => name6
 });
-init_polyfills();
 var name6 = "raw";
 var code6 = 85;
 var encode34 = (node) => coerce2(node);
@@ -18000,7 +17659,6 @@ __export(json_exports2, {
   encode: () => encode35,
   name: () => name7
 });
-init_polyfills();
 var textEncoder4 = new TextEncoder();
 var textDecoder3 = new TextDecoder();
 var name7 = "json";
@@ -18008,49 +17666,12 @@ var code7 = 512;
 var encode35 = (node) => textEncoder4.encode(JSON.stringify(node));
 var decode36 = (data) => JSON.parse(textDecoder3.decode(data));
 
-// node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/index.js
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/interface.js
-init_polyfills();
-
 // node_modules/.pnpm/multiformats@11.0.2/node_modules/multiformats/src/basics.js
 var bases = { ...identity_exports2, ...base2_exports, ...base8_exports, ...base10_exports, ...base16_exports, ...base32_exports2, ...base36_exports2, ...base58_exports2, ...base64_exports2, ...base256emoji_exports };
 var hashes = { ...sha2_browser_exports, ...identity_exports };
 var codecs = { raw: raw_exports, json: json_exports2 };
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/bitswap/index.js
-init_polyfills();
-
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/bitswap/wantlist.js
-init_polyfills();
-
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/lib/configure.js
-init_polyfills();
-
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/lib/core.js
-init_polyfills();
-
-// node_modules/.pnpm/@multiformats+multiaddr@11.6.1/node_modules/@multiformats/multiaddr/dist/src/index.js
-init_polyfills();
-
-// node_modules/.pnpm/@multiformats+multiaddr@11.6.1/node_modules/@multiformats/multiaddr/dist/src/codec.js
-init_polyfills();
-
-// node_modules/.pnpm/@multiformats+multiaddr@11.6.1/node_modules/@multiformats/multiaddr/dist/src/convert.js
-init_polyfills();
-
-// node_modules/.pnpm/@multiformats+multiaddr@11.6.1/node_modules/@multiformats/multiaddr/dist/src/ip.js
-init_polyfills();
-
-// node_modules/.pnpm/@chainsafe+is-ip@2.1.0/node_modules/@chainsafe/is-ip/lib/is-ip.js
-init_polyfills();
-
-// node_modules/.pnpm/@chainsafe+is-ip@2.1.0/node_modules/@chainsafe/is-ip/lib/parse.js
-init_polyfills();
-
 // node_modules/.pnpm/@chainsafe+is-ip@2.1.0/node_modules/@chainsafe/is-ip/lib/parser.js
-init_polyfills();
 var Parser = class {
   index = 0;
   input = "";
@@ -18280,27 +17901,13 @@ function isIP(input) {
   return Boolean(parseIP(input));
 }
 
-// node_modules/.pnpm/uint8arrays@4.0.10/node_modules/uint8arrays/dist/src/to-string.js
-init_polyfills();
-
-// node_modules/.pnpm/uint8arrays@4.0.10/node_modules/uint8arrays/dist/src/util/bases.js
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/basics.js
-init_polyfills();
-
 // node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/bases/base10.js
 var base10_exports2 = {};
 __export(base10_exports2, {
   base10: () => base102
 });
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/bases/base.js
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/vendor/base-x.js
-init_polyfills();
 function base4(ALPHABET2, name10) {
   if (ALPHABET2.length >= 255) {
     throw new TypeError("Alphabet too long");
@@ -18436,7 +18043,6 @@ var _brrp__multiformats_scope_baseX3 = src3;
 var base_x_default3 = _brrp__multiformats_scope_baseX3;
 
 // node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/bytes.js
-init_polyfills();
 var empty3 = new Uint8Array(0);
 var equals5 = (aa, bb) => {
   if (aa === bb) return true;
@@ -18460,9 +18066,6 @@ var coerce3 = (o) => {
 };
 var fromString4 = (str) => new TextEncoder().encode(str);
 var toString4 = (b) => new TextDecoder().decode(b);
-
-// node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/bases/interface.js
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/bases/base.js
 var Encoder3 = class {
@@ -18692,7 +18295,6 @@ __export(base16_exports2, {
   base16: () => base162,
   base16upper: () => base16upper2
 });
-init_polyfills();
 var base162 = rfc46483({
   prefix: "f",
   name: "base16",
@@ -18711,7 +18313,6 @@ var base2_exports2 = {};
 __export(base2_exports2, {
   base2: () => base23
 });
-init_polyfills();
 var base23 = rfc46483({
   prefix: "0",
   name: "base2",
@@ -18724,7 +18325,6 @@ var base256emoji_exports2 = {};
 __export(base256emoji_exports2, {
   base256emoji: () => base256emoji2
 });
-init_polyfills();
 var alphabet3 = Array.from("\u{1F680}\u{1FA90}\u2604\u{1F6F0}\u{1F30C}\u{1F311}\u{1F312}\u{1F313}\u{1F314}\u{1F315}\u{1F316}\u{1F317}\u{1F318}\u{1F30D}\u{1F30F}\u{1F30E}\u{1F409}\u2600\u{1F4BB}\u{1F5A5}\u{1F4BE}\u{1F4BF}\u{1F602}\u2764\u{1F60D}\u{1F923}\u{1F60A}\u{1F64F}\u{1F495}\u{1F62D}\u{1F618}\u{1F44D}\u{1F605}\u{1F44F}\u{1F601}\u{1F525}\u{1F970}\u{1F494}\u{1F496}\u{1F499}\u{1F622}\u{1F914}\u{1F606}\u{1F644}\u{1F4AA}\u{1F609}\u263A\u{1F44C}\u{1F917}\u{1F49C}\u{1F614}\u{1F60E}\u{1F607}\u{1F339}\u{1F926}\u{1F389}\u{1F49E}\u270C\u2728\u{1F937}\u{1F631}\u{1F60C}\u{1F338}\u{1F64C}\u{1F60B}\u{1F497}\u{1F49A}\u{1F60F}\u{1F49B}\u{1F642}\u{1F493}\u{1F929}\u{1F604}\u{1F600}\u{1F5A4}\u{1F603}\u{1F4AF}\u{1F648}\u{1F447}\u{1F3B6}\u{1F612}\u{1F92D}\u2763\u{1F61C}\u{1F48B}\u{1F440}\u{1F62A}\u{1F611}\u{1F4A5}\u{1F64B}\u{1F61E}\u{1F629}\u{1F621}\u{1F92A}\u{1F44A}\u{1F973}\u{1F625}\u{1F924}\u{1F449}\u{1F483}\u{1F633}\u270B\u{1F61A}\u{1F61D}\u{1F634}\u{1F31F}\u{1F62C}\u{1F643}\u{1F340}\u{1F337}\u{1F63B}\u{1F613}\u2B50\u2705\u{1F97A}\u{1F308}\u{1F608}\u{1F918}\u{1F4A6}\u2714\u{1F623}\u{1F3C3}\u{1F490}\u2639\u{1F38A}\u{1F498}\u{1F620}\u261D\u{1F615}\u{1F33A}\u{1F382}\u{1F33B}\u{1F610}\u{1F595}\u{1F49D}\u{1F64A}\u{1F639}\u{1F5E3}\u{1F4AB}\u{1F480}\u{1F451}\u{1F3B5}\u{1F91E}\u{1F61B}\u{1F534}\u{1F624}\u{1F33C}\u{1F62B}\u26BD\u{1F919}\u2615\u{1F3C6}\u{1F92B}\u{1F448}\u{1F62E}\u{1F646}\u{1F37B}\u{1F343}\u{1F436}\u{1F481}\u{1F632}\u{1F33F}\u{1F9E1}\u{1F381}\u26A1\u{1F31E}\u{1F388}\u274C\u270A\u{1F44B}\u{1F630}\u{1F928}\u{1F636}\u{1F91D}\u{1F6B6}\u{1F4B0}\u{1F353}\u{1F4A2}\u{1F91F}\u{1F641}\u{1F6A8}\u{1F4A8}\u{1F92C}\u2708\u{1F380}\u{1F37A}\u{1F913}\u{1F619}\u{1F49F}\u{1F331}\u{1F616}\u{1F476}\u{1F974}\u25B6\u27A1\u2753\u{1F48E}\u{1F4B8}\u2B07\u{1F628}\u{1F31A}\u{1F98B}\u{1F637}\u{1F57A}\u26A0\u{1F645}\u{1F61F}\u{1F635}\u{1F44E}\u{1F932}\u{1F920}\u{1F927}\u{1F4CC}\u{1F535}\u{1F485}\u{1F9D0}\u{1F43E}\u{1F352}\u{1F617}\u{1F911}\u{1F30A}\u{1F92F}\u{1F437}\u260E\u{1F4A7}\u{1F62F}\u{1F486}\u{1F446}\u{1F3A4}\u{1F647}\u{1F351}\u2744\u{1F334}\u{1F4A3}\u{1F438}\u{1F48C}\u{1F4CD}\u{1F940}\u{1F922}\u{1F445}\u{1F4A1}\u{1F4A9}\u{1F450}\u{1F4F8}\u{1F47B}\u{1F910}\u{1F92E}\u{1F3BC}\u{1F975}\u{1F6A9}\u{1F34E}\u{1F34A}\u{1F47C}\u{1F48D}\u{1F4E3}\u{1F942}");
 var alphabetBytesToChars2 = (
   /** @type {string[]} */
@@ -18791,7 +18391,6 @@ __export(base32_exports3, {
   base32upper: () => base32upper3,
   base32z: () => base32z3
 });
-init_polyfills();
 var base323 = rfc46483({
   prefix: "b",
   name: "base32",
@@ -18853,7 +18452,6 @@ __export(base36_exports3, {
   base36: () => base363,
   base36upper: () => base36upper3
 });
-init_polyfills();
 var base363 = baseX3({
   prefix: "k",
   name: "base36",
@@ -18871,7 +18469,6 @@ __export(base58_exports3, {
   base58btc: () => base58btc3,
   base58flickr: () => base58flickr3
 });
-init_polyfills();
 var base58btc3 = baseX3({
   name: "base58btc",
   prefix: "z",
@@ -18891,7 +18488,6 @@ __export(base64_exports3, {
   base64url: () => base64url3,
   base64urlpad: () => base64urlpad3
 });
-init_polyfills();
 var base643 = rfc46483({
   prefix: "m",
   name: "base64",
@@ -18922,7 +18518,6 @@ var base8_exports2 = {};
 __export(base8_exports2, {
   base8: () => base82
 });
-init_polyfills();
 var base82 = rfc46483({
   prefix: "7",
   name: "base8",
@@ -18935,7 +18530,6 @@ var identity_exports3 = {};
 __export(identity_exports3, {
   identity: () => identity3
 });
-init_polyfills();
 var identity3 = from5({
   prefix: "\0",
   name: "identity",
@@ -18944,28 +18538,16 @@ var identity3 = from5({
 });
 
 // node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/codecs/json.js
-init_polyfills();
 var textEncoder5 = new TextEncoder();
 var textDecoder4 = new TextDecoder();
-
-// node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/codecs/raw.js
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/hashes/identity.js
 var identity_exports4 = {};
 __export(identity_exports4, {
   identity: () => identity4
 });
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/hashes/digest.js
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/varint.js
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/vendor/varint.js
-init_polyfills();
 var encode_13 = encode38;
 var MSB3 = 128;
 var REST3 = 127;
@@ -19099,10 +18681,8 @@ __export(sha2_browser_exports2, {
   sha256: () => sha2564,
   sha512: () => sha5124
 });
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/hashes/hasher.js
-init_polyfills();
 var from6 = ({ name: name10, code: code10, encode: encode42 }) => new Hasher3(name10, code10, encode42);
 var Hasher3 = class {
   /**
@@ -19147,15 +18727,6 @@ var sha5124 = from6({
   code: 19,
   encode: sha2("SHA-512")
 });
-
-// node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/index.js
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/cid.js
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/link/interface.js
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/cid.js
 var format4 = (link, base5) => {
@@ -19656,18 +19227,11 @@ var encodeCID3 = (version, code10, multihash) => {
 };
 var cidSymbol3 = /* @__PURE__ */ Symbol.for("@ipld/js-cid/CID");
 
-// node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/interface.js
-init_polyfills();
-
 // node_modules/.pnpm/multiformats@12.1.3/node_modules/multiformats/src/basics.js
 var bases2 = { ...identity_exports3, ...base2_exports2, ...base8_exports2, ...base10_exports2, ...base16_exports2, ...base32_exports3, ...base36_exports3, ...base58_exports3, ...base64_exports3, ...base256emoji_exports2 };
 var hashes2 = { ...sha2_browser_exports2, ...identity_exports4 };
 
-// node_modules/.pnpm/uint8arrays@4.0.10/node_modules/uint8arrays/dist/src/alloc.js
-init_polyfills();
-
 // node_modules/.pnpm/uint8arrays@4.0.10/node_modules/uint8arrays/dist/src/util/as-uint8array.js
-init_polyfills();
 function asUint8Array(buf2) {
   if (globalThis.Buffer != null) {
     return new Uint8Array(buf2.buffer, buf2.byteOffset, buf2.byteLength);
@@ -19816,7 +19380,6 @@ var toString6 = function(buf2, offset = 0, length6) {
 };
 
 // node_modules/.pnpm/@multiformats+multiaddr@11.6.1/node_modules/@multiformats/multiaddr/dist/src/protocols-table.js
-init_polyfills();
 var V = -1;
 var names = {};
 var codes = {};
@@ -19897,7 +19460,6 @@ function getProtocol(proto) {
 var import_varint4 = __toESM(require_varint(), 1);
 
 // node_modules/.pnpm/uint8arrays@4.0.10/node_modules/uint8arrays/dist/src/from-string.js
-init_polyfills();
 function fromString5(string5, encoding = "utf8") {
   const base5 = bases_default[encoding];
   if (base5 == null) {
@@ -19910,7 +19472,6 @@ function fromString5(string5, encoding = "utf8") {
 }
 
 // node_modules/.pnpm/uint8arrays@4.0.10/node_modules/uint8arrays/dist/src/concat.js
-init_polyfills();
 function concat4(arrays, length6) {
   if (length6 == null) {
     length6 = arrays.reduce((acc, curr) => acc + curr.length, 0);
@@ -20279,7 +19840,6 @@ var import_varint6 = __toESM(require_varint(), 1);
 var import_err_code = __toESM(require_err_code(), 1);
 
 // node_modules/.pnpm/uint8arrays@4.0.10/node_modules/uint8arrays/dist/src/equals.js
-init_polyfills();
 function equals7(a, b) {
   if (a === b) {
     return true;
@@ -20553,7 +20113,6 @@ function multiaddr(addr) {
 var import_env = __toESM(require_env(), 1);
 
 // node_modules/.pnpm/parse-duration@1.1.2/node_modules/parse-duration/index.mjs
-init_polyfills();
 var durationRE = /(-?(?:\d+\.?\d*|\d*\.?\d+)(?:e[-+]?\d+)?)\s*([\p{L}]*)/uig;
 parse4.year = parse4.yr = parse4.y = 6e4 * 60 * 24 * 365.25;
 parse4.month = parse4.b = 6e4 * 60 * 24 * (365.25 / 12);
@@ -20591,7 +20150,6 @@ function parse4(str = "", format5 = "ms") {
 var parse_duration_default = parse4;
 
 // node_modules/.pnpm/@libp2p+logger@2.1.1/node_modules/@libp2p/logger/dist/src/index.js
-init_polyfills();
 var import_debug = __toESM(require_browser(), 1);
 import_debug.default.formatters.b = (v) => {
   return v == null ? "undefined" : base58btc2.baseEncode(v);
@@ -20642,34 +20200,14 @@ function logger(name10) {
 var import_http = __toESM(require_http(), 1);
 
 // node_modules/.pnpm/merge-options@3.0.4/node_modules/merge-options/index.mjs
-init_polyfills();
 var import_index3 = __toESM(require_merge_options(), 1);
 var merge_options_default = import_index3.default;
-
-// node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/to-url-string.js
-init_polyfills();
-
-// node_modules/.pnpm/@multiformats+multiaddr-to-uri@9.0.8/node_modules/@multiformats/multiaddr-to-uri/dist/src/index.js
-init_polyfills();
-
-// node_modules/.pnpm/@multiformats+multiaddr@12.5.1/node_modules/@multiformats/multiaddr/dist/src/index.js
-init_polyfills();
-
-// node_modules/.pnpm/uint8arrays@5.1.0/node_modules/uint8arrays/dist/src/to-string.js
-init_polyfills();
-
-// node_modules/.pnpm/uint8arrays@5.1.0/node_modules/uint8arrays/dist/src/util/bases.js
-init_polyfills();
-
-// node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/basics.js
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/bases/base10.js
 var base10_exports3 = {};
 __export(base10_exports3, {
   base10: () => base103
 });
-init_polyfills();
 var base103 = baseX({
   prefix: "9",
   name: "base10",
@@ -20682,7 +20220,6 @@ __export(base16_exports3, {
   base16: () => base163,
   base16upper: () => base16upper3
 });
-init_polyfills();
 var base163 = rfc4648({
   prefix: "f",
   name: "base16",
@@ -20701,7 +20238,6 @@ var base2_exports3 = {};
 __export(base2_exports3, {
   base2: () => base24
 });
-init_polyfills();
 var base24 = rfc4648({
   prefix: "0",
   name: "base2",
@@ -20714,7 +20250,6 @@ var base256emoji_exports3 = {};
 __export(base256emoji_exports3, {
   base256emoji: () => base256emoji3
 });
-init_polyfills();
 var alphabet4 = Array.from("\u{1F680}\u{1FA90}\u2604\u{1F6F0}\u{1F30C}\u{1F311}\u{1F312}\u{1F313}\u{1F314}\u{1F315}\u{1F316}\u{1F317}\u{1F318}\u{1F30D}\u{1F30F}\u{1F30E}\u{1F409}\u2600\u{1F4BB}\u{1F5A5}\u{1F4BE}\u{1F4BF}\u{1F602}\u2764\u{1F60D}\u{1F923}\u{1F60A}\u{1F64F}\u{1F495}\u{1F62D}\u{1F618}\u{1F44D}\u{1F605}\u{1F44F}\u{1F601}\u{1F525}\u{1F970}\u{1F494}\u{1F496}\u{1F499}\u{1F622}\u{1F914}\u{1F606}\u{1F644}\u{1F4AA}\u{1F609}\u263A\u{1F44C}\u{1F917}\u{1F49C}\u{1F614}\u{1F60E}\u{1F607}\u{1F339}\u{1F926}\u{1F389}\u{1F49E}\u270C\u2728\u{1F937}\u{1F631}\u{1F60C}\u{1F338}\u{1F64C}\u{1F60B}\u{1F497}\u{1F49A}\u{1F60F}\u{1F49B}\u{1F642}\u{1F493}\u{1F929}\u{1F604}\u{1F600}\u{1F5A4}\u{1F603}\u{1F4AF}\u{1F648}\u{1F447}\u{1F3B6}\u{1F612}\u{1F92D}\u2763\u{1F61C}\u{1F48B}\u{1F440}\u{1F62A}\u{1F611}\u{1F4A5}\u{1F64B}\u{1F61E}\u{1F629}\u{1F621}\u{1F92A}\u{1F44A}\u{1F973}\u{1F625}\u{1F924}\u{1F449}\u{1F483}\u{1F633}\u270B\u{1F61A}\u{1F61D}\u{1F634}\u{1F31F}\u{1F62C}\u{1F643}\u{1F340}\u{1F337}\u{1F63B}\u{1F613}\u2B50\u2705\u{1F97A}\u{1F308}\u{1F608}\u{1F918}\u{1F4A6}\u2714\u{1F623}\u{1F3C3}\u{1F490}\u2639\u{1F38A}\u{1F498}\u{1F620}\u261D\u{1F615}\u{1F33A}\u{1F382}\u{1F33B}\u{1F610}\u{1F595}\u{1F49D}\u{1F64A}\u{1F639}\u{1F5E3}\u{1F4AB}\u{1F480}\u{1F451}\u{1F3B5}\u{1F91E}\u{1F61B}\u{1F534}\u{1F624}\u{1F33C}\u{1F62B}\u26BD\u{1F919}\u2615\u{1F3C6}\u{1F92B}\u{1F448}\u{1F62E}\u{1F646}\u{1F37B}\u{1F343}\u{1F436}\u{1F481}\u{1F632}\u{1F33F}\u{1F9E1}\u{1F381}\u26A1\u{1F31E}\u{1F388}\u274C\u270A\u{1F44B}\u{1F630}\u{1F928}\u{1F636}\u{1F91D}\u{1F6B6}\u{1F4B0}\u{1F353}\u{1F4A2}\u{1F91F}\u{1F641}\u{1F6A8}\u{1F4A8}\u{1F92C}\u2708\u{1F380}\u{1F37A}\u{1F913}\u{1F619}\u{1F49F}\u{1F331}\u{1F616}\u{1F476}\u{1F974}\u25B6\u27A1\u2753\u{1F48E}\u{1F4B8}\u2B07\u{1F628}\u{1F31A}\u{1F98B}\u{1F637}\u{1F57A}\u26A0\u{1F645}\u{1F61F}\u{1F635}\u{1F44E}\u{1F932}\u{1F920}\u{1F927}\u{1F4CC}\u{1F535}\u{1F485}\u{1F9D0}\u{1F43E}\u{1F352}\u{1F617}\u{1F911}\u{1F30A}\u{1F92F}\u{1F437}\u260E\u{1F4A7}\u{1F62F}\u{1F486}\u{1F446}\u{1F3A4}\u{1F647}\u{1F351}\u2744\u{1F334}\u{1F4A3}\u{1F438}\u{1F48C}\u{1F4CD}\u{1F940}\u{1F922}\u{1F445}\u{1F4A1}\u{1F4A9}\u{1F450}\u{1F4F8}\u{1F47B}\u{1F910}\u{1F92E}\u{1F3BC}\u{1F975}\u{1F6A9}\u{1F34E}\u{1F34A}\u{1F47C}\u{1F48D}\u{1F4E3}\u{1F942}");
 var alphabetBytesToChars3 = alphabet4.reduce((p, c, i) => {
   p[i] = c;
@@ -20761,7 +20296,6 @@ var base8_exports3 = {};
 __export(base8_exports3, {
   base8: () => base83
 });
-init_polyfills();
 var base83 = rfc4648({
   prefix: "7",
   name: "base8",
@@ -20774,7 +20308,6 @@ var identity_exports5 = {};
 __export(identity_exports5, {
   identity: () => identity5
 });
-init_polyfills();
 var identity5 = from({
   prefix: "\0",
   name: "identity",
@@ -20783,19 +20316,14 @@ var identity5 = from({
 });
 
 // node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/codecs/json.js
-init_polyfills();
 var textEncoder6 = new TextEncoder();
 var textDecoder5 = new TextDecoder();
-
-// node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/codecs/raw.js
-init_polyfills();
 
 // node_modules/.pnpm/multiformats@13.4.2/node_modules/multiformats/dist/src/hashes/identity.js
 var identity_exports6 = {};
 __export(identity_exports6, {
   identity: () => identity6
 });
-init_polyfills();
 var code9 = 0;
 var name9 = "identity";
 var encode41 = coerce;
@@ -20816,7 +20344,6 @@ __export(sha2_browser_exports3, {
   sha256: () => sha2565,
   sha512: () => sha5125
 });
-init_polyfills();
 function sha3(name10) {
   return async (data) => new Uint8Array(await crypto.subtle.digest(name10, data));
 }
@@ -20836,7 +20363,6 @@ var bases3 = { ...identity_exports5, ...base2_exports3, ...base8_exports3, ...ba
 var hashes3 = { ...sha2_browser_exports3, ...identity_exports6 };
 
 // node_modules/.pnpm/uint8arrays@5.1.0/node_modules/uint8arrays/dist/src/alloc.js
-init_polyfills();
 function allocUnsafe2(size = 0) {
   return new Uint8Array(size);
 }
@@ -20898,7 +20424,6 @@ function toString7(array2, encoding = "utf8") {
 }
 
 // node_modules/.pnpm/@multiformats+multiaddr@12.5.1/node_modules/@multiformats/multiaddr/dist/src/errors.js
-init_polyfills();
 var InvalidMultiaddrError = class extends Error {
   static name = "InvalidMultiaddrError";
   name = "InvalidMultiaddrError";
@@ -20916,11 +20441,7 @@ var UnknownProtocolError = class extends Error {
   name = "UnknownProtocolError";
 };
 
-// node_modules/.pnpm/@multiformats+multiaddr@12.5.1/node_modules/@multiformats/multiaddr/dist/src/multiaddr.js
-init_polyfills();
-
 // node_modules/.pnpm/uint8arrays@5.1.0/node_modules/uint8arrays/dist/src/equals.js
-init_polyfills();
 function equals8(a, b) {
   if (a === b) {
     return true;
@@ -20937,7 +20458,6 @@ function equals8(a, b) {
 }
 
 // node_modules/.pnpm/uint8arrays@5.1.0/node_modules/uint8arrays/dist/src/from-string.js
-init_polyfills();
 function fromString7(string5, encoding = "utf8") {
   const base5 = bases_default2[encoding];
   if (base5 == null) {
@@ -20946,11 +20466,7 @@ function fromString7(string5, encoding = "utf8") {
   return base5.decoder.decode(`${base5.prefix}${string5}`);
 }
 
-// node_modules/.pnpm/@multiformats+multiaddr@12.5.1/node_modules/@multiformats/multiaddr/dist/src/components.js
-init_polyfills();
-
 // node_modules/.pnpm/uint8-varint@2.0.4/node_modules/uint8-varint/dist/src/index.js
-init_polyfills();
 var N14 = Math.pow(2, 7);
 var N24 = Math.pow(2, 14);
 var N34 = Math.pow(2, 21);
@@ -21123,11 +20639,7 @@ function decode43(buf2, offset = 0) {
   }
 }
 
-// node_modules/.pnpm/uint8arrays@5.1.0/node_modules/uint8arrays/dist/src/concat.js
-init_polyfills();
-
 // node_modules/.pnpm/uint8arrays@5.1.0/node_modules/uint8arrays/dist/src/util/as-uint8array.js
-init_polyfills();
 function asUint8Array2(buf2) {
   return buf2;
 }
@@ -21146,11 +20658,7 @@ function concat5(arrays, length6) {
   return asUint8Array2(output);
 }
 
-// node_modules/.pnpm/@multiformats+multiaddr@12.5.1/node_modules/@multiformats/multiaddr/dist/src/registry.js
-init_polyfills();
-
 // node_modules/.pnpm/@multiformats+multiaddr@12.5.1/node_modules/@multiformats/multiaddr/dist/src/constants.js
-init_polyfills();
 var CODE_IP4 = 4;
 var CODE_TCP = 6;
 var CODE_UDP = 273;
@@ -21193,7 +20701,6 @@ var CODE_P2P_CIRCUIT = 290;
 var CODE_MEMORY = 777;
 
 // node_modules/.pnpm/@multiformats+multiaddr@12.5.1/node_modules/@multiformats/multiaddr/dist/src/utils.js
-init_polyfills();
 function bytesToString2(base5) {
   return (buf2) => {
     return toString7(buf2, base5);
@@ -21365,7 +20872,6 @@ function bytes2mb2(base5) {
 }
 
 // node_modules/.pnpm/@multiformats+multiaddr@12.5.1/node_modules/@multiformats/multiaddr/dist/src/validation.js
-init_polyfills();
 function integer3(value2) {
   const int = parseInt(value2);
   if (int.toString() !== value2) {
@@ -22051,27 +21557,6 @@ function validate3(addr) {
   });
 }
 
-// node_modules/.pnpm/@multiformats+multiaddr@12.5.1/node_modules/@multiformats/multiaddr/dist/src/filter/multiaddr-filter.js
-init_polyfills();
-
-// node_modules/.pnpm/@multiformats+multiaddr@12.5.1/node_modules/@multiformats/multiaddr/dist/src/convert.js
-init_polyfills();
-
-// node_modules/.pnpm/@chainsafe+netmask@2.0.0/node_modules/@chainsafe/netmask/dist/src/index.js
-init_polyfills();
-
-// node_modules/.pnpm/@chainsafe+netmask@2.0.0/node_modules/@chainsafe/netmask/dist/src/ipnet.js
-init_polyfills();
-
-// node_modules/.pnpm/@chainsafe+netmask@2.0.0/node_modules/@chainsafe/netmask/dist/src/cidr.js
-init_polyfills();
-
-// node_modules/.pnpm/@chainsafe+netmask@2.0.0/node_modules/@chainsafe/netmask/dist/src/ip.js
-init_polyfills();
-
-// node_modules/.pnpm/@chainsafe+netmask@2.0.0/node_modules/@chainsafe/netmask/dist/src/util.js
-init_polyfills();
-
 // node_modules/.pnpm/@chainsafe+netmask@2.0.0/node_modules/@chainsafe/netmask/dist/src/ip.js
 var maxIPv6Octet = parseInt("0xFFFF", 16);
 var ipv4Prefix = new Uint8Array([
@@ -22297,7 +21782,6 @@ function toUrlString(url) {
 }
 
 // node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/agent.browser.js
-init_polyfills();
 var agent_browser_default = () => {
 };
 
@@ -22441,11 +21925,7 @@ var configure = (fn) => {
   };
 };
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/lib/to-url-search-params.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/lib/mode-to-string.js
-init_polyfills();
 function modeToString(mode) {
   if (mode == null) {
     return void 0;
@@ -22457,7 +21937,6 @@ function modeToString(mode) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/lib/parse-mtime.js
-init_polyfills();
 var import_err_code2 = __toESM(require_err_code(), 1);
 function parseMtime(input) {
   if (input == null) {
@@ -22545,7 +22024,6 @@ var createWantlist = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/bitswap/wantlist-for-peer.js
-init_polyfills();
 var createWantlistForPeer = configure((api) => {
   async function wantlistForPeer(peerId, options = {}) {
     const res = await (await api.post("bitswap/wantlist", {
@@ -22561,18 +22039,8 @@ var createWantlistForPeer = configure((api) => {
   return wantlistForPeer;
 });
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/bitswap/stat.js
-init_polyfills();
-
-// node_modules/.pnpm/@libp2p+peer-id@2.0.4/node_modules/@libp2p/peer-id/dist/src/index.js
-init_polyfills();
-
 // node_modules/.pnpm/@libp2p+interface-peer-id@2.0.2/node_modules/@libp2p/interface-peer-id/dist/src/index.js
-init_polyfills();
 var symbol3 = /* @__PURE__ */ Symbol.for("@libp2p/peer-id");
-
-// node_modules/.pnpm/@libp2p+interfaces@3.3.2/node_modules/@libp2p/interfaces/dist/src/errors.js
-init_polyfills();
 
 // node_modules/.pnpm/@libp2p+peer-id@2.0.4/node_modules/@libp2p/peer-id/dist/src/index.js
 var inspect3 = /* @__PURE__ */ Symbol.for("nodejs.util.inspect.custom");
@@ -22749,7 +22217,6 @@ function toCoreInterface(res) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/bitswap/unwant.js
-init_polyfills();
 var createUnwant = configure((api) => {
   async function unwant(cid, options = {}) {
     const res = await api.post("bitswap/unwant", {
@@ -22775,11 +22242,7 @@ function createBitswap(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/block/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/block/get.js
-init_polyfills();
 var createGet = configure((api) => {
   async function get(cid, options = {}) {
     const res = await api.post("block/get", {
@@ -22795,21 +22258,10 @@ var createGet = configure((api) => {
   return get;
 });
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/block/put.js
-init_polyfills();
-
-// node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/multipart-request.browser.js
-init_polyfills();
-
-// node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/files/normalise-input-multiple.browser.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/files/normalise-content.browser.js
-init_polyfills();
 var import_err_code3 = __toESM(require_err_code(), 1);
 
 // node_modules/.pnpm/it-peekable@2.0.1/node_modules/it-peekable/dist/src/index.js
-init_polyfills();
 function peekableIterator(iterable) {
   const [iterator, symbol4] = iterable[Symbol.asyncIterator] != null ? [iterable[Symbol.asyncIterator](), Symbol.asyncIterator] : [iterable[Symbol.iterator](), Symbol.iterator];
   const queue = [];
@@ -22836,7 +22288,6 @@ function peekableIterator(iterable) {
 }
 
 // node_modules/.pnpm/browser-readablestream-to-it@2.0.10/node_modules/browser-readablestream-to-it/dist/src/index.js
-init_polyfills();
 async function* browserReadableStreamToIt(stream, options = {}) {
   const reader = stream.getReader();
   try {
@@ -22856,7 +22307,6 @@ async function* browserReadableStreamToIt(stream, options = {}) {
 }
 
 // node_modules/.pnpm/it-all@2.0.1/node_modules/it-all/dist/src/index.js
-init_polyfills();
 async function all(source) {
   const arr = [];
   for await (const entry of source) {
@@ -22866,7 +22316,6 @@ async function all(source) {
 }
 
 // node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/files/utils.js
-init_polyfills();
 function isBytes3(obj) {
   return ArrayBuffer.isView(obj) || obj instanceof ArrayBuffer;
 }
@@ -22917,11 +22366,9 @@ async function itToBlob(stream) {
 }
 
 // node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/files/normalise-candidate-multiple.js
-init_polyfills();
 var import_err_code5 = __toESM(require_err_code(), 1);
 
 // node_modules/.pnpm/it-map@2.0.1/node_modules/it-map/dist/src/index.js
-init_polyfills();
 async function* map(source, func) {
   for await (const val of source) {
     yield func(val);
@@ -22929,11 +22376,9 @@ async function* map(source, func) {
 }
 
 // node_modules/.pnpm/ipfs-unixfs@9.0.1/node_modules/ipfs-unixfs/src/index.js
-init_polyfills();
 var import_err_code4 = __toESM(require_err_code(), 1);
 
 // node_modules/.pnpm/ipfs-unixfs@9.0.1/node_modules/ipfs-unixfs/src/unixfs.js
-init_polyfills();
 var import_minimal = __toESM(require_minimal2(), 1);
 var $Reader = import_minimal.default.Reader;
 var $Writer = import_minimal.default.Writer;
@@ -23467,7 +22912,6 @@ function normaliseInput(input) {
 }
 
 // node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/mode-to-string.js
-init_polyfills();
 function modeToString2(mode) {
   if (mode == null) {
     return void 0;
@@ -23526,7 +22970,6 @@ async function multipartRequest(source, abortController, headers = {}) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/lib/abort-signal.js
-init_polyfills();
 var import_any_signal = __toESM(require_any_signal(), 1);
 function filter(signals) {
   return signals.filter(Boolean);
@@ -23562,7 +23005,6 @@ var createPut = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/block/rm.js
-init_polyfills();
 var createRm = configure((api) => {
   async function* rm(cid, options = {}) {
     if (!Array.isArray(cid)) {
@@ -23594,7 +23036,6 @@ function toCoreInterface2(removed) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/block/stat.js
-init_polyfills();
 var createStat2 = configure((api) => {
   async function stat(cid, options = {}) {
     const res = await api.post("block/stat", {
@@ -23621,11 +23062,7 @@ function createBlock(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/bootstrap/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/bootstrap/add.js
-init_polyfills();
 var createAdd = configure((api) => {
   async function add2(addr, options = {}) {
     const res = await api.post("bootstrap/add", {
@@ -23643,7 +23080,6 @@ var createAdd = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/bootstrap/clear.js
-init_polyfills();
 var createClear = configure((api) => {
   async function clear(options = {}) {
     const res = await api.post("bootstrap/rm", {
@@ -23661,7 +23097,6 @@ var createClear = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/bootstrap/list.js
-init_polyfills();
 var createList = configure((api) => {
   async function list(options = {}) {
     const res = await api.post("bootstrap/list", {
@@ -23676,7 +23111,6 @@ var createList = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/bootstrap/reset.js
-init_polyfills();
 var createReset = configure((api) => {
   async function reset(options = {}) {
     const res = await api.post("bootstrap/add", {
@@ -23694,7 +23128,6 @@ var createReset = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/bootstrap/rm.js
-init_polyfills();
 var createRm2 = configure((api) => {
   async function rm(addr, options = {}) {
     const res = await api.post("bootstrap/rm", {
@@ -23722,14 +23155,7 @@ function createBootstrap(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/config/index.js
-init_polyfills();
-
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/config/profiles/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/config/profiles/apply.js
-init_polyfills();
 var createApply = configure((api) => {
   async function apply(profile, options = {}) {
     const res = await api.post("config/profile/apply", {
@@ -23749,11 +23175,7 @@ var createApply = configure((api) => {
   return apply;
 });
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/config/profiles/list.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/lib/object-to-camel.js
-init_polyfills();
 function objectToCamel(obj) {
   if (obj == null) {
     return obj;
@@ -23795,7 +23217,6 @@ function createProfiles(config) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/config/get.js
-init_polyfills();
 var createGet2 = configure((api) => {
   const get = async (key, options = {}) => {
     if (!key) {
@@ -23816,7 +23237,6 @@ var createGet2 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/config/get-all.js
-init_polyfills();
 var createGetAll = configure((api) => {
   const getAll = async (options = {}) => {
     const res = await api.post("config/show", {
@@ -23833,7 +23253,6 @@ var createGetAll = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/config/replace.js
-init_polyfills();
 var createReplace = configure((api) => {
   const replace = async (config, options = {}) => {
     const controller = new AbortController();
@@ -23849,7 +23268,6 @@ var createReplace = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/config/set.js
-init_polyfills();
 var createSet = configure((api) => {
   const set = async (key, value2, options = {}) => {
     if (typeof key !== "string") {
@@ -23890,11 +23308,7 @@ function createConfig(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dag/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dag/export.js
-init_polyfills();
 var createExport = configure((api) => {
   async function* dagExport(root, options = {}) {
     const res = await api.post("dag/export", {
@@ -23909,11 +23323,7 @@ var createExport = configure((api) => {
   return dagExport;
 });
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dag/get.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/lib/resolve.js
-init_polyfills();
 var import_err_code6 = __toESM(require_err_code(), 1);
 async function* resolve(cid, path, codecs3, getBlock, options) {
   const load = async (cid2) => {
@@ -23951,7 +23361,6 @@ async function* resolve(cid, path, codecs3, getBlock, options) {
 }
 
 // node_modules/.pnpm/it-first@2.0.1/node_modules/it-first/dist/src/index.js
-init_polyfills();
 async function first(source) {
   for await (const entry of source) {
     return entry;
@@ -23960,7 +23369,6 @@ async function first(source) {
 }
 
 // node_modules/.pnpm/it-last@2.0.1/node_modules/it-last/dist/src/index.js
-init_polyfills();
 async function last(source) {
   let res;
   for await (const entry of source) {
@@ -23997,7 +23405,6 @@ var createGet3 = (codecs3, options) => {
 };
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dag/import.js
-init_polyfills();
 var createImport = configure((api) => {
   async function* dagImport(source, options = {}) {
     const controller = new AbortController();
@@ -24025,7 +23432,6 @@ var createImport = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dag/put.js
-init_polyfills();
 var createPut2 = (codecs3, options) => {
   const fn = configure((api) => {
     const put = async (dagNode, options2 = {}) => {
@@ -24062,7 +23468,6 @@ var createPut2 = (codecs3, options) => {
 };
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dag/resolve.js
-init_polyfills();
 var createResolve = configure((api) => {
   const resolve2 = async (ipfsPath, options = {}) => {
     const res = await api.post("dag/resolve", {
@@ -24090,17 +23495,7 @@ function createDag(codecs3, config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dht/index.js
-init_polyfills();
-
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dht/find-peer.js
-init_polyfills();
-
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dht/map-event.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dht/response-types.js
-init_polyfills();
 var SendingQuery = 0;
 var PeerResponse = 1;
 var FinalPeer = 2;
@@ -24215,7 +23610,6 @@ var createFindPeer = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dht/find-provs.js
-init_polyfills();
 var createFindProvs = configure((api) => {
   async function* findProvs(cid, options = {}) {
     const res = await api.post("dht/findprovs", {
@@ -24234,7 +23628,6 @@ var createFindProvs = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dht/get.js
-init_polyfills();
 var createGet4 = configure((api) => {
   async function* get(key, options = {}) {
     const res = await api.post("dht/get", {
@@ -24254,7 +23647,6 @@ var createGet4 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dht/provide.js
-init_polyfills();
 var createProvide = configure((api) => {
   async function* provide(cids, options = { recursive: false }) {
     const cidArr = Array.isArray(cids) ? cids : [cids];
@@ -24274,7 +23666,6 @@ var createProvide = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dht/put.js
-init_polyfills();
 var createPut3 = configure((api) => {
   async function* put(key, value2, options = {}) {
     const controller = new AbortController();
@@ -24295,7 +23686,6 @@ var createPut3 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dht/query.js
-init_polyfills();
 var createQuery = configure((api) => {
   async function* query(peerId, options = {}) {
     const res = await api.post("dht/query", {
@@ -24325,11 +23715,7 @@ function createDht(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/diag/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/diag/cmds.js
-init_polyfills();
 var createCmds = configure((api) => {
   async function cmds(options = {}) {
     const res = await api.post("diag/cmds", {
@@ -24343,7 +23729,6 @@ var createCmds = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/diag/net.js
-init_polyfills();
 var createNet = configure((api) => {
   async function net(options = {}) {
     const res = await api.post("diag/net", {
@@ -24357,7 +23742,6 @@ var createNet = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/diag/sys.js
-init_polyfills();
 var createSys = configure((api) => {
   async function sys(options = {}) {
     const res = await api.post("diag/sys", {
@@ -24379,11 +23763,7 @@ function createDiag(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/files/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/files/chmod.js
-init_polyfills();
 var createChmod = configure((api) => {
   async function chmod(path, mode, options = {}) {
     const res = await api.post("files/chmod", {
@@ -24401,7 +23781,6 @@ var createChmod = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/files/cp.js
-init_polyfills();
 var createCp = configure((api) => {
   async function cp(sources, destination, options = {}) {
     const sourceArr = Array.isArray(sources) ? sources : [sources];
@@ -24419,7 +23798,6 @@ var createCp = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/files/flush.js
-init_polyfills();
 var createFlush = configure((api) => {
   async function flush(path, options = {}) {
     if (!path || typeof path !== "string") {
@@ -24439,11 +23817,7 @@ var createFlush = configure((api) => {
   return flush;
 });
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/files/ls.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/lib/object-to-camel-with-metadata.js
-init_polyfills();
 function objectToCamelWithMetadata(entry) {
   const file = objectToCamel(entry);
   if (Object.prototype.hasOwnProperty.call(file, "mode")) {
@@ -24498,7 +23872,6 @@ function toCoreInterface3(entry) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/files/mkdir.js
-init_polyfills();
 var createMkdir = configure((api) => {
   async function mkdir(path, options = {}) {
     const res = await api.post("files/mkdir", {
@@ -24515,7 +23888,6 @@ var createMkdir = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/files/mv.js
-init_polyfills();
 var createMv = configure((api) => {
   async function mv(sources, destination, options = {}) {
     if (!Array.isArray(sources)) {
@@ -24535,7 +23907,6 @@ var createMv = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/files/read.js
-init_polyfills();
 var import_source = __toESM(require_source(), 1);
 var createRead = configure((api) => {
   async function* read4(path, options = {}) {
@@ -24554,7 +23925,6 @@ var createRead = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/files/rm.js
-init_polyfills();
 var import_http2 = __toESM(require_http(), 1);
 var createRm3 = configure((api) => {
   async function rm(path, options = {}) {
@@ -24577,7 +23947,6 @@ var createRm3 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/files/stat.js
-init_polyfills();
 var createStat3 = configure((api) => {
   async function stat(path, options = {}) {
     const res = await api.post("files/stat", {
@@ -24601,7 +23970,6 @@ function toCoreInterface4(entry) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/files/touch.js
-init_polyfills();
 var createTouch = configure((api) => {
   async function touch(path, options = {}) {
     const res = await api.post("files/touch", {
@@ -24618,7 +23986,6 @@ var createTouch = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/files/write.js
-init_polyfills();
 var createWrite = configure((api) => {
   async function write(path, input, options = {}) {
     const controller = new AbortController();
@@ -24660,11 +24027,7 @@ function createFiles(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/key/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/key/export.js
-init_polyfills();
 var import_err_code8 = __toESM(require_err_code(), 1);
 var createExport2 = configure((api) => {
   const exportKey = async (name10, password, options = {}) => {
@@ -24674,7 +24037,6 @@ var createExport2 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/key/gen.js
-init_polyfills();
 var createGen = configure((api) => {
   async function gen(name10, options) {
     const opts = options ?? { type: "Ed25519" };
@@ -24693,7 +24055,6 @@ var createGen = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/key/import.js
-init_polyfills();
 var createImport2 = configure((api) => {
   async function importKey(name10, pem, password, options = {}) {
     const res = await api.post("key/import", {
@@ -24713,7 +24074,6 @@ var createImport2 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/key/info.js
-init_polyfills();
 var import_err_code9 = __toESM(require_err_code(), 1);
 var createInfo = configure((api) => {
   const info = async (name10, options = {}) => {
@@ -24723,7 +24083,6 @@ var createInfo = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/key/list.js
-init_polyfills();
 var createList3 = configure((api) => {
   async function list(options = {}) {
     const res = await api.post("key/list", {
@@ -24738,7 +24097,6 @@ var createList3 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/key/rename.js
-init_polyfills();
 var createRename = configure((api) => {
   async function rename(oldName, newName, options = {}) {
     const res = await api.post("key/rename", {
@@ -24758,7 +24116,6 @@ var createRename = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/key/rm.js
-init_polyfills();
 var createRm4 = configure((api) => {
   async function rm(name10, options = {}) {
     const res = await api.post("key/rm", {
@@ -24788,11 +24145,7 @@ function createKey(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/log/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/log/level.js
-init_polyfills();
 var createLevel = configure((api) => {
   async function level(subsystem, level2, options = {}) {
     const res = await api.post("log/level", {
@@ -24812,7 +24165,6 @@ var createLevel = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/log/ls.js
-init_polyfills();
 var createLs2 = configure((api) => {
   async function ls(options = {}) {
     const res = await api.post("log/ls", {
@@ -24827,7 +24179,6 @@ var createLs2 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/log/tail.js
-init_polyfills();
 var createTail = configure((api) => {
   async function* tail(options = {}) {
     const res = await api.post("log/tail", {
@@ -24849,11 +24200,7 @@ function createLog(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/name/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/name/publish.js
-init_polyfills();
 var createPublish = configure((api) => {
   async function publish(path, options = {}) {
     const res = await api.post("name/publish", {
@@ -24870,7 +24217,6 @@ var createPublish = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/name/resolve.js
-init_polyfills();
 var createResolve2 = configure((api) => {
   async function* resolve2(path, options = {}) {
     const res = await api.post("name/resolve", {
@@ -24889,11 +24235,7 @@ var createResolve2 = configure((api) => {
   return resolve2;
 });
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/name/pubsub/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/name/pubsub/cancel.js
-init_polyfills();
 var createCancel = configure((api) => {
   async function cancel(name10, options = {}) {
     const res = await api.post("name/pubsub/cancel", {
@@ -24910,7 +24252,6 @@ var createCancel = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/name/pubsub/state.js
-init_polyfills();
 var createState = configure((api) => {
   async function state(options = {}) {
     const res = await api.post("name/pubsub/state", {
@@ -24924,7 +24265,6 @@ var createState = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/name/pubsub/subs.js
-init_polyfills();
 var createSubs = configure((api) => {
   async function subs(options = {}) {
     const res = await api.post("name/pubsub/subs", {
@@ -24956,11 +24296,7 @@ function createName(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/object/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/object/data.js
-init_polyfills();
 var createData = configure((api) => {
   async function data(cid, options = {}) {
     const res = await api.post("object/data", {
@@ -24978,7 +24314,6 @@ var createData = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/object/get.js
-init_polyfills();
 var createGet5 = configure((api) => {
   async function get(cid, options = {}) {
     const res = await api.post("object/get", {
@@ -25004,7 +24339,6 @@ var createGet5 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/object/links.js
-init_polyfills();
 var createLinks = configure((api) => {
   async function links(cid, options = {}) {
     const res = await api.post("object/links", {
@@ -25026,7 +24360,6 @@ var createLinks = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/object/new.js
-init_polyfills();
 var createNew = configure((api) => {
   async function newObject(options = {}) {
     const res = await api.post("object/new", {
@@ -25044,7 +24377,6 @@ var createNew = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/object/put.js
-init_polyfills();
 var createPut4 = (codecs3, options) => {
   const fn = configure((api) => {
     const dagPut = createPut2(codecs3, options);
@@ -25062,7 +24394,6 @@ var createPut4 = (codecs3, options) => {
 };
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/object/stat.js
-init_polyfills();
 var createStat4 = configure((api) => {
   async function stat(cid, options = {}) {
     const res = await api.post("object/stat", {
@@ -25082,11 +24413,7 @@ var createStat4 = configure((api) => {
   return stat;
 });
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/object/patch/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/object/patch/add-link.js
-init_polyfills();
 var createAddLink = configure((api) => {
   async function addLink(cid, dLink, options = {}) {
     const res = await api.post("object/patch/add-link", {
@@ -25110,7 +24437,6 @@ var createAddLink = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/object/patch/append-data.js
-init_polyfills();
 var createAppendData = configure((api) => {
   async function appendData(cid, data, options = {}) {
     const controller = new AbortController();
@@ -25130,7 +24456,6 @@ var createAppendData = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/object/patch/rm-link.js
-init_polyfills();
 var createRmLink = configure((api) => {
   async function rmLink(cid, dLink, options = {}) {
     const res = await api.post("object/patch/rm-link", {
@@ -25152,7 +24477,6 @@ var createRmLink = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/object/patch/set-data.js
-init_polyfills();
 var createSetData = configure((api) => {
   async function setData(cid, data, options = {}) {
     const controller = new AbortController();
@@ -25196,14 +24520,7 @@ function createObject(codecs3, config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/index.js
-init_polyfills();
-
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/add-all.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/pins/normalise-input.js
-init_polyfills();
 var import_err_code10 = __toESM(require_err_code(), 1);
 function isIterable(thing) {
   return Symbol.iterator in thing;
@@ -25333,7 +24650,6 @@ var createAddAll = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/add.js
-init_polyfills();
 function createAdd2(config) {
   const all2 = createAddAll(config);
   return configure(() => {
@@ -25348,7 +24664,6 @@ function createAdd2(config) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/ls.js
-init_polyfills();
 function toPin2(type, cid, metadata) {
   const pin = {
     type,
@@ -25388,7 +24703,6 @@ var createLs3 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/rm-all.js
-init_polyfills();
 var createRmAll = configure((api) => {
   async function* rmAll(source, options = {}) {
     for await (const { path, recursive } of normaliseInput2(source)) {
@@ -25417,7 +24731,6 @@ var createRmAll = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/rm.js
-init_polyfills();
 var createRm5 = (config) => {
   const all2 = createRmAll(config);
   return configure(() => {
@@ -25431,14 +24744,7 @@ var createRm5 = (config) => {
   })(config);
 };
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/index.js
-init_polyfills();
-
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/add.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/utils.js
-init_polyfills();
 var decodePin = ({ Name: name10, Status: status, Cid: cid }) => {
   return {
     cid: CID2.parse(cid),
@@ -25508,7 +24814,6 @@ function createAdd3(client2) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/ls.js
-init_polyfills();
 function createLs4(client2) {
   async function* ls({ timeout, signal, headers, ...query }) {
     const response = await client2.post("pin/remote/ls", {
@@ -25525,7 +24830,6 @@ function createLs4(client2) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/rm.js
-init_polyfills();
 function createRm6(client2) {
   async function rm({ timeout, signal, headers, ...query }) {
     await client2.post("pin/remote/rm", {
@@ -25542,7 +24846,6 @@ function createRm6(client2) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/rm-all.js
-init_polyfills();
 function createRmAll2(client2) {
   async function rmAll({ timeout, signal, headers, ...query }) {
     await client2.post("pin/remote/rm", {
@@ -25558,14 +24861,7 @@ function createRmAll2(client2) {
   return rmAll;
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/service/index.js
-init_polyfills();
-
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/service/add.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/service/utils.js
-init_polyfills();
 function encodeEndpoint(url) {
   const href = String(url);
   if (href === "undefined") {
@@ -25620,7 +24916,6 @@ function createAdd4(client2) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/service/ls.js
-init_polyfills();
 function createLs5(client2) {
   async function ls(options = {}) {
     const { stat, headers, timeout, signal } = options;
@@ -25637,7 +24932,6 @@ function createLs5(client2) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pin/remote/service/rm.js
-init_polyfills();
 function createRm7(client2) {
   async function rm(name10, options = {}) {
     await client2.post("pin/remote/service/rm", {
@@ -25685,14 +24979,7 @@ function createPin(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pubsub/index.js
-init_polyfills();
-
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pubsub/ls.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/lib/http-rpc-wire-format.js
-init_polyfills();
 var rpcArrayToTextArray = (strings) => {
   if (Array.isArray(strings)) {
     return strings.map(rpcToText);
@@ -25718,7 +25005,6 @@ var createLs6 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pubsub/peers.js
-init_polyfills();
 var createPeers = configure((api) => {
   async function peers(topic, options = {}) {
     const res = await api.post("pubsub/peers", {
@@ -25736,7 +25022,6 @@ var createPeers = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pubsub/publish.js
-init_polyfills();
 var createPublish2 = configure((api) => {
   async function publish(topic, data, options = {}) {
     const searchParams = toUrlSearchParams({
@@ -25756,7 +25041,6 @@ var createPublish2 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pubsub/subscribe.js
-init_polyfills();
 var log2 = logger("ipfs-http-client:pubsub:subscribe");
 var createSubscribe = (options, subsTracker) => {
   return configure((api) => {
@@ -25858,7 +25142,6 @@ var isAbortError = (error) => {
 };
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pubsub/unsubscribe.js
-init_polyfills();
 var createUnsubscribe = (options, subsTracker) => {
   async function unsubscribe(topic, handler) {
     subsTracker.unsubscribe(topic, handler);
@@ -25867,7 +25150,6 @@ var createUnsubscribe = (options, subsTracker) => {
 };
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/pubsub/subscription-tracker.js
-init_polyfills();
 var SubscriptionTracker = class {
   constructor() {
     this._subs = /* @__PURE__ */ new Map();
@@ -25922,11 +25204,7 @@ function createPubsub2(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/refs/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/refs/local.js
-init_polyfills();
 var createLocal = configure((api) => {
   async function* refsLocal(options = {}) {
     const res = await api.post("refs/local", {
@@ -25960,11 +25238,7 @@ var createRefs = configure((api, opts) => {
   });
 });
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/repo/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/repo/gc.js
-init_polyfills();
 var createGc = configure((api) => {
   async function* gc(options = {}) {
     const res = await api.post("repo/gc", {
@@ -25984,7 +25258,6 @@ var createGc = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/repo/stat.js
-init_polyfills();
 var createStat5 = configure((api) => {
   async function stat(options = {}) {
     const res = await api.post("repo/stat", {
@@ -26005,7 +25278,6 @@ var createStat5 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/repo/version.js
-init_polyfills();
 var createVersion = configure((api) => {
   async function version(options = {}) {
     const res = await (await api.post("repo/version", {
@@ -26027,11 +25299,7 @@ function createRepo(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/stats/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/stats/bw.js
-init_polyfills();
 var createBw = configure((api) => {
   async function* bw(options = {}) {
     const res = await api.post("stats/bw", {
@@ -26059,11 +25327,7 @@ function createStats(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/swarm/index.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/swarm/addrs.js
-init_polyfills();
 var createAddrs = configure((api) => {
   async function addrs(options = {}) {
     const res = await api.post("swarm/addrs", {
@@ -26081,7 +25345,6 @@ var createAddrs = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/swarm/connect.js
-init_polyfills();
 var createConnect = configure((api) => {
   async function connect(addr, options = {}) {
     const res = await api.post("swarm/connect", {
@@ -26099,7 +25362,6 @@ var createConnect = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/swarm/disconnect.js
-init_polyfills();
 var createDisconnect = configure((api) => {
   async function disconnect(addr, options = {}) {
     const res = await api.post("swarm/disconnect", {
@@ -26117,7 +25379,6 @@ var createDisconnect = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/swarm/local-addrs.js
-init_polyfills();
 var createLocalAddrs = configure((api) => {
   async function localAddrs(options = {}) {
     const res = await api.post("swarm/addrs/local", {
@@ -26132,7 +25393,6 @@ var createLocalAddrs = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/swarm/peers.js
-init_polyfills();
 var createPeers2 = configure((api) => {
   async function peers(options = {}) {
     const res = await api.post("swarm/peers", {
@@ -26166,11 +25426,7 @@ function createSwarm(config) {
   };
 }
 
-// node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/add.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/add-all.js
-init_polyfills();
 var createAddAll2 = configure((api) => {
   async function* addAll(source, options = {}) {
     const controller = new AbortController();
@@ -26235,15 +25491,10 @@ function toCoreInterface5({ name: name10, hash, size, mode, mtime, mtimeNsecs })
   return output;
 }
 
-// node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/files/normalise-input-single.js
-init_polyfills();
-
 // node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/files/normalise-content.js
-init_polyfills();
 var import_err_code11 = __toESM(require_err_code(), 1);
 
 // node_modules/.pnpm/blob-to-it@2.0.10/node_modules/blob-to-it/dist/src/index.js
-init_polyfills();
 function blobToIt(blob) {
   if (typeof blob.stream === "function") {
     return browserReadableStreamToIt(blob.stream());
@@ -26301,7 +25552,6 @@ function toBytes3(chunk) {
 }
 
 // node_modules/.pnpm/ipfs-core-utils@0.18.1_encoding@0.1.13/node_modules/ipfs-core-utils/src/files/normalise-candidate-single.js
-init_polyfills();
 var import_err_code12 = __toESM(require_err_code(), 1);
 async function* normaliseCandidateSingle(input, normaliseContent3) {
   if (input === null || input === void 0) {
@@ -26370,7 +25620,6 @@ function createAdd5(options) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/cat.js
-init_polyfills();
 var createCat = configure((api) => {
   async function* cat(path, options = {}) {
     const res = await api.post("cat", {
@@ -26387,7 +25636,6 @@ var createCat = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/commands.js
-init_polyfills();
 var createCommands = configure((api) => {
   const commands = async (options = {}) => {
     const res = await api.post("commands", {
@@ -26401,7 +25649,6 @@ var createCommands = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/dns.js
-init_polyfills();
 var createDns = configure((api) => {
   const dns = async (domain, options = {}) => {
     const res = await api.post("dns", {
@@ -26419,7 +25666,6 @@ var createDns = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/get-endpoint-config.js
-init_polyfills();
 var createGetEndpointConfig = configure((api) => {
   return () => {
     const url = new URL(api.opts.base || "");
@@ -26434,7 +25680,6 @@ var createGetEndpointConfig = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/get.js
-init_polyfills();
 var createGet6 = configure((api) => {
   async function* get(path, options = {}) {
     const opts = {
@@ -26456,7 +25701,6 @@ var createGet6 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/id.js
-init_polyfills();
 var createId = configure((api) => {
   async function id(options = {}) {
     const res = await api.post("id", {
@@ -26481,7 +25725,6 @@ var createId = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/is-online.js
-init_polyfills();
 var createIsOnline = (options) => {
   const id = createId(options);
   async function isOnline(options2 = {}) {
@@ -26492,7 +25735,6 @@ var createIsOnline = (options) => {
 };
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/ls.js
-init_polyfills();
 var createLs7 = configure((api, opts) => {
   async function* ls(path, options = {}) {
     const pathStr = `${path instanceof Uint8Array ? CID2.decode(path) : path}`;
@@ -26568,7 +25810,6 @@ function typeOf(link) {
 }
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/mount.js
-init_polyfills();
 var createMount = configure((api) => {
   async function mount(options = {}) {
     const res = await api.post("dns", {
@@ -26582,7 +25823,6 @@ var createMount = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/ping.js
-init_polyfills();
 var createPing = configure((api) => {
   async function* ping(peerId, options = {}) {
     const res = await api.post("ping", {
@@ -26600,7 +25840,6 @@ var createPing = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/resolve.js
-init_polyfills();
 var createResolve3 = configure((api) => {
   async function resolve2(path, options = {}) {
     const res = await api.post("resolve", {
@@ -26618,7 +25857,6 @@ var createResolve3 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/start.js
-init_polyfills();
 var import_err_code13 = __toESM(require_err_code(), 1);
 var createStart = configure((api) => {
   const start = async (options = {}) => {
@@ -26628,7 +25866,6 @@ var createStart = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/stop.js
-init_polyfills();
 var createStop = configure((api) => {
   async function stop(options = {}) {
     const res = await api.post("shutdown", {
@@ -26642,7 +25879,6 @@ var createStop = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/version.js
-init_polyfills();
 var createVersion2 = configure((api) => {
   async function version(options = {}) {
     const res = await api.post("version", {
@@ -26659,7 +25895,6 @@ var createVersion2 = configure((api) => {
 });
 
 // node_modules/.pnpm/ipfs-http-client@60.0.1_encoding@0.1.13/node_modules/ipfs-http-client/src/index.js
-var import_glob_source = __toESM(require_glob_source(), 1);
 var import_url_source = __toESM(require_url_source(), 1);
 function create4(options = {}) {
   const id = {
@@ -26753,7 +25988,6 @@ async function downloadFromIPFS(cid) {
 }
 
 // src/ui/app.ts
-window.Buffer = import_buffer4.Buffer;
 var secureStorage = new SecureStorageService();
 function setupMnemonicToggle(spanId, buttonId, mnemonic) {
   const span = document.getElementById(spanId);
@@ -26802,16 +26036,6 @@ function setupCopyButton(buttonId, textToCopy) {
     });
   }
 }
-document.getElementById("togglePin")?.addEventListener("click", () => {
-  const pinInput = document.getElementById("pinInput");
-  const togglePin = document.getElementById("togglePin");
-  if (pinInput && togglePin) {
-    const isPassword = pinInput.type === "password";
-    pinInput.type = isPassword ? "text" : "password";
-    togglePin.innerText = isPassword ? "\u{1F648}" : "\u{1F441}\uFE0F";
-    togglePin.setAttribute("aria-label", isPassword ? "Hide PIN" : "Show PIN");
-  }
-});
 document.getElementById("pinInput")?.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
     e.target.blur();

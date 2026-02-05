@@ -22,8 +22,7 @@ class MockWorker {
   postMessage(message: any) {
     const { requestId } = message;
     if (message.type === 'getNode') {
-      const seed = Buffer.alloc(32);
-      seed.fill(1);
+      const seed = Uint8Array.from(Buffer.alloc(32).fill(1));
       const root = bip32.fromSeed(seed);
       const child = root.derivePath(`m/84'/0'/0'/0/${message.payload.index}`);
       this.onmessage({

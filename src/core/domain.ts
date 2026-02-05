@@ -62,7 +62,7 @@ export class Account {
           break;
         case AddressType.Taproot: {
           // X-only pubkey for Taproot
-          const internalPubkey = Buffer.from(this.node.publicKey.slice(1, 33));
+          const internalPubkey = Uint8Array.from(this.node.publicKey.slice(1, 33));
           result = bitcoin.payments.p2tr({
             internalPubkey,
             network: this.network,
@@ -220,4 +220,14 @@ export interface StateChainCoin {
   stateChainId: string;
   lockTime: number;
   isSpent: boolean;
+}
+
+export interface UnifiedBalance {
+  total: Amount;
+  layers: {
+    l1: Balance;
+    l2: Balance;
+    sidechains: Balance[];
+    statechains: Balance[];
+  };
 }

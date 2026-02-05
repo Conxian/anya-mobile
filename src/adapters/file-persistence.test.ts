@@ -11,7 +11,8 @@ describe('FilePersistence', () => {
 
   afterEach(async () => {
     // Clean up the test directory after each test.
-    await fs.rm(TEST_DATA_DIR, { recursive: true, force: true });
+    // ⚡ Bolt: Using any cast for 'rm' as it might be missing in some node type definitions despite being present at runtime.
+    await (fs as any).rm(TEST_DATA_DIR, { recursive: true, force: true });
   });
 
   it('should save and load a wallet', async () => {

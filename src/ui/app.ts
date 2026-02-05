@@ -1,5 +1,4 @@
-import { Buffer } from 'buffer';
-(window as any).Buffer = Buffer;
+import './palette-init';
 import { createWallet } from '../core/wallet';
 import { SecureStorageService } from '../services/secure-storage';
 import { uploadToIPFS, downloadFromIPFS } from '../services/ipfs';

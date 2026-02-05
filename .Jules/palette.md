@@ -16,3 +16,7 @@
 ## 2024-08-19 - Consistent Styling and Focus States for All Input Types
 **Learning:** Developers often target only `input[type="text"]` when styling forms, inadvertently leaving `password` inputs and `select` elements with default browser styles. This leads to a fragmented UI and, more critically, can break keyboard accessibility if `:focus-visible` styles are not also broadly applied.
 **Action:** Always ensure form styles (borders, padding, margins) and accessibility enhancements (like custom focus rings) are applied to all relevant interactive elements, including `password` inputs and `select` boxes, to maintain a cohesive and inclusive user experience.
+
+## 2025-02-05 - Encoding and Initialization Order for UI Reliability
+**Learning:** Using emojis in the UI requires an explicit `<meta charset="UTF-8">` tag in the HTML head to prevent mojibake rendering. Furthermore, in apps with heavy dependencies that might crash during initialization, critical UI enhancements (like password toggles) should be initialized as early as possible, ideally in a dedicated file imported first, to ensure basic interactivity remains functional even if core logic fails.
+**Action:** Always include the UTF-8 meta tag when using emojis and separate UI initialization logic from heavy domain logic to improve resilience and perceived reliability.

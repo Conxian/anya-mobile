@@ -5,16 +5,20 @@ This document provides a comprehensive review of the development environment and
 ## 1. Vision: The Best Full Bitcoin Wallet
 
 To achieve the goal of being the best full Bitcoin wallet, we support:
-- **All Layers**: L1, Lightning (L2), Sidechains (Liquid, Stacks), and State Chains.
-- **Advanced Protocols**: Taproot, Miniscript, Musig2, Silent Payments.
+- **All Layers**: L1, Lightning (L2), Sidechains (Liquid, Stacks), and State Chains (Mercury, Ark).
+- **Advanced Protocols**: Taproot, Miniscript, Musig2, Silent Payments, Ecash.
 - **Self-Sovereignty**: Non-custodial by default, optional self-hosting of backends (Electrum, Lightning nodes).
 
 ## 2. Best-in-Class Tool Selection
 
-### 2.1. Layer 1 (Base Layer)
+### 2.1. Layer 1 (Base Layer) & Advanced Scripting
 *   **Primary Tool:** `bitcoinjs-lib` (v7)
 *   **Integration:** Full support for P2PKH, P2WPKH, and P2TR (Taproot).
-*   **Status:** Production-ready.
+*   **Advanced Features:**
+    *   **Miniscript:** For complex spending conditions and multi-sig policies.
+    *   **Musig2:** For efficient n-of-n multi-signature schemes (BIP 327).
+    *   **Silent Payments:** For reusable, privacy-preserving payment addresses (BIP 352).
+*   **Status:** Production-ready (Miniscript/Musig2/Silent Payments in integration).
 
 ### 2.2. Layer 2 (Lightning Network)
 *   **Primary Tool:** **lightningdevkit (LDK)**
@@ -27,8 +31,11 @@ To achieve the goal of being the best full Bitcoin wallet, we support:
 *   **Status:** Beta.
 
 ### 2.4. State Chains & Swaps
-*   **Tools:** **Mercury Layer SDK** & **boltz-core**
+*   **Tools:** **Mercury Layer SDK**, **Ark**, & **boltz-core**
 *   **Integration:** `StateChainService` port defined with mock adapter; Boltz integration planned for Phase 4.
+*   **Protocols:**
+    *   **Mercury Layer:** Instant off-chain UTXO transfers.
+    *   **Ark:** Trustless off-chain payments via virtual UTXOs.
 *   **Status:** Planning/Mock.
 
 ### 2.5. Stacks & Smart Contracts

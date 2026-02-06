@@ -41,7 +41,9 @@ This document outlines the findings for achieving "best-in-class" full Bitcoin f
 | **L1 Core** | `bitcoinjs-lib` (v7) | ✅ Implemented (w/ Taproot) |
 | **Lightning** | `lightningdevkit` (LDK) | 🏗️ Integration In Progress |
 | **Liquid** | `liquidjs-lib` | ✅ Adapter Implemented |
-| **State Chains** | Mercury Layer | 📅 Phase 3 |
+| **State Chains** | Mercury Layer / Ark | 📅 Phase 3 |
+| **Silent Payments**| `@bitcoinerlab/silent-payments` | 📅 Phase 4 |
+| **Musig2** | `@noble/curves` / `musig2` | 🏗️ Integration In Progress |
 | **Smart Contracts**| `@stacks/transactions` | ✅ Adapter Implemented |
 | **Swaps** | `boltz-core` | ✅ Installed / Ready |
 

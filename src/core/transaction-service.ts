@@ -62,6 +62,7 @@ export class TransactionServiceImpl implements TransactionService {
       const inputData: any = {
         hash: input.txid,
         index: input.vout,
+        sequence: input.sequence ?? 0xfffffffd, // ⚡ Bolt: Enable Opt-In RBF (BIP 125) by default.
       };
 
       if (sourceAccount.addressType === AddressType.Legacy) {

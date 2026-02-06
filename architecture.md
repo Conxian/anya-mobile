@@ -2,54 +2,36 @@
 
 ## 1. Introduction
 
-This document describes the architecture of the multi-layer Bitcoin wallet. The architecture is based on the Ports and Adapters (or Hexagonal) pattern, which is designed to create a loosely coupled system that is easy to test, maintain, and extend.
+This document describes the architecture of the multi-layer Bitcoin wallet. The architecture is based on the **Ports and Adapters (or Hexagonal)** pattern, designed to create a loosely coupled system that is easy to test, maintain, and extend.
 
 ## 2. Core Principles
 
-*   **Separation of Concerns:** The core logic of the wallet is separated from the external services it interacts with.
-*   **Dependency Inversion:** The core logic does not depend on the specific technologies used to implement the external services. Instead, it depends on abstract interfaces (the "ports").
-*   **Modularity:** The wallet is composed of small, independent modules that can be developed and tested in isolation.
+*   **Separation of Concerns:** Core business logic is strictly separated from external infrastructure (blockchains, databases, UIs).
+*   **Dependency Inversion:** The core logic depends on abstract interfaces (Ports), while implementations (Adapters) depend on these Ports.
+*   **Modularity:** Features are organized into independent modules (e.g., L1, Lightning, Sidechains) that interact through well-defined interfaces.
 
-## 3. High-Level Architecture
+## 3. Architecture Layers
 
-The wallet is divided into three main parts:
+### 3.1. The Core (Domain)
+Contains the essential business rules and data models:
+- **Models:** `Account`, `Wallet`, `Transaction`, `Asset`.
+- **Services:** `WalletServiceImpl`, `TransactionServiceImpl`, `UnifiedBalanceService`.
+- **Ports:** Interfaces for external interaction (e.g., `BlockchainClient`, `Persistence`).
 
-*   **The Core:** This is the heart of the wallet. It contains the business logic for managing accounts, creating transactions, and interacting with the different blockchain layers. The core is completely independent of any specific technology.
-*   **The Ports:** These are the interfaces that define how the core interacts with the outside world. There are two types of ports:
-    *   **Driving Ports:** These are the interfaces that are used by the outside world to interact with the core. For example, the user interface will use a driving port to send a transaction.
-    *   **Driven Ports:** These are the interfaces that are used by the core to interact with the outside world. For example, the core will use a driven port to get the latest price of Bitcoin from an oracle.
-*   **The Adapters:** These are the implementations of the ports. They are the "glue" that connects the core to the specific technologies used in the wallet. There are two types of adapters:
-    *   **Driving Adapters:** These are the adapters that drive the core. For example, the user interface is a driving adapter.
-    *   **Driven Adapters:** These are the adapters that are driven by the core. For example, a Chainlink oracle adapter is a driven adapter.
+### 3.2. The Ports
+Abstract interfaces defining "what" needs to be done, without specifying "how":
+- **Driving Ports:** Used by external agents (UI, CLI) to trigger core logic.
+- **Driven Ports:** Used by the core to interact with the outside world (Blockchains, Oracles).
 
-## 4. Diagram
+### 3.3. The Adapters
+Concrete implementations of the Ports:
+- **Driving Adapters:** Web UI (TypeScript/HTML), CLI (planned).
+- **Driven Adapters:** `ElectrumBlockchainClient`, `BlockstreamClient`, `LiquidBlockchainClient`, `FilePersistence`.
 
-```
-+-----------------------------------------------------------------+
-|                                                                 |
-|      +-----------------+      +-----------------+               |
-|      | Driving Adapter |      | Driving Adapter |               |
-|      | (e.g., UI)      |      | (e.g., CLI)     |               |
-|      +-------+---------+      +--------+--------+               |
-|              |                         |                        |
-|              |       +-----------------+-------+                |
-|              +-------> Driving Port (e.g., API) |                |
-|                      |                         |                |
-|                      |          CORE           |                |
-|                      |                         |                |
-|                      |  Driven Port (e.g., DB) <-------+         |
-|                      +-----------------+-------+        |         |
-|                                        |                |         |
-|              +-------------------------+                |         |
-|              |                                          |         |
-|      +-------+---------+      +-----------------+       |         |
-|      | Driven Adapter  |      | Driven Adapter  |       |         |
-|      | (e.g., Oracle)  |      | (e.g., Node RPC)|       |         |
-|      +-----------------+      +-----------------+       |         |
-|                                                         |         |
-+-----------------------------------------------------------------+
-```
+## 4. Current Progress & Next Steps
 
-## 5. Next Steps
+The architectural foundation is fully established. Most core ports for L1, L2, and Sidechains are defined, and production-ready adapters for L1 are implemented.
 
-The next step is to define the specific ports and adapters that will be needed for the wallet. This will be done in a separate document.
+**Current Focus:**
+- Transitioning Lightning and State Chain adapters from mocks to functional implementations (LDK, Mercury).
+- Implementing unified transaction history across all adapters.

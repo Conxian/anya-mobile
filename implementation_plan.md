@@ -1,127 +1,52 @@
 # Implementation Plan: Multi-Layer Bitcoin Wallet
 
-This document outlines the implementation plan for the multi-layer Bitcoin wallet. The plan is divided into several phases, with each phase having a specific set of goals and deliverables.
+This document outlines the implementation plan for the multi-layer Bitcoin wallet.
 
-## Progress
+## Overall Progress
 
-### Phase 1: Core Logic and Basic Infrastructure
+- [X] **Phase 1: Core Logic & Infrastructure**
+- [X] **Phase 1.5: Decentralized Web App PoC**
+- [X] **Phase 2: Bitcoin L1 Excellence**
+- [/] **Phase 3: Lightning & State Chains (IN PROGRESS)**
+- [ ] **Phase 4: Advanced Privacy & Swaps**
 
-- [X] Project Setup
-- [X] Implement Core Data Structures
-- [X] Implement Driving Ports (`WalletService`, `AccountService`, and `TransactionService`)
-- [ ] Implement Driven Ports
-- [ ] Implement Basic Adapters
-- [X] Unit Testing
+---
 
-### Phase 1.5: Decentralized Web App Proof-of-Concept
+## Phase 1: Core Logic and Basic Infrastructure [COMPLETED]
 
-- [X] Research Decentralized Technologies
-- [X] Setup Development Environment
-- [X] Implement Decentralized Storage (IPFS)
-- [X] Implement Decentralized Hosting (Fleek)
-- [X] Implement Core Wallet Logic
-- [X] Build Basic Frontend UI
-
-## Phase 1: Core Logic and Basic Infrastructure
-
-*   **Goal:** To implement the core logic of the wallet and to set up the basic infrastructure for the project.
+*   **Goal:** To implement the core logic of the wallet and set up basic infrastructure.
 *   **Tasks:**
-    1.  **Project Setup:**
-        *   Initialize the project structure, including separate modules for the core, adapters, and UI.
-        *   Set up the build system and dependency management.
-    2.  **Implement Core Data Structures:**
-        *   Implement the core data structures, such as `Wallet`, `Account`, `Transaction`, `Asset`, etc.
-    3.  **Implement Driving Ports:**
-        *   Implement the `WalletService`, `AccountService`, and `TransactionService` interfaces.
-    4.  **Implement Driven Ports:**
-        *   Define the interfaces for `BlockchainClient`, `OracleClient`, and `Persistence`.
-    5.  **Implement Basic Adapters:**
-        *   Implement a `FilePersistence` adapter for saving and loading the wallet.
-        *   Implement a `MockBlockchainClient` for testing purposes.
-    6.  **Unit Testing:**
-        *   Write comprehensive unit tests for the core logic.
+    *   [X] Project Setup: Initialize structure, build system, and dependencies.
+    *   [X] Core Data Structures: `Wallet`, `Account`, `Transaction`, `Asset`.
+    *   [X] Driving Ports: `WalletService`, `AccountService`, `TransactionService`.
+    *   [X] Driven Ports: `BlockchainClient`, `OracleClient`, `Persistence`.
+    *   [X] Basic Adapters: `FilePersistence`, `MockBlockchainClient`.
+    *   [X] Unit Testing: Comprehensive coverage for core logic.
 
-## Phase 1.5: Decentralized Web App Proof-of-Concept
+## Phase 2: Bitcoin L1 Excellence & UI [COMPLETED]
 
-*   **Goal:** To build a proof-of-concept for a decentralized web application version of the wallet.
+*   **Goal:** Add robust support for Bitcoin L1 and create the SPA frontend.
 *   **Tasks:**
-    1.  **Research Decentralized Technologies:**
-        *   Research and select suitable technologies for decentralized storage, hosting, and domains.
-    2.  **Setup Development Environment:**
-        *   Install and configure the necessary CLI tools and libraries.
-    3.  **Implement Decentralized Storage (IPFS):**
-        *   Implement a service for uploading and downloading data to IPFS.
-    4.  **Implement Decentralized Hosting (Fleek):**
-        *   Prepare the project for deployment to Fleek.
-    5.  **Implement Core Wallet Logic:**
-        *   Implement the logic for creating and managing wallets.
-    6.  **Build Basic Frontend UI:**
-        *   Create a simple user interface for interacting with the wallet.
+    *   [X] Bitcoin L1 Adapters: `BlockstreamClient` (Esplora) and `ElectrumBlockchainClient`.
+    *   [X] Taproot Support: P2TR signing and address generation.
+    *   [X] GUI Setup: TypeScript SPA in `public/` with `esbuild`.
+    *   [X] Crypto Offloading: `CryptoWorkerClient` for responsive UI.
+    *   [X] Unified Balance: Consolidated view of all layers via `UnifiedBalanceService`.
 
-## Phase 2: Bitcoin L1 and GUI Scaffolding
+## Phase 3: Lightning & State Chains [IN PROGRESS]
 
-*   **Goal:** To add support for Bitcoin L1 and to create the basic scaffolding for the graphical user interface.
+*   **Goal:** Add functional support for Lightning Network and Mercury Layer State Chains.
 *   **Tasks:**
-    1.  **Implement Bitcoin L1 Adapter:**
-        *   Implement a `BitcoinNodeClient` that interacts with a Bitcoin node (e.g., via RPC).
-    2.  **GUI Setup:**
-        *   Set up the GUI project using a cross-platform framework (e.g., Tauri, React Native).
-        *   Create the basic UI components, such as the main window, navigation, and basic views.
-    3.  **Connect GUI to Core:**
-        *   Connect the GUI to the core logic via the driving ports.
-    4.  **L1 Functionality:**
-        *   Implement the UI for creating a wallet, viewing balances, and sending/receiving Bitcoin L1 transactions.
+    *   [X] Define Ports: `LightningService` and `StateChainService`.
+    *   [/] Lightning Integration: Transition from `MockLightningClient` to functional LDK-WASM node.
+    *   [ ] State Chain Integration: Implement functional Mercury Layer client.
+    *   [ ] Multi-Layer History: Consolidate transaction history from all adapters.
 
-## Phase 3: Lightning Network and Stacks Integration
+## Phase 4: Advanced Privacy & Swaps [PLANNED]
 
-*   **Goal:** To add support for the Lightning Network and Stacks.
+*   **Goal:** Enhance privacy and interoperability.
 *   **Tasks:**
-    1.  **Implement Lightning Adapter:**
-        *   Implement a `LightningNodeClient` that interacts with a Lightning node.
-    2.  **Implement Stacks Adapter:**
-        *   Implement a `StacksNodeClient` that interacts with a Stacks node.
-    3.  **GUI Integration:**
-        *   Add UI components for managing Lightning channels, creating and paying Lightning invoices.
-        *   Add UI components for viewing Stacks balances and interacting with Clarity smart contracts.
-    4.  **Implement Stacks "Stacking":**
-        *   Implement the `StakingService` port.
-        *   Implement the Stacks "Stacking" functionality in the GUI.
-
-## Phase 4: Liquid and Rootstock Integration
-
-*   **Goal:** To add support for the Liquid Network and Rootstock.
-*   **Tasks:**
-    1.  **Implement Liquid Adapter:**
-        *   Implement a `LiquidNodeClient` that interacts with a Liquid node.
-    2.  **Implement Rootstock Adapter:**
-        *   Implement a `RootstockNodeClient` that interacts with a Rootstock node.
-    3.  **GUI Integration:**
-        *   Add UI components for managing Liquid assets and confidential transactions.
-        *   Add UI components for interacting with EVM-compatible smart contracts on Rootstock.
-
-## Phase 5: Cross-Chain and Oracle Integration
-
-*   **Goal:** To add support for cross-chain transfers and real-time price data.
-*   **Tasks:**
-    1.  **Implement Oracle Adapters:**
-        *   Implement `PythOracleClient` and/or `DiaOracleClient` to fetch real-time price data.
-    2.  **Implement Cross-Chain Adapters:**
-        *   Implement adapters for Wormhole and Chainlink CCIP.
-    3.  **GUI Integration:**
-        *   Display real-time price data in the UI.
-        *   Create a user-friendly interface for cross-chain transfers.
-
-## Phase 6: Testing, Security, and Deployment
-
-*   **Goal:** To thoroughly test the wallet, to perform a security audit, and to prepare for deployment.
-*   **Tasks:**
-    1.  **Integration Testing:**
-        *   Write integration tests for all the adapters.
-    2.  **End-to-End Testing:**
-        *   Perform comprehensive end-to-end testing of all wallet features.
-    3.  **Security Audit:**
-        *   Conduct a thorough security audit of the entire codebase.
-    4.  **Deployment:**
-        *   Set up a build and release pipeline.
-        *   Package the wallet for all target platforms.
-        *   Publish the wallet to the relevant app stores.
+    *   [ ] Silent Payments: BIP 352 implementation.
+    *   [ ] Boltz Swaps: Trustless L1/L2/Sidechain swaps.
+    *   [ ] Hardware Wallet Support: Ledger and Trezor integration.
+    *   [ ] Miniscript: Support for complex spending conditions.

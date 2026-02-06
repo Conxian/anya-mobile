@@ -144,21 +144,32 @@ document.getElementById('createWallet')?.addEventListener('click', async () => {
           <h3>Security</h3>
           <p>
             <strong>Mnemonic:</strong>
-            <span id="mnemonic-value"></span>
-            <button id="toggleMnemonic" title="Show/Hide mnemonic" aria-label="Show mnemonic">👁️</button>
-            <button id="copyMnemonic" title="Copy mnemonic to clipboard" aria-label="Copy mnemonic to clipboard">📋</button>
+            <code id="mnemonic-value"></code>
+            <button id="toggleMnemonic" class="btn-icon" title="Show/Hide mnemonic" aria-label="Show mnemonic">👁️</button>
+            <button id="copyMnemonic" class="btn-icon" title="Copy mnemonic to clipboard" aria-label="Copy mnemonic to clipboard">📋</button>
           </p>
         </div>
         <div class="wallet-section">
           <h3>L1 - Bitcoin</h3>
-          <p><strong>Address:</strong> ${address} <button id="copyAddress" title="Copy address to clipboard" aria-label="Copy address to clipboard">📋</button></p>
+          <p><strong>Address:</strong> <code>${address}</code> <button id="copyAddress" class="btn-icon" title="Copy address to clipboard" aria-label="Copy address to clipboard">📋</button></p>
         </div>
         <div id="unified-balance" class="wallet-section">
           <h3>Unified Balance</h3>
           <p>Loading balances across all layers...</p>
         </div>
-        <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
+        <div class="wallet-section">
+          <p id="ipfs-status"><strong>IPFS CID:</strong> Uploading...</p>
+        </div>
+        <div class="action-container">
+          <button id="closeWallet" title="Close and clear wallet view" aria-label="Close wallet">Close Wallet</button>
+        </div>
       `;
+
+      document.getElementById('closeWallet')?.addEventListener('click', () => {
+        if (confirm('Close wallet view? This will clear the sensitive information from the screen.')) {
+          walletInfo.innerHTML = '';
+        }
+      });
     }
 
     // Update unified balance
@@ -173,12 +184,12 @@ document.getElementById('createWallet')?.addEventListener('click', async () => {
       if (balanceDiv) {
         balanceDiv.innerHTML = `
           <h3>Unified Balance</h3>
-          <ul>
-            <li><strong>Layer 1:</strong> ${balances.l1.amount.value} BTC</li>
-            <li><strong>Lightning (L2):</strong> ${balances.l2.amount.value} BTC</li>
-            <li><strong>Liquid (Sidechain):</strong> ${Number(balances.sidechain.amount.value) / 1e8} L-BTC</li>
+          <ul class="balance-list">
+            <li>🟠 <strong>Layer 1:</strong> ${balances.l1.amount.value} BTC</li>
+            <li>⚡ <strong>Lightning (L2):</strong> ${balances.l2.amount.value} BTC</li>
+            <li>💧 <strong>Liquid (Sidechain):</strong> ${Number(balances.sidechain.amount.value) / 1e8} L-BTC</li>
           </ul>
-          <p><strong>Total Wealth:</strong> ${Number(balances.total) / 1e8} BTC equivalent</p>
+          <p class="total-wealth"><strong>Total Wealth:</strong> ${Number(balances.total) / 1e8} BTC equivalent</p>
         `;
       }
     }).catch(err => {
@@ -200,8 +211,8 @@ document.getElementById('createWallet')?.addEventListener('click', async () => {
       const ipfsStatus = document.getElementById('ipfs-status');
       if (ipfsStatus) {
         ipfsStatus.innerHTML = `
-          <strong>IPFS CID:</strong> ${cidStr}
-          <button id="copyCID" title="Copy CID to clipboard" aria-label="Copy CID to clipboard">📋</button>
+          <strong>IPFS CID:</strong> <code>${cidStr}</code>
+          <button id="copyCID" class="btn-icon" title="Copy CID to clipboard" aria-label="Copy CID to clipboard">📋</button>
         `;
       }
       setupCopyButton('copyCID', cidStr);
@@ -255,16 +266,33 @@ document.getElementById('loadWallet')?.addEventListener('click', async () => {
 
     if (walletInfo) {
       walletInfo.innerHTML = `
-        <p>
-          <strong>Mnemonic (Decrypted):</strong>
-          <span id="loaded-mnemonic-value"></span>
-          <button id="toggleLoadedMnemonic" title="Show/Hide mnemonic" aria-label="Show mnemonic">👁️</button>
-          <button id="copyLoadedMnemonic" title="Copy mnemonic to clipboard" aria-label="Copy mnemonic to clipboard">📋</button>
-        </p>
-        <p><strong>Original Address:</strong> ${loadedData.address}</p>
+        <div class="wallet-section">
+          <h3>Security</h3>
+          <p>
+            <strong>Mnemonic (Decrypted):</strong>
+            <code id="loaded-mnemonic-value"></code>
+            <button id="toggleLoadedMnemonic" class="btn-icon" title="Show/Hide mnemonic" aria-label="Show mnemonic">👁️</button>
+            <button id="copyLoadedMnemonic" class="btn-icon" title="Copy mnemonic to clipboard" aria-label="Copy mnemonic to clipboard">📋</button>
+          </p>
+        </div>
+        <div class="wallet-section">
+          <h3>L1 - Bitcoin</h3>
+          <p><strong>Original Address:</strong> <code>${loadedData.address}</code> <button id="copyLoadedAddress" class="btn-icon" title="Copy address to clipboard" aria-label="Copy address to clipboard">📋</button></p>
+        </div>
+        <div class="action-container">
+          <button id="closeLoadedWallet" title="Close and clear wallet view" aria-label="Close wallet">Close Wallet</button>
+        </div>
       `;
+
+      document.getElementById('closeLoadedWallet')?.addEventListener('click', () => {
+        if (confirm('Close wallet view? This will clear the sensitive information from the screen.')) {
+          walletInfo.innerHTML = '';
+        }
+      });
+
       setupMnemonicToggle('loaded-mnemonic-value', 'toggleLoadedMnemonic', mnemonic);
       setupCopyButton('copyLoadedMnemonic', mnemonic);
+      setupCopyButton('copyLoadedAddress', loadedData.address);
     }
   } catch (err) {
     console.error('Failed to load wallet:', err);

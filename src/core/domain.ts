@@ -195,6 +195,7 @@ export interface UTXO {
   txid: string;
   vout: number;
   value: bigint; // in satoshis
+  sequence?: number; // Optional sequence number for RBF support
 }
 
 // --- Layer 2 & Sidechains ---

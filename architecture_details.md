@@ -4,78 +4,56 @@ This document provides a detailed breakdown of the ports and adapters for the mu
 
 ## 1. Driving Ports (API)
 
-These are the interfaces that the outside world (e.g., the UI) will use to interact with the wallet's core logic.
+These interfaces allow the UI to drive the core logic.
 
-### 1.1. `WalletService`
+### 1.1. `WalletService` [COMPLETED]
+- `createWallet(passphrase: string)`, `loadWallet()`, `lock/unlock`.
 
-*   `createWallet(passphrase: string): Wallet`
-*   `loadWallet(passphrase: string): Wallet`
-*   `lockWallet()`
-*   `unlockWallet(passphrase: string)`
-*   `getWalletStatus(): WalletStatus`
+### 1.2. `AccountService` [COMPLETED]
+- `getAccounts()`, `createAccount()`, `getAccountBalance()`.
 
-### 1.2. `AccountService`
+### 1.3. `TransactionService` [COMPLETED]
+- `createTransaction()`, `signTransaction()`, `broadcastTransaction()`.
+- Support for Legacy, SegWit, and Taproot.
 
-*   `getAccounts(wallet: Wallet): Account[]`
-*   `createAccount(wallet: Wallet, name: string): Account`
-*   `getAccountBalance(account: Account, asset: Asset): Balance`
-
-### 1.3. `TransactionService`
-
-*   `createTransaction(sourceAccount: Account, destinationAddress: string, asset: Asset, amount: Amount): Transaction`
-*   `signTransaction(transaction: Transaction, privateKey: PrivateKey): SignedTransaction`
-*   `broadcastTransaction(signedTransaction: SignedTransaction): TransactionID`
-*   `getTransactionHistory(account: Account): Transaction[]`
-
-### 1.4. `StakingService`
-
-*   `getStakingOptions(asset: Asset): StakingOption[]`
-*   `stake(account: Account, option: StakingOption, amount: Amount): StakingPosition`
-*   `unstake(position: StakingPosition): Transaction`
-*   `getStakingPositions(account: Account): StakingPosition[]`
+### 1.4. `UnifiedBalanceService` [COMPLETED]
+- Consolidated view of L1, L2, and Sidechain balances.
 
 ## 2. Driven Ports (SPI)
 
-These are the interfaces that the core logic will use to interact with the outside world (e.g., blockchain nodes, oracles).
+These interfaces are used by the core to communicate with external systems.
 
-### 2.1. `BlockchainClient`
+### 2.1. `BlockchainClient` (L1) [COMPLETED]
+- `getBalance()`, `getUTXOs()`, `broadcast()`, `getTransactionHistory()`.
 
-*   `getBalance(address: string, asset: Asset): Balance`
-*   `getTransaction(transactionID: TransactionID): Transaction`
-*   `broadcastTransaction(signedTransaction: SignedTransaction): TransactionID`
-*   `getFeeEstimates(asset: Asset): FeeEstimates`
+### 2.2. `LightningService` (L2) [INITIAL/MOCK]
+- `getBalance()`, `createInvoice()`, `payInvoice()`.
 
-### 2.2. `OracleClient`
+### 2.3. `SidechainService` (Liquid/Stacks) [INITIAL/MOCK]
+- `getBalance()`, `transferAsset()`.
 
-*   `getPrice(asset: Asset, currency: string): Price`
+### 2.4. `Persistence` [COMPLETED]
+- `saveWallet()`, `loadWallet()`. Implementation: `FilePersistence`.
 
-### 2.3. `Persistence`
-
-*   `saveWallet(wallet: Wallet)`
-*   `loadWallet(): Wallet`
-
-## 3. Adapters
-
-These are the implementations of the ports.
+## 3. Adapters (Implemented)
 
 ### 3.1. Driving Adapters
-
-*   **GUI:** A graphical user interface for desktop and mobile platforms.
-*   **CLI:** A command-line interface for advanced users and automation.
-*   **API Server:** A server that exposes the driving ports as a REST or gRPC API.
+- **Web UI:** TypeScript-based SPA in `src/ui/app.ts`.
 
 ### 3.2. Driven Adapters
+- **BlockstreamClient:** Esplora API integration.
+- **ElectrumBlockchainClient:** Electrum protocol integration.
+- **LiquidBlockchainClient:** `liquidjs-lib` based balance fetching.
+- **FilePersistence:** Local storage with encryption.
+- **CryptoWorkerClient:** Offloads crypto to Web Workers.
 
-*   **BitcoinNodeClient:** An implementation of `BlockchainClient` that interacts with a Bitcoin node.
-*   **LightningNodeClient:** An implementation of `BlockchainClient` that interacts with a Lightning node.
-*   **LiquidNodeClient:** An implementation of `BlockchainClient` that interacts with a Liquid node.
-*   **RootstockNodeClient:** An implementation of `BlockchainClient` that interacts with a Rootstock node.
-*   **StacksNodeClient:** An implementation of `BlockchainClient` that interacts with a Stacks node.
-*   **PythOracleClient:** An implementation of `OracleClient` that gets price data from the Pyth network.
-*   **DiaOracleClient:** An implementation of `OracleClient` that gets price data from the DIA oracle.
-*   **FilePersistence:** An implementation of `Persistence` that saves the wallet to an encrypted file.
-*   **DatabasePersistence:** An implementation of `Persistence` that saves the wallet to a database.
+## 4. Implementation Status Table
 
-## 4. Next Steps
-
-With the ports and adapters defined, the next step is to start implementing the core logic and the adapters. The core logic can be implemented and tested in isolation, and the adapters can be developed in parallel.
+| Port | Status | Primary Adapter |
+| --- | --- | --- |
+| L1 Blockchain | Done | `ElectrumBlockchainClient` / `BlockstreamClient` |
+| Key Management| Done | `CryptoWorkerClient` (BIP39/BIP32) |
+| Persistence   | Done | `FilePersistence` |
+| Lightning     | Mock | `MockLightningClient` (LDK Integration in progress) |
+| Sidechains    | Beta | `LiquidBlockchainClient`, `MockLiquidClient` |
+| Oracles       | Mock | `MockOracleClient` |

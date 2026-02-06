@@ -2,34 +2,36 @@
 
 ## 1. Executive Summary
 
-This document outlines a strategic roadmap for the development of the Bitcoin Layer 1 (L1) functionality within the multi-layer wallet. Our objective is to build a secure, robust, and feature-complete L1 wallet that serves as a solid foundation for all other layers.
+This document outlines the strategic roadmap for the development of Bitcoin Layer 1 (L1) functionality. Our goal is to provide a robust, secure, and performant base layer that powers all multi-layer features.
 
 ## 2. Current State
 
-The L1 implementation has progressed significantly:
-*   **Transaction Lifecycle:** `TransactionService` is implemented with support for P2WPKH transaction creation, signing, and broadcasting via the `BlockstreamClient`.
-*   **Address Type Support:** The `Account` model supports Legacy (P2PKH), Native SegWit (P2WPKH), and Taproot (P2TR) address generation.
-*   **Transaction History:** Basic transaction history retrieval is implemented in the `BlockstreamClient`.
+The L1 implementation is mature and supports:
+*   **Transaction Lifecycle:** Full lifecycle support in `TransactionServiceImpl` for creating, signing, and broadcasting.
+*   **Address Types:** Comprehensive support for Legacy (P2PKH), Native SegWit (P2WPKH), and Taproot (P2TR).
+*   **Backends:** Production-ready adapters for both Blockstream Esplora and Electrum protocols.
+*   **Optimization:** Parallelized raw transaction fetching for Legacy inputs and efficient BIP32 node caching.
 
-## 3. L1 Roadmap: Path to Excellence
+## 3. L1 Roadmap: Status & Milestones
 
-The following is a prioritized list of features required to move from an MVP to a best-in-class L1 wallet.
+### 3.1. **Phase 1: Foundation (COMPLETED)**
 
-### 3.1. **Priority 1: Multi-Address Type Signing Support**
+*   [x] **Hexagonal Architecture:** Implementation of `BlockchainClient` port and initial adapters.
+*   [x] **Native SegWit Support:** Full P2WPKH transaction support.
+*   [x] **Secure Key Management:** BIP39 mnemonics and BIP32 derivation in a secure Web Worker.
 
-*   **Implement Taproot (P2TR) Signing:** [DONE] Support for Schnorr-based Taproot Key-path spending is implemented in `TransactionServiceImpl`.
-*   **Implement Legacy (P2PKH) Signing:** [DONE] Full backward compatibility with optimized raw transaction pre-fetching.
+### 3.2. **Phase 2: Advanced Scripting & Protocols (COMPLETED)**
 
-### 3.2. **Priority 2: Robust Infrastructure (Electrum)**
+*   [x] **Taproot (P2TR) Signing:** Support for Schnorr-based Key-path spending using tweaked BIP32 nodes.
+*   [x] **Legacy (P2PKH) Optimization:** Optimized signing flow with parallelized pre-fetching of non-witness UTXOs.
+*   [x] **Electrum Integration:** Robust `ElectrumBlockchainClient` using `@mempool/electrum-client`.
 
-*   **Implement `ElectrumClient`:** [INITIAL IMPLEMENTATION] Functional `ElectrumBlockchainClient` using `@mempool/electrum-client` in `src/adapters/electrum-client.ts`. Supports balance, UTXOs, and broadcasting.
-*   **User-Configurable Nodes:** Supported by the `ElectrumBlockchainClient` constructor.
+### 3.3. **Phase 3: Robustness & Scaling (CURRENT)**
 
-### 3.3. **Priority 3: Advanced Logic (BDK Integration)**
-
-*   **Descriptor-Based Wallets:** Move to descriptors for better backup and multi-sig support.
-*   **Improved Coin Selection:** Implement more sophisticated algorithms (e.g., Branch and Bound) to optimize for fees and privacy.
+*   [ ] **Descriptor-Based Wallets:** Transition to output descriptors (BIP 380+) for better backup and multi-sig support.
+*   [ ] **Advanced Coin Selection:** Implementation of Branch and Bound or Knapsack algorithms for fee optimization.
+*   [ ] **RBF & CPFP Support:** Tools for bumping transaction fees and handling stuck transactions.
 
 ## 4. Next Steps
 
-The immediate next step is to implement Taproot signing support in the `TransactionService` and expand the architecture to support L2 and Sidechains.
+The immediate focus is transitioning to **Descriptor-based wallets** to simplify account management and prepare for multi-signature support. Additionally, we are working on **Miniscript** integration for complex spending conditions.

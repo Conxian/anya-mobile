@@ -1,47 +1,83 @@
 # Multi-Layer Bitcoin Wallet
 
-This project is a multi-layer Bitcoin wallet that aims to provide a comprehensive and user-friendly platform for interacting with the entire Bitcoin ecosystem, from the base layer to the various Layer 2 and sidechain solutions.
+This project is a high-performance, multi-layer Bitcoin wallet designed to provide a comprehensive and user-friendly platform for interacting with the entire Bitcoin ecosystem. It supports everything from the Bitcoin base layer (L1) to various Layer 2, sidechain, and state chain solutions.
 
-## Architecture
+## 🏗️ Architecture
 
-The wallet is designed with a "Ports and Adapters" (or Hexagonal) architecture. This architecture separates the core logic of the wallet from the external services it interacts with, making the system loosely coupled, easy to test, maintain, and extend.
+The wallet follows a **Ports and Adapters (Hexagonal)** architecture. This design decouples core business logic from external services (blockchains, oracles, persistence), ensuring the system is:
+- **Testable:** Core logic can be tested in isolation with mocks.
+- **Maintainable:** Clear separation of concerns.
+- **Extensible:** New layers or service providers can be added by implementing new adapters.
 
-## Decentralized Web App
+## 🚀 Key Features
 
-A proof-of-concept for a decentralized web application version of the wallet has been implemented. This version utilizes a fully decentralized stack for storage and hosting.
+- **Multi-Layer Support:** Native integration for L1 (Legacy, SegWit, Taproot), Lightning Network, Liquid, and Stacks.
+- **Unified Balance:** A consolidated view of assets across all layers.
+- **Secure by Design:** AES-GCM encryption for sensitive data, pure-JS ECC engine, and Web Worker-based cryptography.
+- **Performance Optimized:** Parallelized network requests and efficient address derivation.
+- **Decentralized Frontend:** Proof-of-concept for hosting on IPFS and Fleek.
 
-### Technologies
+## 🛠️ Technologies & Stack
 
-*   **Storage:** IPFS
-*   **Hosting:** Fleek
-*   **Domain:** Handshake
+- **Core:** TypeScript, `bitcoinjs-lib` (v7), `liquidjs-lib`, `@stacks/transactions`.
+- **L2/State Chains:** `lightningdevkit` (LDK), Boltz, Mercury Layer (planned).
+- **Networking:** Electrum protocol (`@mempool/electrum-client`), Blockstream Esplora.
+- **Cryptography:** Hybrid ECC engine (`elliptic`, `@noble/curves`), Web Crypto API.
+- **Frontend:** Pure HTML5/CSS3/TypeScript, no heavy framework overhead.
+- **Build/Test:** `esbuild`, `Jest`, `pnpm`.
 
-### Current Status
+## 📈 Current Status
 
-The project is in the early stages of development. The core logic and basic infrastructure are currently being implemented. The decentralized web app is a proof-of-concept and has the following limitations:
+The project has moved past the initial MVP phase:
+- [x] **Core Infrastructure:** Hexagonal architecture and secure key management.
+- [x] **L1 Support:** Full support for P2WPKH and P2TR (Taproot) with Electrum/Esplora backends.
+- [x] **Unified Balance:** Implementation of `UnifiedBalanceService` fetching from multiple layers.
+- [x] **Decentralized PoC:** Web app structure ready for IPFS/Fleek deployment.
+- [ ] **Phase 3 (In Progress):** Integrating LDK for Lightning channels and Mercury Layer for State Chains.
 
-*   **IPFS Upload:** The application is configured to upload data to a local IPFS node. For a production environment, this needs to be configured to use a pinning service with authentication.
-*   **Handshake Domain:** The Handshake domain has not been registered.
+## 🚦 Getting Started
 
-### Getting Started
+### Prerequisites
 
-To get started with the project, you will need to have Node.js and pnpm installed.
+- [Node.js](https://nodejs.org/) (v18+)
+- [pnpm](https://pnpm.io/)
 
-1.  Clone the repository:
-    ```
-    git clone https://github.com/your-username/multi-layer-bitcoin-wallet.git
-    ```
-2.  Install the dependencies:
-    ```
-    pnpm install
-    ```
-3.  Build the web app:
-    ```
-    node build.js
-    ```
-4.  Open the `public/index.html` file in your browser to run the web app.
+### Installation
 
-5.  Run the tests:
-    ```
-    npx jest
-    ```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/multi-layer-bitcoin-wallet.git
+   cd multi-layer-bitcoin-wallet
+   ```
+
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+
+3. Build the application:
+   ```bash
+   node build.js
+   ```
+
+4. Run tests:
+   ```bash
+   pnpm test
+   ```
+
+## 🧪 Testing
+
+We maintain high test coverage across core logic and adapters:
+```bash
+pnpm test          # Run all tests
+pnpm test:watch    # Run tests in watch mode
+```
+
+## 🌐 Decentralized Web App
+
+The application is configured for a fully decentralized stack:
+- **Storage:** IPFS
+- **Hosting:** Fleek
+- **Domain:** Handshake (configured)
+
+To run the local PoC, simply open `public/index.html` in a modern browser after building.

@@ -222,3 +222,26 @@ export interface StateChainCoin {
   lockTime: number;
   isSpent: boolean;
 }
+
+export interface LightningChannel {
+  id: string;
+  peerId: string;
+  capacity: Amount;
+  localBalance: Amount;
+  remoteBalance: Amount;
+  isActive: boolean;
+  isPublic: boolean;
+}
+
+export interface EcashMint {
+  url: string;
+  alias: string;
+}
+
+export interface EcashToken {
+  mint: EcashMint;
+  amount: Amount;
+  serialized: string;
+}
+
+export type SilentPaymentAddress = string;

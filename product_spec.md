@@ -42,9 +42,10 @@ The wallet provides native support (or planned integration) for:
 *   **L1 Excellence:** Full support for P2WPKH and P2TR.
 *   **Unified Balance:** Core logic for consolidating balances across layers.
 
-### 4.2. Phase 3: Lightning & State Chains (CURRENT)
-*   **LDK Integration:** Transition from mock clients to a functional Lightning Dev Kit (LDK) node.
-*   **Mercury Layer:** Implement State Chain coin support for off-chain Bitcoin transfers.
+### 4.2. Phase 3: Lightning, State Chains & Ecash (CURRENT)
+*   **LDK Integration:** Transition from mock clients to a functional Lightning Dev Kit (LDK) node (upgraded to v0.122+).
+*   **Mercury Layer:** Implement State Chain coin support using `mercury-layer-sdk`.
+*   **Ecash & Silent Payments:** Initial implementation of Cashu and BIP 352 protocols.
 *   **Unified History:** A consolidated view of all transaction activities across layers.
 
 ### 4.3. Phase 4: Advanced Privacy & Swaps

@@ -13,8 +13,8 @@ describe('FilePersistence', () => {
     // Clean up the test directory after each test.
     try {
       // fs.rm is available in modern Node versions and is preferred over rmdir
-      if (typeof fs.rm === 'function') {
-        await fs.rm(TEST_DATA_DIR, { recursive: true, force: true });
+      if (typeof (fs as any).rm === 'function') {
+        await (fs as any).rm(TEST_DATA_DIR, { recursive: true, force: true });
       } else {
         // Fallback for older environments
         await fs.rmdir(TEST_DATA_DIR, { recursive: true });

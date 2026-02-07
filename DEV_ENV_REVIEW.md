@@ -22,17 +22,22 @@ To achieve the goal of being the best full Bitcoin wallet, we support:
 
 ### 2.2. Layer 2 (Lightning Network)
 *   **Primary Tool:** **lightningdevkit (LDK)**
-*   **Integration:** Mock clients implemented; LDK integration in progress.
-*   **Status:** Active Development.
+*   **Integration:** Enhanced `LightningService` port with channel management; mock implementation updated.
+*   **Status:** Functional Skeleton (LDK WASM upgrade in progress).
 
-### 2.3. Sidechains (Liquid Network)
+### 2.3. Layer 3 & Privacy (Silent Payments & Ecash)
+*   **Tools:** **@bitcoinerlab/silent-payments** & **Cashu (SDK placeholder)**
+*   **Integration:** New `SilentPaymentService` and `EcashService` ports defined with initial mock adapters.
+*   **Status:** Newly Integrated (Phase 3 acceleration).
+
+### 2.4. Sidechains (Liquid Network)
 *   **Primary Tool:** **liquidjs-lib**
 *   **Integration:** `LiquidBlockchainClient` adapter implemented for balance and transaction history.
 *   **Status:** Beta.
 
-### 2.4. State Chains & Swaps
-*   **Tools:** **Mercury Layer SDK**, **Ark**, & **boltz-core**
-*   **Integration:** `StateChainService` port defined with mock adapter; Boltz integration planned for Phase 4.
+### 2.5. State Chains & Swaps
+*   **Tools:** **mercury-layer-sdk**, **Ark**, & **boltz-core**
+*   **Integration:** `StateChainService` port defined; initial Mercury SDK configuration added to `package.json`.
 *   **Protocols:**
     *   **Mercury Layer:** Instant off-chain UTXO transfers.
     *   **Ark:** Trustless off-chain payments via virtual UTXOs.

@@ -20,6 +20,10 @@ import {
   LightningInvoice,
   ConfidentialAsset,
   StateChainCoin,
+  LightningChannel,
+  EcashToken,
+  EcashMint,
+  SilentPaymentAddress,
 } from './domain';
 
 // --- Driving Ports ---
@@ -90,6 +94,23 @@ export interface LightningService {
   payInvoice(account: Account, invoice: string): Promise<TransactionID>;
   getInvoiceStatus(paymentHash: string): Promise<'pending' | 'paid' | 'expired'>;
   getBalance(account: Account): Promise<Balance>;
+
+  // Channel Management
+  openChannel(account: Account, peerId: string, amount: Amount): Promise<string>;
+  closeChannel(channelId: string): Promise<void>;
+  listChannels(account: Account): Promise<LightningChannel[]>;
+}
+
+export interface EcashService {
+  mint(mint: EcashMint, amount: Amount): Promise<EcashToken>;
+  melt(token: EcashToken, invoice: string): Promise<TransactionID>;
+  send(token: EcashToken, amount: Amount): Promise<{ sent: EcashToken; change: EcashToken }>;
+  receive(token: EcashToken): Promise<Balance>;
+}
+
+export interface SilentPaymentService {
+  generateAddress(account: Account): Promise<SilentPaymentAddress>;
+  scanForPayments(account: Account): Promise<Transaction[]>;
 }
 
 export interface SidechainService {

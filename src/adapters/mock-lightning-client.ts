@@ -5,13 +5,14 @@ import {
   LightningInvoice,
   Balance,
   TransactionID,
+  LightningChannel,
 } from '../core/domain';
 
 export class MockLightningClient implements LightningService {
   private invoices: Map<string, LightningInvoice> = new Map();
 
   async createInvoice(
-    account: Account,
+    _account: Account,
     amount: Amount,
     description: string
   ): Promise<LightningInvoice> {
@@ -29,17 +30,17 @@ export class MockLightningClient implements LightningService {
     return invoice;
   }
 
-  async payInvoice(account: Account, invoice: string): Promise<TransactionID> {
+  async payInvoice(_account: Account, _invoice: string): Promise<TransactionID> {
     return `ln-pay-${Math.random().toString(16).substring(2)}`;
   }
 
   async getInvoiceStatus(
-    paymentHash: string
+    _paymentHash: string
   ): Promise<'pending' | 'paid' | 'expired'> {
     return 'paid';
   }
 
-  async getBalance(account: Account): Promise<Balance> {
+  async getBalance(_account: Account): Promise<Balance> {
     return {
       asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 },
       amount: {
@@ -47,5 +48,40 @@ export class MockLightningClient implements LightningService {
         value: '0.1',
       },
     };
+  }
+
+  async openChannel(
+    _account: Account,
+    _peerId: string,
+    _amount: Amount
+  ): Promise<string> {
+    return `chan-${Math.random().toString(16).substring(2)}`;
+  }
+
+  async closeChannel(channelId: string): Promise<void> {
+    console.log(`Closing channel ${channelId}`);
+  }
+
+  async listChannels(_account: Account): Promise<LightningChannel[]> {
+    return [
+      {
+        id: 'mock-chan-1',
+        peerId: 'peer-1',
+        capacity: {
+          asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 },
+          value: '1000000',
+        },
+        localBalance: {
+          asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 },
+          value: '500000',
+        },
+        remoteBalance: {
+          asset: { symbol: 'BTC', name: 'Bitcoin', decimals: 8 },
+          value: '500000',
+        },
+        isActive: true,
+        isPublic: true,
+      },
+    ];
   }
 }

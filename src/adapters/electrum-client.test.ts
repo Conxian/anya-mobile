@@ -44,4 +44,19 @@ describe('ElectrumBlockchainClient', () => {
 
     jest.restoreAllMocks();
   });
+
+  it('should cache script hashes', () => {
+    const address = '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa';
+    const clientAny = client as unknown as {
+      addressToScriptHash: (addr: string) => string;
+      scriptHashCache: Map<string, string>;
+    };
+
+    const scriptHash1 = clientAny.addressToScriptHash(address);
+    const scriptHash2 = clientAny.addressToScriptHash(address);
+
+    expect(scriptHash1).toBe(scriptHash2);
+    expect(clientAny.scriptHashCache.has(address)).toBe(true);
+    expect(clientAny.scriptHashCache.get(address)).toBe(scriptHash1);
+  });
 });

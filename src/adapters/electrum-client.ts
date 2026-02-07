@@ -18,6 +18,7 @@ export class ElectrumBlockchainClient implements BlockchainClient {
   private client: any;
   private cachedFeeEstimates: FeeEstimates | null = null;
   private lastFeeFetchTime: number = 0;
+  private scriptHashCache: Map<string, string> = new Map();
 
   constructor(
     host: string,
@@ -36,10 +37,20 @@ export class ElectrumBlockchainClient implements BlockchainClient {
     await this.client.close();
   }
 
+  /**
+   * ⚡ Bolt: Cache script hashes to avoid redundant address decoding, script
+   * generation, and hashing for multiple requests to the same address.
+   */
   private addressToScriptHash(address: Address): string {
+    const cached = this.scriptHashCache.get(address);
+    if (cached) return cached;
+
     const script = bitcoin.address.toOutputScript(address, this.network);
     const hash = bitcoin.crypto.sha256(script);
-    return Buffer.from(hash).reverse().toString('hex');
+    const scriptHash = Buffer.from(hash).reverse().toString('hex');
+
+    this.scriptHashCache.set(address, scriptHash);
+    return scriptHash;
   }
 
   async getBalance(address: Address, asset: Asset): Promise<Balance> {

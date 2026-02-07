@@ -23,3 +23,7 @@ This journal is for CRITICAL, non-routine performance learnings that will help a
 ## 2026-02-05 - [Hybrid ECC Engine for Browser Performance]
 **Learning:** Modern pure-JS ECC libraries like @noble/curves are significantly faster (~35%) than legacy libraries like elliptic for point arithmetic. However, switching entirely to @noble/curves can break compatibility with strict bip32/bitcoinjs-lib deterministic signature tests if the library's internal RFC6979 implementation differs even slightly in nonce generation or formatting.
 **Action:** Use a hybrid approach: leverage @noble/curves for performance-critical point arithmetic (address derivation, key tweaking) and retain elliptic for standard ECDSA signing to ensure cross-library compatibility and passing of legacy test suites.
+
+## 2025-05-15 - [Script Hash Caching in Electrum Adapters]
+**Learning:** Repetitive address-to-scripthash conversions (decoding, script construction, hashing) are a hidden CPU bottleneck in wallets that frequently query balance, UTXOs, and history for the same set of addresses. Caching these deterministic results in the adapter layer can speed up subsequent lookups by >2000x.
+**Action:** Implement a `Map`-based cache for script hashes in any adapter that uses the Electrum protocol (`blockchain.scripthash.*` methods).

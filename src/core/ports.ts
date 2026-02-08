@@ -63,6 +63,7 @@ export interface TransactionService {
   ): Promise<DraftTransaction>;
   broadcastTransaction(signedTransaction: DraftTransaction): Promise<TransactionID>;
   getTransactionHistory(account: Account): Promise<Transaction[]>;
+  bumpFee(account: Account, transactionID: TransactionID, newFeeRate: FeeRate): Promise<DraftTransaction>;
 }
 
 export interface StakingService {
@@ -99,6 +100,11 @@ export interface LightningService {
   openChannel(account: Account, peerId: string, amount: Amount): Promise<string>;
   closeChannel(channelId: string): Promise<void>;
   listChannels(account: Account): Promise<LightningChannel[]>;
+
+  // Advanced LDK Features
+  getNodeInfo(): Promise<{ nodePubkey: string; alias?: string }>;
+  listPayments(account: Account): Promise<any[]>;
+  estimateFee(amount: Amount, speed: FeeRate): Promise<Amount>;
 }
 
 export interface EcashService {

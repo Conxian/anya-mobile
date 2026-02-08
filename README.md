@@ -15,12 +15,14 @@ The wallet follows a **Ports and Adapters (Hexagonal)** architecture. This desig
 - **Unified Balance:** A consolidated view of assets across all layers.
 - **Secure by Design:** AES-GCM encryption for sensitive data, pure-JS ECC engine, and Web Worker-based cryptography.
 - **Performance Optimized:** Parallelized network requests and efficient address derivation.
+- **Advanced Privacy:** Built-in support for Silent Payments (BIP 352) and Ecash (Cashu).
 - **Decentralized Frontend:** Proof-of-concept for hosting on IPFS and Fleek.
 
-## 🛠️ Technologies & Stack
+## 🛠️ Technologies & Stack ("Don't Recreate the Wheel")
 
 - **Core:** TypeScript, `bitcoinjs-lib` (v7), `liquidjs-lib`, `@stacks/transactions`.
-- **L2/State Chains:** `lightningdevkit` (LDK), Boltz, Mercury Layer (planned).
+- **L2/State Chains:** `lightningdevkit` (LDK), Boltz, Mercury Layer.
+- **Privacy:** `@bitcoinerlab/silent-payments`, `@cashu/cashu-ts`.
 - **Networking:** Electrum protocol (`@mempool/electrum-client`), Blockstream Esplora.
 - **Cryptography:** Hybrid ECC engine (`elliptic`, `@noble/curves`), Web Crypto API.
 - **Frontend:** Pure HTML5/CSS3/TypeScript, no heavy framework overhead.
@@ -28,12 +30,13 @@ The wallet follows a **Ports and Adapters (Hexagonal)** architecture. This desig
 
 ## 📈 Current Status
 
-The project has moved past the initial MVP phase:
+The project is now in **Phase 3**:
 - [x] **Core Infrastructure:** Hexagonal architecture and secure key management.
-- [x] **L1 Support:** Full support for P2WPKH and P2TR (Taproot) with Electrum/Esplora backends.
+- [x] **L1 Excellence:** Full support for P2WPKH and P2TR (Taproot) with Electrum/Esplora backends.
+- [x] **Advanced Privacy:** Native integration for Silent Payments (BIP 352).
 - [x] **Unified Balance:** Implementation of `UnifiedBalanceService` fetching from multiple layers.
-- [x] **Decentralized PoC:** Web app structure ready for IPFS/Fleek deployment.
-- [ ] **Phase 3 (In Progress):** Integrating LDK for Lightning channels and Mercury Layer for State Chains.
+- [ ] **Lightning Integration:** Transitioning to full LDK-WASM implementation.
+- [ ] **State Chains:** Transitioning to real Mercury Layer SDK.
 
 ## 🚦 Getting Started
 
@@ -79,5 +82,3 @@ The application is configured for a fully decentralized stack:
 - **Storage:** IPFS
 - **Hosting:** Fleek
 - **Domain:** Handshake (configured)
-
-To run the local PoC, simply open `public/index.html` in a modern browser after building.

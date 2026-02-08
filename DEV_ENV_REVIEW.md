@@ -9,50 +9,47 @@ To achieve the goal of being the best full Bitcoin wallet, we support:
 - **Advanced Protocols**: Taproot, Miniscript, Musig2, Silent Payments, Ecash.
 - **Self-Sovereignty**: Non-custodial by default, optional self-hosting of backends (Electrum, Lightning nodes).
 
-## 2. Best-in-Class Tool Selection
+## 2. Best-in-Class Tool Selection (The "Don't Recreate the Wheel" Stack)
+
+We prioritize using the most robust, well-maintained, and performant libraries in the ecosystem.
 
 ### 2.1. Layer 1 (Base Layer) & Advanced Scripting
-*   **Primary Tool:** `bitcoinjs-lib` (v7)
-*   **Integration:** Full support for P2PKH, P2WPKH, and P2TR (Taproot).
+*   **Primary Tool:** `bitcoinjs-lib` (v7) - The industry standard for JavaScript Bitcoin development.
 *   **Advanced Features:**
-    *   **Miniscript:** For complex spending conditions and multi-sig policies.
-    *   **Musig2:** For efficient n-of-n multi-signature schemes (BIP 327).
-    *   **Silent Payments:** For reusable, privacy-preserving payment addresses (BIP 352).
-*   **Status:** Production-ready (Miniscript/Musig2/Silent Payments in integration).
+    *   **Miniscript:** Use `@bitcoinerlab/descriptors` for complex spending conditions.
+    *   **Musig2:** BIP 327 implementation for efficient multi-sig.
+    *   **Silent Payments:** `@bitcoinerlab/silent-payments` (BIP 352).
+*   **Signer:** `bip32` for hierarchical deterministic keys.
+*   **ECC Engine:** Hybrid engine (Noble Curves + Elliptic) for maximum browser compatibility and performance.
 
 ### 2.2. Layer 2 (Lightning Network)
-*   **Primary Tool:** **lightningdevkit (LDK)**
-*   **Integration:** Enhanced `LightningService` port with channel management; mock implementation updated.
-*   **Status:** Functional Skeleton (LDK WASM upgrade in progress).
+*   **Primary Tool:** **lightningdevkit (LDK)** via LDK-WASM.
+*   **Why:** Provides a flexible, modular Lightning node implementation without the overhead of a full `lnd` or `cln` instance in the browser.
+*   **Status:** Integrating LDK-WASM v0.122+.
 
 ### 2.3. Layer 3 & Privacy (Silent Payments & Ecash)
-*   **Tools:** **@bitcoinerlab/silent-payments** & **Cashu (SDK placeholder)**
-*   **Integration:** New `SilentPaymentService` and `EcashService` ports defined with initial mock adapters.
-*   **Status:** Newly Integrated (Phase 3 acceleration).
+*   **Tools:** **@bitcoinerlab/silent-payments** & **@cashu/cashu-ts**
+*   **Why:** Native JS implementations of the latest privacy protocols.
+*   **Status:** Silent Payments (Production-ready integration); Ecash (Beta).
 
 ### 2.4. Sidechains (Liquid Network)
 *   **Primary Tool:** **liquidjs-lib**
-*   **Integration:** `LiquidBlockchainClient` adapter implemented for balance and transaction history.
-*   **Status:** Beta.
+*   **Integration:** Full support for Confidential Transactions and Issued Assets.
 
 ### 2.5. State Chains & Swaps
-*   **Tools:** **mercury-layer-sdk**, **Ark**, & **boltz-core**
-*   **Integration:** `StateChainService` port defined; initial Mercury SDK configuration added to `package.json`.
-*   **Protocols:**
-    *   **Mercury Layer:** Instant off-chain UTXO transfers.
-    *   **Ark:** Trustless off-chain payments via virtual UTXOs.
-*   **Status:** Planning/Mock.
+*   **Tools:** **mercury-layer-sdk** & **boltz-core**
+*   **Why:** Mercury for instant UTXO transfers; Boltz for trustless cross-layer swaps.
 
-### 2.5. Stacks & Smart Contracts
+### 2.6. Stacks & Smart Contracts
 *   **Tool:** **@stacks/transactions**
-*   **Integration:** Core support for STX balances and basic transaction signing.
-*   **Status:** Beta.
+*   **Integration:** Native STX support and Clarity contract interaction.
 
-## 3. Infrastructure & Performance
-*   **Backends:** Multi-backend support for Blockstream Esplora and Electrum (`@mempool/electrum-client`).
-*   **Parallelism:** `UnifiedBalanceService` parallelizes requests across layers to minimize latency.
-*   **Crypto Offloading:** Web Workers (`CryptoWorkerClient`) ensure UI responsiveness during heavy tasks like BIP39 derivation.
-*   **Caching:** Multi-level caching for mnemonics, seeds, and BIP32 nodes to reduce derivation time.
+## 3. Infrastructure & Performance Manifest
+
+*   **Networking:** Hybrid Electrum (`@mempool/electrum-client`) + Esplora (REST) for maximum uptime and censorship resistance.
+*   **Parallelism:** Sequential requests are prohibited for core flows (balances, history). All network calls must be parallelized.
+*   **Crypto Security:** All heavy cryptographic operations (PBKDF2, BIP32 derivation) MUST happen in a Web Worker to keep the UI at 60fps.
+*   **Precision:** Financial math MUST use `BigInt` (satoshis) to avoid floating-point errors.
 
 ## 4. Architectural Roadmap Progress
 
@@ -64,13 +61,11 @@ To achieve the goal of being the best full Bitcoin wallet, we support:
 - [x] Unified Balance Service
 
 ### Phase 3: Lightning & State Chains (CURRENT)
-- [ ] Integrate LDK-WASM for functional Lightning channels.
-- [ ] Transition from mock to real Mercury Layer implementation.
-- [ ] Unified multi-layer transaction history.
+- [x] Real Silent Payments integration (BIP 352).
+- [ ] Transition LDK Mock to real LDK-WASM.
+- [ ] Transition Mercury Mock to real `mercury-layer-sdk`.
 
 ### Phase 4: Advanced UX & Privacy (PLANNED)
-- [ ] Silent Payments (BIP 352).
 - [ ] In-wallet trustless swaps (Boltz).
 - [ ] Hardware wallet integration (Ledger/Trezor).
-
-By adhering to this manifest, the wallet remains at the cutting edge of Bitcoin technology, providing users with the most powerful and secure tools available.
+- [ ] Taproot Assets (TAP) support.

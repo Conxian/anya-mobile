@@ -6,6 +6,7 @@ import { UnifiedBalanceService } from '../core/unified-balance-service';
 import { MockBlockchainClient } from '../adapters/mock-blockchain-client';
 import { MockLightningClient } from '../adapters/mock-lightning-client';
 import { LiquidBlockchainClient } from '../adapters/liquid-client';
+import { SilentPaymentClient } from '../adapters/silent-payment-client';
 import { Account, AddressType } from '../core/domain';
 
 const secureStorage = new SecureStorageService();
@@ -15,6 +16,7 @@ const secureStorage = new SecureStorageService();
 const l1Client = new MockBlockchainClient();
 const l2Client = new MockLightningClient();
 const sidechainClient = new LiquidBlockchainClient();
+const silentPaymentClient = new SilentPaymentClient();
 const balanceService = new UnifiedBalanceService(
   l1Client,
   l2Client,
@@ -152,6 +154,7 @@ document.getElementById('createWallet')?.addEventListener('click', async () => {
         <div class="wallet-section">
           <h3>L1 - Bitcoin</h3>
           <p><strong>Address:</strong> <code>${address}</code> <button id="copyAddress" class="btn-icon" title="Copy address to clipboard" aria-label="Copy address to clipboard">📋</button></p>
+          <p id="sp-container"><strong>Silent Payment:</strong> <span id="sp-address">Generating...</span> <button id="copySPAddress" class="btn-icon" title="Copy Silent Payment address to clipboard" aria-label="Copy SP address to clipboard">📋</button></p>
         </div>
         <div id="unified-balance" class="wallet-section">
           <h3>Unified Balance</h3>
@@ -199,6 +202,19 @@ document.getElementById('createWallet')?.addEventListener('click', async () => {
     setupMnemonicToggle('mnemonic-value', 'toggleMnemonic', mnemonic);
     setupCopyButton('copyMnemonic', mnemonic);
     setupCopyButton('copyAddress', address);
+
+    // Generate Silent Payment address
+    silentPaymentClient.generateAddress(tempAccount).then(spAddr => {
+      const spSpan = document.getElementById('sp-address');
+      if (spSpan) {
+        spSpan.innerHTML = `<code>${spAddr}</code>`;
+        setupCopyButton('copySPAddress', spAddr);
+      }
+    }).catch(err => {
+      console.error('SP Generation failed:', err);
+      const spContainer = document.getElementById('sp-container');
+      if (spContainer) spContainer.style.display = 'none';
+    });
 
     try {
       const walletData = {

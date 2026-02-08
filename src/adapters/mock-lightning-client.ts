@@ -1,4 +1,4 @@
-import { LightningService } from '../core/ports';
+import { LightningService, FeeRate } from '../core/ports';
 import {
   Account,
   Amount,
@@ -83,5 +83,23 @@ export class MockLightningClient implements LightningService {
         isPublic: true,
       },
     ];
+  }
+
+  async getNodeInfo(): Promise<{ nodePubkey: string; alias?: string }> {
+    return {
+      nodePubkey: '02abc123...',
+      alias: 'Mock Lightning Node',
+    };
+  }
+
+  async listPayments(_account: Account): Promise<any[]> {
+    return [];
+  }
+
+  async estimateFee(amount: Amount, _speed: FeeRate): Promise<Amount> {
+    return {
+      asset: amount.asset,
+      value: '1000', // 1000 sats fixed mock fee
+    };
   }
 }

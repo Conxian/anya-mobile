@@ -20,7 +20,7 @@ We prioritize using the most robust, well-maintained, and performant libraries i
     *   **Musig2:** BIP 327 implementation for efficient multi-sig.
     *   **Silent Payments:** `@bitcoinerlab/silent-payments` (BIP 352).
 *   **Signer:** `bip32` for hierarchical deterministic keys.
-*   **ECC Engine:** Hybrid engine (Noble Curves + Elliptic) for maximum browser compatibility and performance.
+*   **ECC Engine:** Hybrid engine (Noble Curves + Elliptic) optimized with `DataView` for high-performance BigInt operations.
 
 ### 2.2. Layer 2 (Lightning Network)
 *   **Primary Tool:** **lightningdevkit (LDK)** via LDK-WASM.
@@ -62,6 +62,7 @@ We prioritize using the most robust, well-maintained, and performant libraries i
 
 ### Phase 3: Lightning & State Chains (CURRENT)
 - [x] Real Silent Payments integration (BIP 352).
+- [x] Full Unified Balance across 5 layers (L1, L2, Sidechain, Ecash, State Chain).
 - [ ] Transition LDK Mock to real LDK-WASM.
 - [ ] Transition Mercury Mock to real `mercury-layer-sdk`.
 

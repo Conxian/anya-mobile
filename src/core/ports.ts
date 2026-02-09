@@ -110,8 +110,12 @@ export interface LightningService {
 export interface EcashService {
   mint(mint: EcashMint, amount: Amount): Promise<EcashToken>;
   melt(token: EcashToken, invoice: string): Promise<TransactionID>;
-  send(token: EcashToken, amount: Amount): Promise<{ sent: EcashToken; change: EcashToken }>;
+  send(
+    token: EcashToken,
+    amount: Amount
+  ): Promise<{ sent: EcashToken; change: EcashToken }>;
   receive(token: EcashToken): Promise<Balance>;
+  getBalance(account: Account): Promise<Balance>;
 }
 
 export interface SilentPaymentService {
@@ -132,8 +136,15 @@ export interface SidechainService {
 
 export interface StateChainService {
   deposit(account: Account, amount: Amount): Promise<StateChainCoin>;
-  transfer(coin: StateChainCoin, recipientPublicKey: PublicKey): Promise<TransactionID>;
-  withdraw(coin: StateChainCoin, destinationAddress: Address): Promise<TransactionID>;
+  transfer(
+    coin: StateChainCoin,
+    recipientPublicKey: PublicKey
+  ): Promise<TransactionID>;
+  withdraw(
+    coin: StateChainCoin,
+    destinationAddress: Address
+  ): Promise<TransactionID>;
+  getBalance(account: Account): Promise<Balance>;
 }
 
 // --- Driven Ports ---

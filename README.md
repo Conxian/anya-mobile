@@ -11,8 +11,8 @@ The wallet follows a **Ports and Adapters (Hexagonal)** architecture. This desig
 
 ## 🚀 Key Features
 
-- **Multi-Layer Support:** Native integration for L1 (Legacy, SegWit, Taproot), Lightning Network, Liquid, and Stacks.
-- **Unified Balance:** A consolidated view of assets across all layers.
+- **Multi-Layer Support:** Native integration for L1 (Legacy, SegWit, Taproot), Lightning Network, Liquid, Stacks, State Chains, and Ecash.
+- **Unified Balance:** A consolidated view of assets across all five layers (L1, L2, Sidechains, Ecash, and State Chains).
 - **Secure by Design:** AES-GCM encryption for sensitive data, pure-JS ECC engine, and Web Worker-based cryptography.
 - **Performance Optimized:** Parallelized network requests and efficient address derivation.
 - **Advanced Privacy:** Built-in support for Silent Payments (BIP 352) and Ecash (Cashu).
@@ -34,7 +34,7 @@ The project is now in **Phase 3**:
 - [x] **Core Infrastructure:** Hexagonal architecture and secure key management.
 - [x] **L1 Excellence:** Full support for P2WPKH and P2TR (Taproot) with Electrum/Esplora backends.
 - [x] **Advanced Privacy:** Native integration for Silent Payments (BIP 352).
-- [x] **Unified Balance:** Implementation of `UnifiedBalanceService` fetching from multiple layers.
+- [x] **Unified Balance:** Implementation of `UnifiedBalanceService` fetching from all five layers in parallel.
 - [ ] **Lightning Integration:** Transitioning to full LDK-WASM implementation.
 - [ ] **State Chains:** Transitioning to real Mercury Layer SDK.
 

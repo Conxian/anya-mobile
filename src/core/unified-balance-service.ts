@@ -1,11 +1,19 @@
-import { BlockchainClient, LightningService, SidechainService } from './ports';
+import {
+  BlockchainClient,
+  LightningService,
+  SidechainService,
+  EcashService,
+  StateChainService,
+} from './ports';
 import { Account, Asset, Balance } from './domain';
 
 export class UnifiedBalanceService {
   constructor(
     private readonly l1Client: BlockchainClient,
     private readonly l2Client: LightningService,
-    private readonly sidechainClient: SidechainService
+    private readonly sidechainClient: SidechainService,
+    private readonly ecashClient: EcashService,
+    private readonly stateChainClient: StateChainService
   ) {}
 
   /**
@@ -13,16 +21,29 @@ export class UnifiedBalanceService {
    * This approach avoids sequential network requests, reducing the total time to
    * display a consolidated view of the user's wealth.
    */
-  async getUnifiedBalance(account: Account, asset: Asset): Promise<{
+  async getUnifiedBalance(
+    account: Account,
+    asset: Asset
+  ): Promise<{
     l1: Balance;
     l2: Balance;
     sidechain: Balance;
+    ecash: Balance;
+    stateChain: Balance;
     total: bigint;
   }> {
-    const [l1Balance, l2Balance, sidechainBalance] = await Promise.all([
+    const [
+      l1Balance,
+      l2Balance,
+      sidechainBalance,
+      ecashBalance,
+      stateChainBalance,
+    ] = await Promise.all([
       this.l1Client.getBalance(account.address, asset),
       this.l2Client.getBalance(account),
       this.sidechainClient.getBalance(account, asset),
+      this.ecashClient.getBalance(account),
+      this.stateChainClient.getBalance(account),
     ]);
 
     // Helper to convert decimal string balance to satoshis (BigInt)
@@ -40,14 +61,19 @@ export class UnifiedBalanceService {
       return BigInt(intPart) * BigInt(10 ** decimals) + BigInt(fragPart);
     };
 
-    const total = toSats(l1Balance.amount.value) +
-                  toSats(l2Balance.amount.value) +
-                  toSats(sidechainBalance.amount.value);
+    const total =
+      toSats(l1Balance.amount.value) +
+      toSats(l2Balance.amount.value) +
+      toSats(sidechainBalance.amount.value) +
+      toSats(ecashBalance.amount.value) +
+      toSats(stateChainBalance.amount.value);
 
     return {
       l1: l1Balance,
       l2: l2Balance,
       sidechain: sidechainBalance,
+      ecash: ecashBalance,
+      stateChain: stateChainBalance,
       total,
     };
   }

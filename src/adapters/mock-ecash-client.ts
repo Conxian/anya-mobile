@@ -1,5 +1,6 @@
 import { EcashService } from '../core/ports';
 import {
+  Account,
   Amount,
   Balance,
   EcashMint,
@@ -45,6 +46,14 @@ export class MockEcashClient implements EcashService {
     return {
       asset: token.amount.asset,
       amount: token.amount,
+    };
+  }
+
+  async getBalance(_account: Account): Promise<Balance> {
+    const asset = { symbol: 'BTC', name: 'Bitcoin', decimals: 8 };
+    return {
+      asset,
+      amount: { asset, value: '0.05' }, // Mock balance
     };
   }
 }

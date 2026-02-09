@@ -11,13 +11,44 @@ import EC from 'elliptic';
 const ec = new EC.ec('secp256k1');
 const NOBLE_ORDER = BigInt('0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141');
 
-const toHex = (b: Uint8Array) => Buffer.from(b).toString('hex');
-const fromHex = (s: string) => Uint8Array.from(Buffer.from(s, 'hex'));
-const toBI = (b: Uint8Array) => BigInt('0x' + toHex(b));
+/**
+ * ⚡ Bolt: High-performance BigInt conversion using DataView.
+ * This avoids redundant hex string allocations and parsing,
+ * which is significantly faster for 32-byte cryptographic keys.
+ */
+function bytesToNumberBE(bytes: Uint8Array): bigint {
+  if (bytes.length !== 32) {
+    return BigInt('0x' + Buffer.from(bytes).toString('hex'));
+  }
+  const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  return (
+    (dv.getBigUint64(0) << 192n) |
+    (dv.getBigUint64(8) << 128n) |
+    (dv.getBigUint64(16) << 64n) |
+    dv.getBigUint64(24)
+  );
+}
+
+function numberToBytesBE(n: bigint, length: number): Uint8Array {
+  const bytes = new Uint8Array(length);
+  if (length !== 32) {
+    const hex = n.toString(16).padStart(length * 2, '0');
+    return Uint8Array.from(Buffer.from(hex, 'hex'));
+  }
+  const dv = new DataView(bytes.buffer);
+  dv.setBigUint64(24, n & 0xffffffffffffffffn);
+  n >>= 64n;
+  dv.setBigUint64(16, n & 0xffffffffffffffffn);
+  n >>= 64n;
+  dv.setBigUint64(8, n & 0xffffffffffffffffn);
+  n >>= 64n;
+  dv.setBigUint64(0, n & 0xffffffffffffffffn);
+  return bytes;
+}
 
 export const isPoint = (p: Uint8Array): boolean => {
   try {
-    noble.Point.fromHex(toHex(p));
+    noble.Point.fromBytes(p);
     return true;
   } catch {
     return false;
@@ -27,17 +58,21 @@ export const isPoint = (p: Uint8Array): boolean => {
 export const isPrivate = (d: Uint8Array): boolean => {
   if (d.length !== 32) return false;
   try {
-    const scalar = toBI(d);
+    const scalar = bytesToNumberBE(d);
     return scalar > 0n && scalar < NOBLE_ORDER;
   } catch {
     return false;
   }
 };
 
-export const pointAdd = (pA: Uint8Array, pB: Uint8Array, compressed?: boolean): Uint8Array | null => {
+export const pointAdd = (
+  pA: Uint8Array,
+  pB: Uint8Array,
+  compressed?: boolean
+): Uint8Array | null => {
   try {
-    const a = noble.Point.fromHex(toHex(pA));
-    const b = noble.Point.fromHex(toHex(pB));
+    const a = noble.Point.fromBytes(pA);
+    const b = noble.Point.fromBytes(pB);
     const res = a.add(b);
     if (res.is0()) return null;
     return res.toBytes(compressed !== false);
@@ -46,10 +81,14 @@ export const pointAdd = (pA: Uint8Array, pB: Uint8Array, compressed?: boolean): 
   }
 };
 
-export const pointAddScalar = (p: Uint8Array, tweak: Uint8Array, compressed?: boolean): Uint8Array | null => {
+export const pointAddScalar = (
+  p: Uint8Array,
+  tweak: Uint8Array,
+  compressed?: boolean
+): Uint8Array | null => {
   try {
-    const pt = noble.Point.fromHex(toHex(p));
-    const scalar = toBI(tweak);
+    const pt = noble.Point.fromBytes(p);
+    const scalar = bytesToNumberBE(tweak);
     if (scalar >= NOBLE_ORDER) return null;
     const res = pt.add(noble.Point.BASE.multiply(scalar));
     if (res.is0()) return null;
@@ -59,15 +98,22 @@ export const pointAddScalar = (p: Uint8Array, tweak: Uint8Array, compressed?: bo
   }
 };
 
-export const pointCompress = (p: Uint8Array, compressed?: boolean): Uint8Array => {
-  const pt = noble.Point.fromHex(toHex(p));
+export const pointCompress = (
+  p: Uint8Array,
+  compressed?: boolean
+): Uint8Array => {
+  const pt = noble.Point.fromBytes(p);
   return pt.toBytes(compressed !== false);
 };
 
-export const pointMultiply = (p: Uint8Array, tweak: Uint8Array, compressed?: boolean): Uint8Array | null => {
+export const pointMultiply = (
+  p: Uint8Array,
+  tweak: Uint8Array,
+  compressed?: boolean
+): Uint8Array | null => {
   try {
-    const pt = noble.Point.fromHex(toHex(p));
-    const scalar = toBI(tweak);
+    const pt = noble.Point.fromBytes(p);
+    const scalar = bytesToNumberBE(tweak);
     const res = pt.multiply(scalar);
     if (res.is0()) return null;
     return res.toBytes(compressed !== false);
@@ -76,9 +122,12 @@ export const pointMultiply = (p: Uint8Array, tweak: Uint8Array, compressed?: boo
   }
 };
 
-export const pointFromScalar = (d: Uint8Array, compressed?: boolean): Uint8Array | null => {
+export const pointFromScalar = (
+  d: Uint8Array,
+  compressed?: boolean
+): Uint8Array | null => {
   try {
-    const scalar = toBI(d);
+    const scalar = bytesToNumberBE(d);
     if (scalar === 0n || scalar >= NOBLE_ORDER) return null;
     const res = noble.Point.BASE.multiply(scalar);
     return res.toBytes(compressed !== false);
@@ -87,22 +136,25 @@ export const pointFromScalar = (d: Uint8Array, compressed?: boolean): Uint8Array
   }
 };
 
-export const privateAdd = (d: Uint8Array, tweak: Uint8Array): Uint8Array | null => {
+export const privateAdd = (
+  d: Uint8Array,
+  tweak: Uint8Array
+): Uint8Array | null => {
   try {
-    const dd = toBI(d);
-    const tt = toBI(tweak);
+    const dd = bytesToNumberBE(d);
+    const tt = bytesToNumberBE(tweak);
     const res = (dd + tt) % NOBLE_ORDER;
     if (res === 0n) return null;
-    return fromHex(res.toString(16).padStart(64, '0'));
+    return numberToBytesBE(res, 32);
   } catch {
     return null;
   }
 };
 
 export const privateNegate = (d: Uint8Array): Uint8Array => {
-  const dd = toBI(d);
+  const dd = bytesToNumberBE(d);
   const res = (NOBLE_ORDER - dd) % NOBLE_ORDER;
-  return fromHex(res.toString(16).padStart(64, '0'));
+  return numberToBytesBE(res, 32);
 };
 
 export const sign = (hash: Uint8Array, x: Uint8Array): Uint8Array => {
@@ -128,17 +180,26 @@ export const verify = (hash: Uint8Array, p: Uint8Array, signature: Uint8Array): 
 export const isXOnlyPoint = (p: Uint8Array): boolean => {
   if (p.length !== 32) return false;
   try {
-    noble.Point.fromHex('02' + toHex(p));
+    const evenP = new Uint8Array(33);
+    evenP[0] = 0x02;
+    evenP.set(p, 1);
+    noble.Point.fromBytes(evenP);
     return true;
   } catch {
     return false;
   }
 };
 
-export const xOnlyPointAddTweak = (p: Uint8Array, t: Uint8Array): { parity: 0 | 1; xOnlyPubkey: Uint8Array } | null => {
+export const xOnlyPointAddTweak = (
+  p: Uint8Array,
+  t: Uint8Array
+): { parity: 0 | 1; xOnlyPubkey: Uint8Array } | null => {
   try {
-    const pt = noble.Point.fromHex('02' + toHex(p));
-    const scalar = toBI(t);
+    const evenP = new Uint8Array(33);
+    evenP[0] = 0x02;
+    evenP.set(p, 1);
+    const pt = noble.Point.fromBytes(evenP);
+    const scalar = bytesToNumberBE(t);
     if (scalar >= NOBLE_ORDER) return null;
     const res = pt.add(noble.Point.BASE.multiply(scalar));
     if (res.is0()) return null;
@@ -151,19 +212,22 @@ export const xOnlyPointAddTweak = (p: Uint8Array, t: Uint8Array): { parity: 0 | 
   }
 };
 
-export const privateTweakAdd = (d: Uint8Array, t: Uint8Array): Uint8Array | null => {
+export const privateTweakAdd = (
+  d: Uint8Array,
+  t: Uint8Array
+): Uint8Array | null => {
   try {
-    const d_bi = toBI(d);
+    const d_bi = bytesToNumberBE(d);
     const P = noble.Point.BASE.multiply(d_bi);
     let d_norm = d_bi;
     if (P.toBytes(true)[0] !== 2) {
       d_norm = (NOBLE_ORDER - d_bi) % NOBLE_ORDER;
     }
-    const t_bi = toBI(t);
+    const t_bi = bytesToNumberBE(t);
     if (t_bi >= NOBLE_ORDER) return null;
     const res = (d_norm + t_bi) % NOBLE_ORDER;
     if (res === 0n) return null;
-    return fromHex(res.toString(16).padStart(64, '0'));
+    return numberToBytesBE(res, 32);
   } catch {
     return null;
   }

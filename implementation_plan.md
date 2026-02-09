@@ -37,7 +37,8 @@ This document outlines the implementation plan for the multi-layer Bitcoin walle
 
 *   **Goal:** Add functional support for Lightning Network and Mercury Layer State Chains.
 *   **Tasks:**
-    *   [X] Define Ports: `LightningService` and `StateChainService`.
+    *   [X] Define Ports: `LightningService`, `StateChainService`, `EcashService`.
+    *   [X] Unified Balance: Support for all 5 layers in `UnifiedBalanceService`.
     *   [/] Lightning Integration: Transition from `MockLightningClient` to functional LDK-WASM node.
     *   [ ] State Chain Integration: Implement functional Mercury Layer client.
     *   [ ] Multi-Layer History: Consolidate transaction history from all adapters.

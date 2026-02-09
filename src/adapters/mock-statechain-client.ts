@@ -20,16 +20,24 @@ export class MockStateChainClient implements StateChainService {
   }
 
   async transfer(
-    coin: StateChainCoin,
-    recipientPublicKey: PublicKey
+    _coin: StateChainCoin,
+    _recipientPublicKey: PublicKey
   ): Promise<TransactionID> {
     return `sc-transfer-${Math.random().toString(16).substring(2)}`;
   }
 
   async withdraw(
-    coin: StateChainCoin,
-    destinationAddress: Address
+    _coin: StateChainCoin,
+    _destinationAddress: Address
   ): Promise<TransactionID> {
     return `sc-withdraw-${Math.random().toString(16).substring(2)}`;
+  }
+
+  async getBalance(_account: Account): Promise<Balance> {
+    const asset = { symbol: 'BTC', name: 'Bitcoin', decimals: 8 };
+    return {
+      asset,
+      amount: { asset, value: '0.25' }, // Mock balance
+    };
   }
 }

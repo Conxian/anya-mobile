@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@bitcoinerlab/descriptors':
+        specifier: ^2.1.0
+        version: 2.3.6
+      '@cashu/cashu-ts':
+        specifier: ^1.0.0
+        version: 1.2.1
       '@mempool/electrum-client':
         specifier: ^1.1.9
         version: 1.1.9
@@ -68,9 +74,6 @@ importers:
       esbuild:
         specifier: ^0.27.0
         version: 0.27.2
-      lightningdevkit:
-        specifier: 0.1.8-0
-        version: 0.1.8-0
       liquidjs-lib:
         specifier: 6.0.2-liquid.37
         version: 6.0.2-liquid.37
@@ -874,8 +877,28 @@ packages:
   '@bcoe/v8-coverage@0.2.3':
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
 
+  '@bitcoinerlab/descriptors@2.3.6':
+    resolution: {integrity: sha512-joBjyYMGlzdOwieZlQ37oONy27/cu+EvotVmKmoKRsNIEy40lAiQC6ImaQsLk08PQjlh1SqEBXhSN5CuxK+T1A==}
+    peerDependencies:
+      ledger-bitcoin: ^0.2.2
+    peerDependenciesMeta:
+      ledger-bitcoin:
+        optional: true
+
+  '@bitcoinerlab/miniscript@1.4.3':
+    resolution: {integrity: sha512-gf7WK4dKJJJl+IgLGmkTOxXQLiCje9c9y4wTLC+cyt0tBDTiSXgsG0X8FFaXf4d+34b8B5p/EJGvRd7mEYB6mQ==}
+
+  '@bitcoinerlab/secp256k1@1.2.0':
+    resolution: {integrity: sha512-jeujZSzb3JOZfmJYI0ph1PVpCRV5oaexCgy+RvCXV8XlY+XFB/2n3WOcvBsKLsOw78KYgnQrQWb2HrKE4be88Q==}
+
   '@boltz/bitcoin-ops@2.0.0':
     resolution: {integrity: sha512-AM7vFNwSD7B4XI6yeRKccWbbD/lvwoFr8U3pqhzryBQo4uMkYe5V3/kMVnml4SNuxzyqdIFu4ur3TId02sC33A==}
+
+  '@cashu/cashu-ts@1.2.1':
+    resolution: {integrity: sha512-B0+e02S8DQA8KBt2FgKHgGYvtHQokXJ3sZcTyAdHqvb0T0jfo1zF7nHn19eU9iYcfk8VSWf5xNBTocpTfj1aNg==}
+
+  '@cashu/crypto@0.2.7':
+    resolution: {integrity: sha512-1aaDfUjiHNXoJqg8nW+341TLWV9W28DsVNXJUKcHL0yAmwLs5+56SSnb8LLDJzPamLVoYL0U0bda91klAzptig==}
 
   '@chainsafe/is-ip@2.1.0':
     resolution: {integrity: sha512-KIjt+6IfysQ4GCv66xihEitBjvhU/bixbbbFxdJ1sqCp4uJ0wuZiYBPhksZoy4lfaF0k9cwNzY5upEW/VWdw3w==}
@@ -1544,6 +1567,12 @@ packages:
 
   '@scure/base@2.0.0':
     resolution: {integrity: sha512-3E1kpuZginKkek01ovG8krQ0Z44E3DHPjc5S2rjJw9lZn3KSQOs8S7wqikF/AH7iRanHypj85uGyxk0XAyC37w==}
+
+  '@scure/bip32@1.7.0':
+    resolution: {integrity: sha512-E4FFX/N3f4B80AKWp5dP6ow+flD1LQZo/w8UnLGYZO674jS6YnYeepycOOksv+vLPSpgN35wgKgy+ybfTb2SMw==}
+
+  '@scure/bip39@1.6.0':
+    resolution: {integrity: sha512-+lF0BbLiJNwVlev4eKelw1WWLaiKXw7sSl8T6FvBlWkdX+94aGJ4o8XjUdlyhTCjd8c+B3KT3JfS8P0bLRNU6A==}
 
   '@scure/bip39@2.0.1':
     resolution: {integrity: sha512-PsxdFj/d2AcJcZDX1FXN3dDgitDDTmwf78rKZq1a6c1P1Nan1X/Sxc7667zU3U+AN60g7SxxP0YCVw2H/hBycg==}
@@ -2278,6 +2307,10 @@ packages:
 
   bip66@2.0.0:
     resolution: {integrity: sha512-kBG+hSpgvZBrkIm9dt5T1Hd/7xGCPEX2npoxAWZfsK1FvjgaxySEh2WizjyIstWXriKo9K9uJ4u0OnsyLDUPXQ==}
+
+  bip68@1.0.4:
+    resolution: {integrity: sha512-O1htyufFTYy3EO0JkHg2CLykdXEtV2ssqw47Gq9A0WByp662xpJnMEB9m43LZjsSDjIAOozWRExlFQk2hlV1XQ==}
+    engines: {node: '>=4.5.0'}
 
   bitcoinjs-lib@6.1.7:
     resolution: {integrity: sha512-tlf/r2DGMbF7ky1MgUqXHzypYHakkEnm0SZP23CJKIqNY/5uNAnMbFhMJdhjrL/7anfb/U8+AlpdjPWjPnAalg==}
@@ -3581,9 +3614,6 @@ packages:
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
-
-  lightningdevkit@0.1.8-0:
-    resolution: {integrity: sha512-TAWaaXnIzA5mAvo0a4kFUq313tfX4cWtgNIyaWS/97TXLyTbD55wBJnT5WV0xF/eJo5PNIACYBm4MxgBsXbjNg==}
 
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
@@ -5764,7 +5794,42 @@ snapshots:
 
   '@bcoe/v8-coverage@0.2.3': {}
 
+  '@bitcoinerlab/descriptors@2.3.6':
+    dependencies:
+      '@bitcoinerlab/miniscript': 1.4.3
+      '@bitcoinerlab/secp256k1': 1.2.0
+      bip32: 4.0.0
+      bitcoinjs-lib: 6.1.7
+      ecpair: 2.1.0
+      lodash.memoize: 4.1.2
+      varuint-bitcoin: 1.1.2
+
+  '@bitcoinerlab/miniscript@1.4.3':
+    dependencies:
+      bip68: 1.0.4
+
+  '@bitcoinerlab/secp256k1@1.2.0':
+    dependencies:
+      '@noble/curves': 1.9.7
+
   '@boltz/bitcoin-ops@2.0.0': {}
+
+  '@cashu/cashu-ts@1.2.1':
+    dependencies:
+      '@cashu/crypto': 0.2.7
+      '@noble/curves': 1.9.7
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      buffer: 6.0.3
+
+  '@cashu/crypto@0.2.7':
+    dependencies:
+      '@noble/curves': 1.9.7
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      buffer: 6.0.3
 
   '@chainsafe/is-ip@2.1.0': {}
 
@@ -6472,6 +6537,17 @@ snapshots:
   '@scure/base@1.2.6': {}
 
   '@scure/base@2.0.0': {}
+
+  '@scure/bip32@1.7.0':
+    dependencies:
+      '@noble/curves': 1.9.7
+      '@noble/hashes': 1.8.0
+      '@scure/base': 1.2.6
+
+  '@scure/bip39@1.6.0':
+    dependencies:
+      '@noble/hashes': 1.8.0
+      '@scure/base': 1.2.6
 
   '@scure/bip39@2.0.1':
     dependencies:
@@ -7381,6 +7457,8 @@ snapshots:
       safe-buffer: 5.2.1
 
   bip66@2.0.0: {}
+
+  bip68@1.0.4: {}
 
   bitcoinjs-lib@6.1.7:
     dependencies:
@@ -9089,8 +9167,6 @@ snapshots:
     dependencies:
       prelude-ls: 1.2.1
       type-check: 0.4.0
-
-  lightningdevkit@0.1.8-0: {}
 
   lines-and-columns@1.2.4: {}
 

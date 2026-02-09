@@ -6,6 +6,8 @@ import { UnifiedBalanceService } from '../core/unified-balance-service';
 import { MockBlockchainClient } from '../adapters/mock-blockchain-client';
 import { MockLightningClient } from '../adapters/mock-lightning-client';
 import { LiquidBlockchainClient } from '../adapters/liquid-client';
+import { MockEcashClient } from '../adapters/mock-ecash-client';
+import { MockStateChainClient } from '../adapters/mock-statechain-client';
 import { SilentPaymentClient } from '../adapters/silent-payment-client';
 import { Account, AddressType } from '../core/domain';
 
@@ -16,11 +18,15 @@ const secureStorage = new SecureStorageService();
 const l1Client = new MockBlockchainClient();
 const l2Client = new MockLightningClient();
 const sidechainClient = new LiquidBlockchainClient();
+const ecashClient = new MockEcashClient();
+const stateChainClient = new MockStateChainClient();
 const silentPaymentClient = new SilentPaymentClient();
 const balanceService = new UnifiedBalanceService(
   l1Client,
   l2Client,
-  sidechainClient
+  sidechainClient,
+  ecashClient,
+  stateChainClient
 );
 
 /**
@@ -191,6 +197,8 @@ document.getElementById('createWallet')?.addEventListener('click', async () => {
             <li>🟠 <strong>Layer 1:</strong> ${balances.l1.amount.value} BTC</li>
             <li>⚡ <strong>Lightning (L2):</strong> ${balances.l2.amount.value} BTC</li>
             <li>💧 <strong>Liquid (Sidechain):</strong> ${Number(balances.sidechain.amount.value) / 1e8} L-BTC</li>
+            <li>💸 <strong>Ecash (L3):</strong> ${balances.ecash.amount.value} BTC</li>
+            <li>⛓️ <strong>State Chain:</strong> ${balances.stateChain.amount.value} BTC</li>
           </ul>
           <p class="total-wealth"><strong>Total Wealth:</strong> ${Number(balances.total) / 1e8} BTC equivalent</p>
         `;

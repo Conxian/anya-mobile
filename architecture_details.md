@@ -17,7 +17,7 @@ These interfaces allow the UI to drive the core logic.
 - Support for Legacy, SegWit, and Taproot.
 
 ### 1.4. `UnifiedBalanceService` [COMPLETED]
-- Consolidated view of L1, L2, and Sidechain balances.
+- Consolidated view of L1, L2, Sidechain, Ecash, and State Chain balances.
 
 ## 2. Driven Ports (SPI)
 
@@ -32,7 +32,13 @@ These interfaces are used by the core to communicate with external systems.
 ### 2.3. `SidechainService` (Liquid/Stacks) [INITIAL/MOCK]
 - `getBalance()`, `transferAsset()`.
 
-### 2.4. `Persistence` [COMPLETED]
+### 2.4. `EcashService` (L3/Privacy) [INITIAL/MOCK]
+- `getBalance()`, `mint()`, `melt()`, `send/receive`.
+
+### 2.5. `StateChainService` [INITIAL/MOCK]
+- `getBalance()`, `deposit()`, `transfer()`, `withdraw()`.
+
+### 2.6. `Persistence` [COMPLETED]
 - `saveWallet()`, `loadWallet()`. Implementation: `FilePersistence`.
 
 ## 3. Adapters (Implemented)
@@ -56,4 +62,6 @@ These interfaces are used by the core to communicate with external systems.
 | Persistence   | Done | `FilePersistence` |
 | Lightning     | Mock | `MockLightningClient` (LDK Integration in progress) |
 | Sidechains    | Beta | `LiquidBlockchainClient`, `MockLiquidClient` |
+| Ecash (L3)    | Mock | `MockEcashClient` |
+| State Chains  | Mock | `MockStateChainClient` |
 | Oracles       | Mock | `MockOracleClient` |

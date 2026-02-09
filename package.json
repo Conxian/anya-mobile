@@ -18,6 +18,7 @@
     "bn.js": "^5.2.2",
     "boltz-core": "^3.1.0",
     "ecpair": "^3.0.0",
+    "@bitcoinerlab/descriptors": "^2.1.0",
     "@bitcoinerlab/silent-payments": "^1.1.2",
     "@cashu/cashu-ts": "^1.0.0",
     "elliptic": "^6.6.1",

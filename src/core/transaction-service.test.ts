@@ -120,7 +120,9 @@ describe('TransactionServiceImpl', () => {
       expect(draftTx.amount.value).toEqual(amount.value);
 
       const psbt = bitcoin.Psbt.fromBase64(draftTx.psbt);
-      expect(psbt.txInputs.length).toBe(1);
+      // Accumulative coin selection will pick both UTXOs because the first one (100000)
+      // is not enough to cover the target amount (150000) + fees.
+      expect(psbt.txInputs.length).toBe(2);
       expect(psbt.txOutputs.length).toBe(2);
     });
 

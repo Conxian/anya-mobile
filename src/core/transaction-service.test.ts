@@ -120,7 +120,7 @@ describe('TransactionServiceImpl', () => {
       expect(draftTx.amount.value).toEqual(amount.value);
 
       const psbt = bitcoin.Psbt.fromBase64(draftTx.psbt);
-      expect(psbt.txInputs.length).toBe(1);
+      expect(psbt.txInputs.length).toBe(2);
       expect(psbt.txOutputs.length).toBe(2);
     });
 

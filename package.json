@@ -18,13 +18,10 @@
     "bn.js": "^5.2.2",
     "boltz-core": "^3.1.0",
     "ecpair": "^3.0.0",
-    "@bitcoinerlab/silent-payments": "^1.1.2",
-    "@cashu/cashu-ts": "^1.0.0",
     "elliptic": "^6.6.1",
     "esbuild": "^0.27.0",
-    "lightningdevkit": "^0.122.0",
+    "lightningdevkit": "0.1.8-0",
     "liquidjs-lib": "6.0.2-liquid.37",
-    "mercury-layer-sdk": "^0.1.0",
     "tiny-secp256k1": "^1.1.6"
   },
   "scripts": {

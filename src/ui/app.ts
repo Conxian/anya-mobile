@@ -7,6 +7,8 @@ import { MockBlockchainClient } from '../adapters/mock-blockchain-client';
 import { MockLightningClient } from '../adapters/mock-lightning-client';
 import { LiquidBlockchainClient } from '../adapters/liquid-client';
 import { SilentPaymentClient } from '../adapters/silent-payment-client';
+import { MockEcashClient } from '../adapters/mock-ecash-client';
+import { MockStateChainClient } from '../adapters/mock-statechain-client';
 import { Account, AddressType } from '../core/domain';
 
 const secureStorage = new SecureStorageService();
@@ -17,10 +19,14 @@ const l1Client = new MockBlockchainClient();
 const l2Client = new MockLightningClient();
 const sidechainClient = new LiquidBlockchainClient();
 const silentPaymentClient = new SilentPaymentClient();
+const ecashClient = new MockEcashClient();
+const stateChainClient = new MockStateChainClient();
 const balanceService = new UnifiedBalanceService(
   l1Client,
   l2Client,
-  sidechainClient
+  sidechainClient,
+  ecashClient,
+  stateChainClient
 );
 
 /**
@@ -190,7 +196,9 @@ document.getElementById('createWallet')?.addEventListener('click', async () => {
           <ul class="balance-list">
             <li>🟠 <strong>Layer 1:</strong> ${balances.l1.amount.value} BTC</li>
             <li>⚡ <strong>Lightning (L2):</strong> ${balances.l2.amount.value} BTC</li>
-            <li>💧 <strong>Liquid (Sidechain):</strong> ${Number(balances.sidechain.amount.value) / 1e8} L-BTC</li>
+            <li>💧 <strong>Liquid (Sidechain):</strong> ${balances.sidechain.amount.value} L-BTC</li>
+            <li>🏦 <strong>Ecash (Cashu):</strong> ${balances.ecash.amount.value} BTC</li>
+            <li>⛓️ <strong>State Chain (Mercury):</strong> ${balances.statechain.amount.value} BTC</li>
           </ul>
           <p class="total-wealth"><strong>Total Wealth:</strong> ${Number(balances.total) / 1e8} BTC equivalent</p>
         `;
@@ -295,6 +303,10 @@ document.getElementById('loadWallet')?.addEventListener('click', async () => {
           <h3>L1 - Bitcoin</h3>
           <p><strong>Original Address:</strong> <code>${loadedData.address}</code> <button id="copyLoadedAddress" class="btn-icon" title="Copy address to clipboard" aria-label="Copy address to clipboard">📋</button></p>
         </div>
+        <div id="unified-balance-loaded" class="wallet-section">
+          <h3>Unified Balance</h3>
+          <p>Loading balances across all layers...</p>
+        </div>
         <div class="action-container">
           <button id="closeLoadedWallet" title="Close and clear wallet view" aria-label="Close wallet">Close Wallet</button>
         </div>
@@ -309,6 +321,30 @@ document.getElementById('loadWallet')?.addEventListener('click', async () => {
       setupMnemonicToggle('loaded-mnemonic-value', 'toggleLoadedMnemonic', mnemonic);
       setupCopyButton('copyLoadedMnemonic', mnemonic);
       setupCopyButton('copyLoadedAddress', loadedData.address);
+
+      // Update unified balance for loaded wallet
+      const btcAsset = { symbol: 'BTC', name: 'Bitcoin', decimals: 8 };
+      const tempAccount = new Account('temp-loaded', 'Temp Loaded', null as any, undefined, AddressType.NativeSegWit);
+      Object.defineProperty(tempAccount, 'address', { get: () => loadedData.address });
+
+      balanceService.getUnifiedBalance(tempAccount, btcAsset).then(balances => {
+        const balanceDiv = document.getElementById('unified-balance-loaded');
+        if (balanceDiv) {
+          balanceDiv.innerHTML = `
+            <h3>Unified Balance</h3>
+            <ul class="balance-list">
+              <li>🟠 <strong>Layer 1:</strong> ${balances.l1.amount.value} BTC</li>
+              <li>⚡ <strong>Lightning (L2):</strong> ${balances.l2.amount.value} BTC</li>
+              <li>💧 <strong>Liquid (Sidechain):</strong> ${balances.sidechain.amount.value} L-BTC</li>
+              <li>🏦 <strong>Ecash (Cashu):</strong> ${balances.ecash.amount.value} BTC</li>
+              <li>⛓️ <strong>State Chain (Mercury):</strong> ${balances.statechain.amount.value} BTC</li>
+            </ul>
+            <p class="total-wealth"><strong>Total Wealth:</strong> ${Number(balances.total) / 1e8} BTC equivalent</p>
+          `;
+        }
+      }).catch(err => {
+        console.error('Failed to fetch unified balance for loaded wallet:', err);
+      });
     }
   } catch (err) {
     console.error('Failed to load wallet:', err);

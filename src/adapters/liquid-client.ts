@@ -64,7 +64,7 @@ export class LiquidBlockchainClient implements SidechainService {
     // Electrum server or a block explorer API like Blockstream.info.
     return {
       asset,
-      amount: { asset, value: '1250000' }, // Mocked balance for the review
+      amount: { asset, value: '0.0125' }, // Mocked balance for the review
     };
   }
 }

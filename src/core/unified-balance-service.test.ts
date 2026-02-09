@@ -1,5 +1,5 @@
 import { UnifiedBalanceService } from './unified-balance-service';
-import { BlockchainClient, LightningService, SidechainService } from './ports';
+import { BlockchainClient, LightningService, SidechainService, EcashService, StateChainService } from './ports';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { Account, Asset, AddressType } from './domain';
 import * as bitcoin from 'bitcoinjs-lib';
@@ -9,6 +9,8 @@ describe('UnifiedBalanceService', () => {
   let l1Client: MockProxy<BlockchainClient>;
   let l2Client: MockProxy<LightningService>;
   let sidechainClient: MockProxy<SidechainService>;
+  let ecashClient: MockProxy<EcashService>;
+  let stateChainClient: MockProxy<StateChainService>;
   let account: Account;
   const btcAsset: Asset = { symbol: 'BTC', name: 'Bitcoin', decimals: 8 };
 
@@ -16,14 +18,22 @@ describe('UnifiedBalanceService', () => {
     l1Client = mock<BlockchainClient>();
     l2Client = mock<LightningService>();
     sidechainClient = mock<SidechainService>();
-    balanceService = new UnifiedBalanceService(l1Client, l2Client, sidechainClient);
+    ecashClient = mock<EcashService>();
+    stateChainClient = mock<StateChainService>();
+    balanceService = new UnifiedBalanceService(
+      l1Client,
+      l2Client,
+      sidechainClient,
+      ecashClient,
+      stateChainClient
+    );
 
     account = new Account('test', 'Test', null as any, bitcoin.networks.bitcoin, AddressType.NativeSegWit);
     // Mock address getter
     Object.defineProperty(account, 'address', { get: () => 'bc1qtest' });
   });
 
-  it('should aggregate balances from all layers in parallel', async () => {
+  it('should aggregate balances from all 5 layers in parallel', async () => {
     l1Client.getBalance.mockResolvedValue({
       asset: btcAsset,
       amount: { asset: btcAsset, value: '1.5' },
@@ -34,21 +44,26 @@ describe('UnifiedBalanceService', () => {
     });
     sidechainClient.getBalance.mockResolvedValue({
       asset: btcAsset,
-      amount: { asset: btcAsset, value: '100000000' }, // 1.0 BTC in sats
+      amount: { asset: btcAsset, value: '1.0' },
+    });
+    ecashClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0.25' },
+    });
+    stateChainClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0.75' },
     });
 
     const unifiedBalance = await balanceService.getUnifiedBalance(account, btcAsset);
 
     expect(unifiedBalance.l1.amount.value).toBe('1.5');
     expect(unifiedBalance.l2.amount.value).toBe('0.5');
-    expect(unifiedBalance.sidechain.amount.value).toBe('100000000');
-    // 1.5 + 0.5 + 1.0 = 3.0 BTC.
-    // Wait, total wealth calculation in my service used BigInt(value).
-    // Let's check the service implementation.
-    // BigInt('1.5') will fail if it's not an integer.
+    expect(unifiedBalance.sidechain.amount.value).toBe('1.0');
+    expect(unifiedBalance.ecash.amount.value).toBe('0.25');
+    expect(unifiedBalance.statechain.amount.value).toBe('0.75');
 
-    // Ah! I should have handled decimals in total calculation.
-    // Since everything is in BTC symbol but different values (sats vs BTC string), it's tricky.
-    // Usually we should keep everything in sats (BigInt).
+    // Total = 1.5 + 0.5 + 1.0 + 0.25 + 0.75 = 4.0 BTC = 400,000,000 sats
+    expect(unifiedBalance.total).toBe(400_000_000n);
   });
 });

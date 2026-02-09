@@ -6,6 +6,7 @@ import {
   PublicKey,
   TransactionID,
   Address,
+  Balance,
 } from '../core/domain';
 
 export class MockStateChainClient implements StateChainService {
@@ -31,5 +32,12 @@ export class MockStateChainClient implements StateChainService {
     destinationAddress: Address
   ): Promise<TransactionID> {
     return `sc-withdraw-${Math.random().toString(16).substring(2)}`;
+  }
+
+  async getBalance(_account: Account): Promise<Balance> {
+    return {
+      asset: { symbol: "BTC", name: "Bitcoin", decimals: 8 },
+      amount: { value: "0.012", asset: { symbol: "BTC", name: "Bitcoin", decimals: 8 } }
+    };
   }
 }

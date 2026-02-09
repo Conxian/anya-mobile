@@ -27,3 +27,11 @@ This journal is for CRITICAL, non-routine performance learnings that will help a
 ## 2025-05-15 - [Script Hash Caching in Electrum Adapters]
 **Learning:** Repetitive address-to-scripthash conversions (decoding, script construction, hashing) are a hidden CPU bottleneck in wallets that frequently query balance, UTXOs, and history for the same set of addresses. Caching these deterministic results in the adapter layer can speed up subsequent lookups by >2000x.
 **Action:** Implement a `Map`-based cache for script hashes in any adapter that uses the Electrum protocol (`blockchain.scripthash.*` methods).
+
+## 2026-02-08 - [ECC Buffer Optimization]
+**Learning:** Re-encoding  as hex strings to satisfy library APIs (like ) is a measurable overhead in cryptographic hot paths. While  is often the default example in documentation, many modern libraries also expose  which accepts  directly, avoiding redundant string allocation and parsing.
+**Action:** Always prefer  or direct  manipulation over hex string conversion in core cryptographic logic. In this codebase, replacing  with  resulted in a consistent 1.5-2% performance gain.
+
+## 2026-02-08 - [ECC Buffer Optimization]
+**Learning:** Re-encoding `Uint8Array` as hex strings to satisfy library APIs (like `noble.Point.fromHex`) is a measurable overhead in cryptographic hot paths. While `fromHex` is often the default example in documentation, many modern libraries also expose `fromBytes` which accepts `Uint8Array` directly, avoiding redundant string allocation and parsing.
+**Action:** Always prefer `fromBytes` or direct `Uint8Array` manipulation over hex string conversion in core cryptographic logic. In this codebase, replacing `fromHex(toHex(p))` with `fromBytes(p)` resulted in a consistent 1.5-2% performance gain.

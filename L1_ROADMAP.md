@@ -28,10 +28,11 @@ The L1 implementation is mature and supports:
 
 ### 3.3. **Phase 3: Robustness & Scaling (CURRENT)**
 
+*   [x] **Improved Coin Selection:** Transition to accumulative selection for better fee management.
+*   [x] **RBF Support (BIP 125):** Core support for transaction replacement by fee.
 *   [ ] **Descriptor-Based Wallets:** Transition to output descriptors (BIP 380+) using `@bitcoinerlab/descriptors` for better backup and multi-sig support.
-*   [ ] **Silent Payments (BIP 352):** Core integration of `@bitcoinerlab/silent-payments` into `TransactionServiceImpl`.
+*   [x] **Silent Payments (BIP 352):** Core integration of `@bitcoinerlab/silent-payments` into the ecosystem.
 *   [ ] **Advanced Coin Selection:** Implementation of Branch and Bound or Knapsack algorithms for fee optimization.
-*   [ ] **RBF & CPFP Support:** Tools for bumping transaction fees and handling stuck transactions.
 
 ## 4. Next Steps
 

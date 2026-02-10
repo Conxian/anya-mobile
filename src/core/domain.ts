@@ -245,3 +245,28 @@ export interface EcashToken {
 }
 
 export type SilentPaymentAddress = string;
+
+// --- Ark (Layer 2 / State Chain) ---
+
+export interface ArkASP {
+  id: string;
+  url: string;
+  pubkey: string;
+}
+
+export interface ArkVTXO {
+  id: string;
+  amount: Amount;
+  asp: ArkASP;
+  expiresAt: number;
+}
+
+// --- Miniscript ---
+
+export interface MiniscriptPolicy {
+  id: string;
+  policy: string; // The Miniscript policy string
+  descriptor?: string; // The compiled descriptor
+  requiredSigners: number;
+  totalSigners: number;
+}

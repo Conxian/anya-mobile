@@ -44,8 +44,9 @@ The wallet provides native support (or planned integration) for:
 
 ### 4.2. Phase 3: Lightning, State Chains & Ecash (CURRENT)
 *   **LDK Integration:** Transition from mock clients to a functional Lightning Dev Kit (LDK) node (upgraded to v0.122+).
-*   **Mercury Layer:** Implement State Chain coin support using `mercury-layer-sdk`.
+*   **Mercury Layer & Ark:** Implement State Chain and VTXO support.
 *   **Ecash & Silent Payments:** Initial implementation of Cashu and BIP 352 protocols.
+*   **Message Signing:** Initial port for BIP 322 support.
 *   **Unified History:** A consolidated view of all transaction activities across layers.
 
 ### 4.3. Phase 4: Advanced Privacy & Swaps

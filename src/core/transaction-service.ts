@@ -220,4 +220,29 @@ export class TransactionServiceImpl implements TransactionService {
       newFeeRate
     );
   }
+
+  /**
+   * ⚡ Bolt: Implement BIP 322 Generic Signed Messages.
+   * This allows proving ownership of an address (Legacy, SegWit, or Taproot).
+   * Note: Current implementation is an INITIAL MOCK for architectural demonstration.
+   */
+  async signMessage(account: Account, message: string): Promise<string> {
+    console.warn('BIP 322 signMessage is currently an INITIAL MOCK.');
+    const signer = account.getSigner();
+    const hash = new Uint8Array(bitcoin.crypto.sha256(Buffer.from(message) as any));
+    const signature = signer.sign(hash);
+    return Buffer.from(signature).toString('base64');
+  }
+
+  async verifyMessage(
+    address: Address,
+    message: string,
+    signature: string
+  ): Promise<boolean> {
+    console.warn('BIP 322 verifyMessage is NOT YET IMPLEMENTED and currently returns false for safety.');
+    // Real BIP 322 verification involves verifying the virtual transaction's script execution
+    // against the provided address's scriptPubKey.
+    // TODO: Integrate a BIP 322 library (e.g., bip322-js) for production use.
+    return false;
+  }
 }

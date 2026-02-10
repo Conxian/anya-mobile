@@ -24,6 +24,9 @@ import {
   EcashToken,
   EcashMint,
   SilentPaymentAddress,
+  ArkASP,
+  ArkVTXO,
+  MiniscriptPolicy,
 } from './domain';
 
 // --- Driving Ports ---
@@ -64,6 +67,10 @@ export interface TransactionService {
   broadcastTransaction(signedTransaction: DraftTransaction): Promise<TransactionID>;
   getTransactionHistory(account: Account): Promise<Transaction[]>;
   bumpFee(account: Account, transactionID: TransactionID, newFeeRate: FeeRate): Promise<DraftTransaction>;
+
+  // BIP 322: Generic Signed Messages
+  signMessage(account: Account, message: string): Promise<string>;
+  verifyMessage(address: Address, message: string, signature: string): Promise<boolean>;
 }
 
 export interface StakingService {
@@ -136,6 +143,23 @@ export interface StateChainService {
   transfer(coin: StateChainCoin, recipientPublicKey: PublicKey): Promise<TransactionID>;
   withdraw(coin: StateChainCoin, destinationAddress: Address): Promise<TransactionID>;
   getBalance(account: Account): Promise<Balance>;
+}
+
+export interface ArkService {
+  lift(account: Account, amount: Amount, asp: ArkASP): Promise<TransactionID>;
+  settle(vtxo: ArkVTXO, destinationAddress: Address): Promise<TransactionID>;
+  transfer(vtxo: ArkVTXO, recipientPublicKey: PublicKey): Promise<TransactionID>;
+  getVTXOs(account: Account): Promise<ArkVTXO[]>;
+  getBalance(account: Account): Promise<Balance>;
+}
+
+export interface MiniscriptService {
+  compilePolicy(policy: string): Promise<MiniscriptPolicy>;
+  analyzePolicy(policy: string): Promise<{
+    isMalleable: boolean;
+    vsize: number;
+    requiredSigs: number;
+  }>;
 }
 
 // --- Driven Ports ---

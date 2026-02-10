@@ -6,7 +6,7 @@ This document provides a comprehensive review of the development environment and
 
 To achieve the goal of being the best full Bitcoin wallet, we support:
 - **All Layers**: L1, Lightning (L2), Sidechains (Liquid, Stacks), and State Chains (Mercury, Ark).
-- **Advanced Protocols**: Taproot, Miniscript, Musig2, Silent Payments, Ecash.
+- **Advanced Protocols**: Taproot, Miniscript, Musig2, Silent Payments, Ecash, BIP 322.
 - **Self-Sovereignty**: Non-custodial by default, optional self-hosting of backends (Electrum, Lightning nodes).
 
 ## 2. Best-in-Class Tool Selection (The "Don't Recreate the Wheel" Stack)
@@ -37,8 +37,8 @@ We prioritize using the most robust, well-maintained, and performant libraries i
 *   **Integration:** Full support for Confidential Transactions and Issued Assets.
 
 ### 2.5. State Chains & Swaps
-*   **Tools:** **mercury-layer-sdk** & **boltz-core**
-*   **Why:** Mercury for instant UTXO transfers; Boltz for trustless cross-layer swaps.
+*   **Tools:** **mercury-layer-sdk**, **ark-sdk**, & **boltz-core**
+*   **Why:** Mercury/Ark for instant UTXO transfers; Boltz for trustless cross-layer swaps.
 
 ### 2.6. Stacks & Smart Contracts
 *   **Tool:** **@stacks/transactions**
@@ -62,6 +62,8 @@ We prioritize using the most robust, well-maintained, and performant libraries i
 
 ### Phase 3: Lightning & State Chains (CURRENT)
 - [x] Real Silent Payments integration (BIP 352).
+- [x] Ark Layer support (Initial architecture & Mock).
+- [ ] BIP 322 Generic Message Signing (Initial port defined).
 - [ ] Transition LDK Mock to real LDK-WASM.
 - [ ] Transition Mercury Mock to real `mercury-layer-sdk`.
 

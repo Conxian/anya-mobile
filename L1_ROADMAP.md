@@ -32,6 +32,7 @@ The L1 implementation is mature and supports:
 *   [x] **RBF Support (BIP 125):** Core support for transaction replacement by fee.
 *   [ ] **Descriptor-Based Wallets:** Transition to output descriptors (BIP 380+) using `@bitcoinerlab/descriptors` for better backup and multi-sig support.
 *   [x] **Silent Payments (BIP 352):** Core integration of `@bitcoinerlab/silent-payments` into the ecosystem.
+*   [ ] **BIP 322 Support:** Port defined, initial mock implemented for all address types.
 *   [ ] **Advanced Coin Selection:** Implementation of Branch and Bound or Knapsack algorithms for fee optimization.
 
 ## 4. Next Steps

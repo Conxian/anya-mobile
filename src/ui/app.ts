@@ -9,6 +9,7 @@ import { LiquidBlockchainClient } from '../adapters/liquid-client';
 import { SilentPaymentClient } from '../adapters/silent-payment-client';
 import { MockEcashClient } from '../adapters/mock-ecash-client';
 import { MockStateChainClient } from '../adapters/mock-statechain-client';
+import { MockArkClient } from '../adapters/mock-ark-client';
 import { Account, AddressType } from '../core/domain';
 
 const secureStorage = new SecureStorageService();
@@ -21,12 +22,14 @@ const sidechainClient = new LiquidBlockchainClient();
 const silentPaymentClient = new SilentPaymentClient();
 const ecashClient = new MockEcashClient();
 const stateChainClient = new MockStateChainClient();
+const arkClient = new MockArkClient();
 const balanceService = new UnifiedBalanceService(
   l1Client,
   l2Client,
   sidechainClient,
   ecashClient,
-  stateChainClient
+  stateChainClient,
+  arkClient
 );
 
 /**
@@ -145,6 +148,7 @@ document.getElementById('createWallet')?.addEventListener('click', async () => {
     if (addressType === 'P2PKH') path = "m/44'/0'/0'/0";
 
     const address = await wallet.getAddress(0, pin, path, addressType);
+    const node = await wallet.secureWallet.getNode(0, pin);
 
     if (walletInfo) {
       walletInfo.innerHTML = `
@@ -184,7 +188,7 @@ document.getElementById('createWallet')?.addEventListener('click', async () => {
     // Update unified balance
     const btcAsset = { symbol: 'BTC', name: 'Bitcoin', decimals: 8 };
     // Create a temporary account object for balance fetching.
-    const tempAccount = new Account('temp', 'Temp', null as any, undefined, addressType as AddressType);
+    const tempAccount = new Account('temp', 'Temp', node, undefined, addressType as AddressType);
     // Use the derived address for the mock account
     Object.defineProperty(tempAccount, 'address', { get: () => address });
 
@@ -199,6 +203,7 @@ document.getElementById('createWallet')?.addEventListener('click', async () => {
             <li>💧 <strong>Liquid (Sidechain):</strong> ${balances.sidechain.amount.value} L-BTC</li>
             <li>🏦 <strong>Ecash (Cashu):</strong> ${balances.ecash.amount.value} BTC</li>
             <li>⛓️ <strong>State Chain (Mercury):</strong> ${balances.statechain.amount.value} BTC</li>
+            <li>⛩️ <strong>Ark (Layer 2):</strong> ${balances.ark.amount.value} BTC</li>
           </ul>
           <p class="total-wealth"><strong>Total Wealth:</strong> ${Number(balances.total) / 1e8} BTC equivalent</p>
         `;
@@ -338,6 +343,7 @@ document.getElementById('loadWallet')?.addEventListener('click', async () => {
               <li>💧 <strong>Liquid (Sidechain):</strong> ${balances.sidechain.amount.value} L-BTC</li>
               <li>🏦 <strong>Ecash (Cashu):</strong> ${balances.ecash.amount.value} BTC</li>
               <li>⛓️ <strong>State Chain (Mercury):</strong> ${balances.statechain.amount.value} BTC</li>
+              <li>⛩️ <strong>Ark (Layer 2):</strong> ${balances.ark.amount.value} BTC</li>
             </ul>
             <p class="total-wealth"><strong>Total Wealth:</strong> ${Number(balances.total) / 1e8} BTC equivalent</p>
           `;

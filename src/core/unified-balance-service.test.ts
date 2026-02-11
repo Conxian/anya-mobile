@@ -1,5 +1,5 @@
 import { UnifiedBalanceService } from './unified-balance-service';
-import { BlockchainClient, LightningService, SidechainService, EcashService, StateChainService } from './ports';
+import { BlockchainClient, LightningService, SidechainService, EcashService, StateChainService, ArkService } from './ports';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { Account, Asset, AddressType } from './domain';
 import * as bitcoin from 'bitcoinjs-lib';
@@ -11,6 +11,7 @@ describe('UnifiedBalanceService', () => {
   let sidechainClient: MockProxy<SidechainService>;
   let ecashClient: MockProxy<EcashService>;
   let stateChainClient: MockProxy<StateChainService>;
+  let arkClient: MockProxy<ArkService>;
   let account: Account;
   const btcAsset: Asset = { symbol: 'BTC', name: 'Bitcoin', decimals: 8 };
 
@@ -20,12 +21,14 @@ describe('UnifiedBalanceService', () => {
     sidechainClient = mock<SidechainService>();
     ecashClient = mock<EcashService>();
     stateChainClient = mock<StateChainService>();
+    arkClient = mock<ArkService>();
     balanceService = new UnifiedBalanceService(
       l1Client,
       l2Client,
       sidechainClient,
       ecashClient,
-      stateChainClient
+      stateChainClient,
+      arkClient
     );
 
     account = new Account('test', 'Test', null as any, bitcoin.networks.bitcoin, AddressType.NativeSegWit);
@@ -54,6 +57,10 @@ describe('UnifiedBalanceService', () => {
       asset: btcAsset,
       amount: { asset: btcAsset, value: '0.75' },
     });
+    arkClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '1.0' },
+    });
 
     const unifiedBalance = await balanceService.getUnifiedBalance(account, btcAsset);
 
@@ -62,8 +69,9 @@ describe('UnifiedBalanceService', () => {
     expect(unifiedBalance.sidechain.amount.value).toBe('1.0');
     expect(unifiedBalance.ecash.amount.value).toBe('0.25');
     expect(unifiedBalance.statechain.amount.value).toBe('0.75');
+    expect(unifiedBalance.ark.amount.value).toBe('1.0');
 
-    // Total = 1.5 + 0.5 + 1.0 + 0.25 + 0.75 = 4.0 BTC = 400,000,000 sats
-    expect(unifiedBalance.total).toBe(400_000_000n);
+    // Total = 1.5 + 0.5 + 1.0 + 0.25 + 0.75 + 1.0 = 5.0 BTC = 500,000,000 sats
+    expect(unifiedBalance.total).toBe(500_000_000n);
   });
 });

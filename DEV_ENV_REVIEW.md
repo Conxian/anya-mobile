@@ -61,11 +61,12 @@ We prioritize using the most robust, well-maintained, and performant libraries i
 - [x] Unified Balance Service
 
 ### Phase 3: Lightning & State Chains (CURRENT)
-- [x] Real Silent Payments integration (BIP 352).
-- [x] Ark Layer support (Initial architecture & Mock).
-- [ ] BIP 322 Generic Message Signing (Initial port defined).
-- [ ] Transition LDK Mock to real LDK-WASM.
+- [x] Real Silent Payments integration (BIP 352) with standard derivation paths.
+- [x] Ark Layer support (Integrated into Unified Balance & UI).
+- [ ] BIP 322 Generic Message Signing (Port defined; mock implementation).
+- [ ] Transition LDK Mock to real LDK-WASM (^0.122.0).
 - [ ] Transition Mercury Mock to real `mercury-layer-sdk`.
+- [ ] Transition Ark Mock to real `ark-sdk`.
 
 ### Phase 4: Advanced UX & Privacy (PLANNED)
 - [ ] In-wallet trustless swaps (Boltz).

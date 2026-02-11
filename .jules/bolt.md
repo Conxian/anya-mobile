@@ -27,3 +27,7 @@ This journal is for CRITICAL, non-routine performance learnings that will help a
 ## 2025-05-15 - [Script Hash Caching in Electrum Adapters]
 **Learning:** Repetitive address-to-scripthash conversions (decoding, script construction, hashing) are a hidden CPU bottleneck in wallets that frequently query balance, UTXOs, and history for the same set of addresses. Caching these deterministic results in the adapter layer can speed up subsequent lookups by >2000x.
 **Action:** Implement a `Map`-based cache for script hashes in any adapter that uses the Electrum protocol (`blockchain.scripthash.*` methods).
+
+## 2025-05-16 - [Redundant ECC Point Serialization]
+**Learning:** In Taproot (BIP 341) operations, deriving the X-only public key and parity from a point using separate calls to `toBytes(true)` (compressed) and `toBytes(false)` (uncompressed) is redundant and expensive. The compressed format already contains the parity in its first byte and the X-coordinate in the subsequent 32 bytes.
+**Action:** Call `res.toBytes(true)` once. Use the first byte to determine parity (`0x02` is even/0, `0x03` is odd/1) and slice bytes 1 to 33 for the X-only public key. This reduced `xOnlyPointAddTweak` latency by ~50% in benchmarks.

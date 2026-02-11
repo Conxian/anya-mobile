@@ -185,9 +185,14 @@ export const xOnlyPointAddTweak = (p: Uint8Array, t: Uint8Array): { parity: 0 | 
     if (scalar >= NOBLE_ORDER) return null;
     const res = pt.add(noble.Point.BASE.multiply(scalar));
     if (res.is0()) return null;
+    // ⚡ Bolt: Optimization - toBytes(true) generates the compressed point (33 bytes).
+    // The first byte indicates parity (0x02 for even, 0x03 for odd), and the next
+    // 32 bytes are the X-coordinate. This avoids a second expensive call to
+    // toBytes(false) which would also serialize the Y-coordinate.
+    const compressed = res.toBytes(true);
     return {
-      parity: res.toBytes(true)[0] === 2 ? 0 : 1,
-      xOnlyPubkey: res.toBytes(false).slice(1, 33),
+      parity: compressed[0] === 0x02 ? 0 : 1,
+      xOnlyPubkey: compressed.slice(1, 33),
     };
   } catch {
     return null;

@@ -74,4 +74,38 @@ describe('UnifiedBalanceService', () => {
     // Total = 1.5 + 0.5 + 1.0 + 0.25 + 0.75 + 1.0 = 5.0 BTC = 500,000,000 sats
     expect(unifiedBalance.total).toBe(500_000_000n);
   });
+
+  it('should correctly handle negative and fractional balances in toSats', async () => {
+    // We can test the private static method by calling it through the class prototype if needed,
+    // or just use the public method with some negative mocks.
+    l1Client.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '-0.5' },
+    });
+    l2Client.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0.1' },
+    });
+    sidechainClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0' },
+    });
+    ecashClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0' },
+    });
+    stateChainClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0' },
+    });
+    arkClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0' },
+    });
+
+    const unifiedBalance = await balanceService.getUnifiedBalance(account, btcAsset);
+
+    // Total = -0.5 + 0.1 = -0.4 BTC = -40,000,000 sats
+    expect(unifiedBalance.total).toBe(-40_000_000n);
+  });
 });

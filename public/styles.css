@@ -123,7 +123,36 @@ hr {
 button:focus-visible,
 input[type="text"]:focus-visible,
 input[type="password"]:focus-visible,
+input[type="number"]:focus-visible,
 select:focus-visible {
   outline: 2px solid #D4A017;
   outline-offset: 2px;
+}
+
+input[type="number"] {
+  border: 1px solid #E0E0E0;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 5px;
+}
+
+#sendTransaction, #swapSection {
+  background-color: #FFFFFF;
+  border: 1px solid #E0E0E0;
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 5px;
+  width: 80%;
+  max-width: 600px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.success-message {
+  color: #2E7D32;
+  font-weight: bold;
+}
+
+.error-message {
+  color: #C62828;
+  font-weight: bold;
 }

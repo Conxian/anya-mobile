@@ -3,6 +3,7 @@ import { createWallet } from '../core/wallet';
 import { SecureStorageService } from '../services/secure-storage';
 import { uploadToIPFS, downloadFromIPFS } from '../services/ipfs';
 import { UnifiedBalanceService } from '../core/unified-balance-service';
+import { TransactionServiceImpl } from '../core/transaction-service';
 import { MockBlockchainClient } from '../adapters/mock-blockchain-client';
 import { MockLightningClient } from '../adapters/mock-lightning-client';
 import { LiquidBlockchainClient } from '../adapters/liquid-client';
@@ -10,6 +11,7 @@ import { SilentPaymentClient } from '../adapters/silent-payment-client';
 import { MockEcashClient } from '../adapters/mock-ecash-client';
 import { MockStateChainClient } from '../adapters/mock-statechain-client';
 import { MockArkClient } from '../adapters/mock-ark-client';
+import { BoltzClient } from '../adapters/boltz-client';
 import { Account, AddressType } from '../core/domain';
 
 const secureStorage = new SecureStorageService();
@@ -23,6 +25,7 @@ const silentPaymentClient = new SilentPaymentClient();
 const ecashClient = new MockEcashClient();
 const stateChainClient = new MockStateChainClient();
 const arkClient = new MockArkClient();
+const boltzClient = new BoltzClient();
 const balanceService = new UnifiedBalanceService(
   l1Client,
   l2Client,
@@ -31,6 +34,10 @@ const balanceService = new UnifiedBalanceService(
   stateChainClient,
   arkClient
 );
+const transactionService = new TransactionServiceImpl(l1Client, (l1Client as any).network || (window as any).bitcoin?.networks?.bitcoin);
+
+let currentAccount: Account | null = null;
+let currentPin: string | null = null;
 
 /**
  * 🎨 Palette: Standardized helper to toggle visibility of sensitive information like mnemonics.
@@ -148,7 +155,19 @@ document.getElementById('createWallet')?.addEventListener('click', async () => {
     if (addressType === 'P2PKH') path = "m/44'/0'/0'/0";
 
     const address = await wallet.getAddress(0, pin, path, addressType);
-    const node = await wallet.secureWallet.getNode(0, pin);
+    const node = await wallet.secureWallet.getNode(0, pin, path, addressType);
+
+    // Store for transactions
+    currentAccount = new Account('main', 'Main Account', node, undefined, addressType as AddressType);
+    currentPin = pin;
+
+    // Show send form
+    const sendSection = document.getElementById('sendTransaction');
+    if (sendSection) sendSection.style.display = 'block';
+
+    // Show swap section
+    const swapSection = document.getElementById('swapSection');
+    if (swapSection) swapSection.style.display = 'block';
 
     if (walletInfo) {
       walletInfo.innerHTML = `
@@ -272,6 +291,56 @@ if (cidInput && loadWalletButton) {
   });
 }
 
+// --- Send Transaction Logic ---
+document.getElementById('sendButton')?.addEventListener('click', async () => {
+  if (!currentAccount || !currentPin) {
+    alert('Please create or load a wallet first.');
+    return;
+  }
+
+  const destAddress = (document.getElementById('destAddress') as HTMLInputElement).value;
+  const amountStr = (document.getElementById('sendAmount') as HTMLInputElement).value;
+  const resultDiv = document.getElementById('sendResult');
+
+  if (!destAddress || !amountStr) {
+    alert('Please enter destination address and amount.');
+    return;
+  }
+
+  if (resultDiv) resultDiv.innerHTML = '<p>Preparing transaction...</p>';
+
+  try {
+    const btcAsset = { symbol: 'BTC', name: 'Bitcoin', decimals: 8 };
+    const amount = { value: (Number(amountStr) * 1e8).toString(), asset: btcAsset };
+
+    const draft = await transactionService.createTransaction(
+      currentAccount,
+      destAddress,
+      btcAsset,
+      amount,
+      'medium'
+    );
+
+    if (resultDiv) resultDiv.innerHTML = '<p>Signing transaction...</p>';
+    const signed = await transactionService.signTransaction(draft, currentAccount);
+
+    if (resultDiv) resultDiv.innerHTML = '<p>Broadcasting transaction...</p>';
+    const txid = await transactionService.broadcastTransaction(signed);
+
+    if (resultDiv) {
+      resultDiv.innerHTML = `
+        <p class="success-message">✅ Transaction sent successfully!</p>
+        <p><strong>TXID:</strong> <code>${txid}</code></p>
+      `;
+    }
+  } catch (err) {
+    console.error('Send failed:', err);
+    if (resultDiv) {
+      resultDiv.innerHTML = `<p class="error-message">❌ Send failed: ${(err as Error).message}</p>`;
+    }
+  }
+});
+
 document.getElementById('loadWallet')?.addEventListener('click', async () => {
   if (!loadWalletButton || !cidInput) return;
 
@@ -292,6 +361,23 @@ document.getElementById('loadWallet')?.addEventListener('click', async () => {
     const walletJson = await downloadFromIPFS(cid);
     const loadedData = JSON.parse(walletJson.toString());
     const mnemonic = await secureStorage.decrypt(loadedData.encryptedMnemonic, pin);
+
+    // Derived node for the loaded wallet to enable sending
+    const { createWalletFromMnemonic } = await import('../core/wallet');
+    const wallet = await createWalletFromMnemonic(secureStorage, mnemonic, pin);
+    // For loaded wallet, we assume default NativeSegWit if not specified in metadata
+    const node = await wallet.secureWallet.getNode(0, pin);
+
+    currentAccount = new Account('main-loaded', 'Main Account', node, undefined, AddressType.NativeSegWit);
+    currentPin = pin;
+
+    // Show send form
+    const sendSection = document.getElementById('sendTransaction');
+    if (sendSection) sendSection.style.display = 'block';
+
+    // Show swap section
+    const swapSection = document.getElementById('swapSection');
+    if (swapSection) swapSection.style.display = 'block';
 
     if (walletInfo) {
       walletInfo.innerHTML = `
@@ -329,6 +415,10 @@ document.getElementById('loadWallet')?.addEventListener('click', async () => {
 
       // Update unified balance for loaded wallet
       const btcAsset = { symbol: 'BTC', name: 'Bitcoin', decimals: 8 };
+
+      // Initialize full account for loaded wallet if possible
+      // In a real app, we would derive the node from mnemonic here too
+      // For this demo, we'll use a mock account for the balance view
       const tempAccount = new Account('temp-loaded', 'Temp Loaded', null as any, undefined, AddressType.NativeSegWit);
       Object.defineProperty(tempAccount, 'address', { get: () => loadedData.address });
 
@@ -361,5 +451,66 @@ document.getElementById('loadWallet')?.addEventListener('click', async () => {
     loadWalletButton.disabled = false;
     loadWalletButton.innerText = 'Load Wallet from IPFS';
     cidInput.disabled = false;
+  }
+});
+
+// --- Boltz Swap Logic ---
+document.getElementById('swapType')?.addEventListener('change', (e) => {
+  const type = (e.target as HTMLSelectElement).value;
+  const submarineInputs = document.getElementById('submarineInputs');
+  if (submarineInputs) {
+    submarineInputs.style.display = type === 'submarine' ? 'block' : 'none';
+  }
+});
+
+document.getElementById('createSwapButton')?.addEventListener('click', async () => {
+  if (!currentAccount) {
+    alert('Please create or load a wallet first.');
+    return;
+  }
+
+  const swapType = (document.getElementById('swapType') as HTMLSelectElement).value;
+  const invoice = (document.getElementById('swapInvoice') as HTMLInputElement).value;
+  const resultDiv = document.getElementById('swapResult');
+
+  if (swapType === 'submarine' && !invoice) {
+    alert('Please enter a Lightning invoice for submarine swap.');
+    return;
+  }
+
+  if (resultDiv) resultDiv.innerHTML = '<p>Initializing Boltz Swap...</p>';
+
+  try {
+    if (swapType === 'submarine') {
+      const swap = await boltzClient.createSubmarineSwap(currentAccount, invoice, currentAccount.address);
+      if (resultDiv) {
+        resultDiv.innerHTML = `
+          <p class="success-message">🚀 Submarine Swap Initialized!</p>
+          <p><strong>Send BTC to:</strong> <code>${swap.address}</code></p>
+          <p><strong>Expected Amount:</strong> ${Number(swap.expectedAmount.value) / 1e8} BTC</p>
+          <p><small>Boltz will pay your invoice once the on-chain deposit is confirmed.</small></p>
+        `;
+      }
+    } else {
+      const btcAsset = { symbol: 'BTC', name: 'Bitcoin', decimals: 8 };
+      const swap = await boltzClient.createReverseSwap(
+        currentAccount,
+        { value: '0.001', asset: btcAsset },
+        currentAccount.address
+      );
+      if (resultDiv) {
+        resultDiv.innerHTML = `
+          <p class="success-message">🚀 Reverse Swap Initialized!</p>
+          <p><strong>Pay this Invoice:</strong> <code>${swap.invoice}</code></p>
+          <p><strong>Lockup Address:</strong> <code>${swap.lockupAddress}</code></p>
+          <p><small>Boltz will lock up funds on-chain, and you can claim them after paying the invoice.</small></p>
+        `;
+      }
+    }
+  } catch (err) {
+    console.error('Swap failed:', err);
+    if (resultDiv) {
+      resultDiv.innerHTML = `<p class="error-message">❌ Swap failed: ${(err as Error).message}</p>`;
+    }
   }
 });

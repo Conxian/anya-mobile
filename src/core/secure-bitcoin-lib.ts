@@ -77,7 +77,12 @@ export class SecureWallet {
     return response.address;
   }
 
-  async getNode(index: number, pin: string): Promise<BIP32Interface> {
+  async getNode(
+    index: number,
+    pin: string,
+    path?: string,
+    addressType?: string
+  ): Promise<BIP32Interface> {
     const response = await CryptoWorkerClient.call<{
       node: {
         publicKey: ArrayBuffer;
@@ -88,6 +93,8 @@ export class SecureWallet {
       encryptedMnemonic: this.encryptedMnemonic,
       pin,
       index,
+      path,
+      addressType,
     });
 
     const { privateKey, chainCode } = response.node;

@@ -222,27 +222,38 @@ export class TransactionServiceImpl implements TransactionService {
   }
 
   /**
-   * ⚡ Bolt: Implement BIP 322 Generic Signed Messages.
-   * This allows proving ownership of an address (Legacy, SegWit, or Taproot).
-   * Note: Current implementation is an INITIAL MOCK for architectural demonstration.
+   * ⚡ Bolt: BIP 322 Generic Signed Messages (Architectural Mock).
+   * This provides the interface and structural foundation for proving ownership
+   * of an address (Legacy, SegWit, or Taproot).
+   *
+   * WARNING: The current implementation is a simplified mock that uses tagged
+   * hashing but DOES NOT yet construct the full virtual "to_sign" and "to_spend"
+   * transactions required by the BIP 322 specification.
    */
   async signMessage(account: Account, message: string): Promise<string> {
-    console.warn('BIP 322 signMessage is currently an INITIAL MOCK.');
     const signer = account.getSigner();
-    const hash = new Uint8Array(bitcoin.crypto.sha256(Buffer.from(message) as any));
-    const signature = signer.sign(hash);
+    // ⚡ Bolt: Use tagged hashing as a structural placeholder for BIP 340/322.
+    const tagHash = bitcoin.crypto.sha256(new Uint8Array(Buffer.from('BIP322-signed-message') as any));
+    const hash = bitcoin.crypto.sha256(new Uint8Array(Buffer.concat([tagHash, tagHash, new Uint8Array(Buffer.from(message) as any)]) as any));
+    const signature = signer.sign(new Uint8Array(hash as any));
+
+    // Structural placeholder: in a full implementation, this would return the
+    // witness of a virtual transaction.
     return Buffer.from(signature).toString('base64');
   }
 
+  /**
+   * ⚡ Bolt: BIP 322 Verification (Architectural Mock).
+   * Note: Full verification requires executing the scriptPubKey against the virtual
+   * BIP 322 transactions. Currently returns false for safety.
+   */
   async verifyMessage(
-    address: Address,
-    message: string,
-    signature: string
+    _address: Address,
+    _message: string,
+    _signature: string
   ): Promise<boolean> {
-    console.warn('BIP 322 verifyMessage is NOT YET IMPLEMENTED and currently returns false for safety.');
-    // Real BIP 322 verification involves verifying the virtual transaction's script execution
-    // against the provided address's scriptPubKey.
-    // TODO: Integrate a BIP 322 library (e.g., bip322-js) for production use.
+    console.warn('BIP 322 verifyMessage is an ARCHITECTURAL MOCK and currently returns false for safety.');
+    // TODO: Integrate bip322-js or similar library for full specification compliance.
     return false;
   }
 }

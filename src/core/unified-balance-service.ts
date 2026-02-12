@@ -35,20 +35,12 @@ export class UnifiedBalanceService {
       this.arkClient.getBalance(account),
     ]);
 
-    // ⚡ Bolt: Robust decimal to bigint conversion to avoid floating point precision issues.
-    // This replaces a dangerous heuristic-based conversion with a deterministic one.
-    const toSats = (val: string, decimals: number = 8): bigint => {
-      const [intPart, fragPart = ''] = val.split('.');
-      const paddedFrag = fragPart.padEnd(decimals, '0').slice(0, decimals);
-      return BigInt(intPart) * BigInt(10 ** decimals) + BigInt(paddedFrag);
-    };
-
-    const total = toSats(l1Balance.amount.value) +
-                  toSats(l2Balance.amount.value) +
-                  toSats(sidechainBalance.amount.value) +
-                  toSats(ecashBalance.amount.value) +
-                  toSats(statechainBalance.amount.value) +
-                  toSats(arkBalance.amount.value);
+    const total = UnifiedBalanceService.toSats(l1Balance.amount.value) +
+                  UnifiedBalanceService.toSats(l2Balance.amount.value) +
+                  UnifiedBalanceService.toSats(sidechainBalance.amount.value) +
+                  UnifiedBalanceService.toSats(ecashBalance.amount.value) +
+                  UnifiedBalanceService.toSats(statechainBalance.amount.value) +
+                  UnifiedBalanceService.toSats(arkBalance.amount.value);
 
     return {
       l1: l1Balance,
@@ -59,5 +51,19 @@ export class UnifiedBalanceService {
       ark: arkBalance,
       total,
     };
+  }
+
+  /**
+   * ⚡ Bolt: Robust decimal to bigint conversion to avoid floating point precision issues.
+   * Performs deterministic decimal string-to-BigInt conversion using 10^decimals,
+   * while robustly handling negative signs (including values between 0 and -1).
+   */
+  private static toSats(val: string, decimals: number = 8): bigint {
+    const isNegative = val.startsWith('-');
+    const absoluteVal = isNegative ? val.substring(1) : val;
+    const [intPart, fragPart = ''] = absoluteVal.split('.');
+    const paddedFrag = fragPart.padEnd(decimals, '0').slice(0, decimals);
+    const result = BigInt(intPart) * BigInt(10 ** decimals) + BigInt(paddedFrag);
+    return isNegative ? -result : result;
   }
 }

@@ -74,4 +74,68 @@ describe('UnifiedBalanceService', () => {
     // Total = 1.5 + 0.5 + 1.0 + 0.25 + 0.75 + 1.0 = 5.0 BTC = 500,000,000 sats
     expect(unifiedBalance.total).toBe(500_000_000n);
   });
+
+  it('should correctly handle negative balances when aggregating', async () => {
+    l1Client.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '1.0' },
+    });
+    l2Client.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '-0.25' },
+    });
+    sidechainClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0' },
+    });
+    ecashClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0' },
+    });
+    stateChainClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0' },
+    });
+    arkClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0' },
+    });
+
+    const unifiedBalance = await balanceService.getUnifiedBalance(account, btcAsset);
+
+    // 1.0 - 0.25 = 0.75 BTC = 75,000,000 sats
+    expect(unifiedBalance.total).toBe(75_000_000n);
+  });
+
+  it('should correctly handle negative balances between 0 and -1', async () => {
+    l1Client.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '-0.5' },
+    });
+    l2Client.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0' },
+    });
+    sidechainClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0' },
+    });
+    ecashClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0' },
+    });
+    stateChainClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0' },
+    });
+    arkClient.getBalance.mockResolvedValue({
+      asset: btcAsset,
+      amount: { asset: btcAsset, value: '0' },
+    });
+
+    const unifiedBalance = await balanceService.getUnifiedBalance(account, btcAsset);
+
+    // -0.5 BTC = -50,000,000 sats
+    expect(unifiedBalance.total).toBe(-50_000_000n);
+  });
 });

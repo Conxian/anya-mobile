@@ -162,6 +162,27 @@ export interface MiniscriptService {
   }>;
 }
 
+export interface SwapService {
+  createSubmarineSwap(
+    account: Account,
+    invoice: string,
+    refundAddress: Address
+  ): Promise<{
+    address: Address;
+    redeemScript: string;
+    expectedAmount: Amount;
+  }>;
+  createReverseSwap(
+    account: Account,
+    amount: Amount,
+    onchainAddress: Address
+  ): Promise<{
+    invoice: string;
+    lockupAddress: Address;
+    redeemScript: string;
+  }>;
+}
+
 // --- Driven Ports ---
 
 export interface BlockchainClient {

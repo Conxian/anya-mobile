@@ -31,3 +31,7 @@ This journal is for CRITICAL, non-routine performance learnings that will help a
 ## 2025-05-16 - [Redundant ECC Point Serialization]
 **Learning:** In Taproot (BIP 341) operations, deriving the X-only public key and parity from a point using separate calls to `toBytes(true)` (compressed) and `toBytes(false)` (uncompressed) is redundant and expensive. The compressed format already contains the parity in its first byte and the X-coordinate in the subsequent 32 bytes.
 **Action:** Call `res.toBytes(true)` once. Use the first byte to determine parity (`0x02` is even/0, `0x03` is odd/1) and slice bytes 1 to 33 for the X-only public key. This reduced `xOnlyPointAddTweak` latency by ~50% in benchmarks.
+
+## 2026-02-06 - [Direct BigInt Coordinate Access for Parity]
+**Learning:** Checking the parity of an ECC point using `P.y & 1n` is significantly faster (~30x) than serializing the point to bytes and checking the first byte (`P.toBytes(true)[0]`). Similarly, extracting the X-coordinate directly using `numberToBytesBE(P.x, 32)` avoids the overhead of full point serialization.
+**Action:** Use direct BigInt coordinate access for parity checks and coordinate extraction in performance-critical ECC operations like Taproot/Schnorr tweaking.

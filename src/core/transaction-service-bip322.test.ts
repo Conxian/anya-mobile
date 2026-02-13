@@ -38,7 +38,7 @@ describe('TransactionServiceImpl BIP 322', () => {
     expect(typeof signature).toBe('string');
 
     const isValid = await transactionService.verifyMessage(account.address, message, signature);
-    // verifyMessage currently returns false as it is a mock/placeholder
-    expect(isValid).toBe(false);
+    // ⚡ Bolt: Verify that BIP 322 signature is now correctly validated.
+    expect(isValid).toBe(true);
   });
 });

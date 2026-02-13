@@ -63,7 +63,8 @@ We prioritize using the most robust, well-maintained, and performant libraries i
 ### Phase 3: Lightning & State Chains (CURRENT)
 - [x] Real Silent Payments integration (BIP 352) with standard derivation paths.
 - [x] Ark Layer support (Integrated into Unified Balance & UI).
-- [ ] BIP 322 Generic Message Signing (Port defined; mock implementation).
+- [x] BIP 322 Generic Message Signing (Integrated `bip322-js`).
+- [x] Unified Transaction History (Aggregated across all layers).
 - [ ] Transition LDK Mock to real LDK-WASM (^0.122.0).
 - [ ] Transition Mercury Mock to real `mercury-layer-sdk`.
 - [ ] Transition Ark Mock to real `ark-sdk`.

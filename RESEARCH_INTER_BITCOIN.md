@@ -42,7 +42,9 @@ This document outlines the findings for achieving "best-in-class" full Bitcoin f
 | **Lightning** | `lightningdevkit` (LDK) | 🏗️ Integration In Progress |
 | **Liquid** | `liquidjs-lib` | ✅ Adapter Implemented |
 | **State Chains** | Mercury Layer / Ark | 📅 Phase 3 |
-| **Silent Payments**| `@bitcoinerlab/silent-payments` | 📅 Phase 4 |
+| **Silent Payments**| `silent-payments` (BIP 352) | ✅ Integrated |
+| **BIP 322** | `bip322-js` | ✅ Integrated |
+| **Miniscript** | `@bitcoinerlab/descriptors`| ✅ Integrated |
 | **Musig2** | `@noble/curves` / `musig2` | 🏗️ Integration In Progress |
 | **Smart Contracts**| `@stacks/transactions` | ✅ Adapter Implemented |
 | **Swaps** | `boltz-core` | ✅ Installed / Ready |

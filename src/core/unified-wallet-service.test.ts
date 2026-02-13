@@ -1,11 +1,11 @@
-import { UnifiedBalanceService } from './unified-balance-service';
+import { UnifiedWalletService } from './unified-wallet-service';
 import { BlockchainClient, LightningService, SidechainService, EcashService, StateChainService, ArkService } from './ports';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { Account, Asset, AddressType } from './domain';
 import * as bitcoin from 'bitcoinjs-lib';
 
-describe('UnifiedBalanceService', () => {
-  let balanceService: UnifiedBalanceService;
+describe('UnifiedWalletService', () => {
+  let balanceService: UnifiedWalletService;
   let l1Client: MockProxy<BlockchainClient>;
   let l2Client: MockProxy<LightningService>;
   let sidechainClient: MockProxy<SidechainService>;
@@ -22,7 +22,7 @@ describe('UnifiedBalanceService', () => {
     ecashClient = mock<EcashService>();
     stateChainClient = mock<StateChainService>();
     arkClient = mock<ArkService>();
-    balanceService = new UnifiedBalanceService(
+    balanceService = new UnifiedWalletService(
       l1Client,
       l2Client,
       sidechainClient,

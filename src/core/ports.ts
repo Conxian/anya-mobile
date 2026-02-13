@@ -102,6 +102,7 @@ export interface LightningService {
   payInvoice(account: Account, invoice: string): Promise<TransactionID>;
   getInvoiceStatus(paymentHash: string): Promise<'pending' | 'paid' | 'expired'>;
   getBalance(account: Account): Promise<Balance>;
+  getTransactionHistory(account: Account): Promise<Transaction[]>;
 
   // Channel Management
   openChannel(account: Account, peerId: string, amount: Amount): Promise<string>;
@@ -120,6 +121,7 @@ export interface EcashService {
   send(token: EcashToken, amount: Amount): Promise<{ sent: EcashToken; change: EcashToken }>;
   receive(token: EcashToken): Promise<Balance>;
   getBalance(account: Account): Promise<Balance>;
+  getTransactionHistory(account: Account): Promise<Transaction[]>;
 }
 
 export interface SilentPaymentService {
@@ -136,6 +138,7 @@ export interface SidechainService {
     amount: Amount
   ): Promise<TransactionID>;
   getBalance(account: Account, asset: Asset): Promise<Balance>;
+  getTransactionHistory(account: Account): Promise<Transaction[]>;
 }
 
 export interface StateChainService {
@@ -143,6 +146,7 @@ export interface StateChainService {
   transfer(coin: StateChainCoin, recipientPublicKey: PublicKey): Promise<TransactionID>;
   withdraw(coin: StateChainCoin, destinationAddress: Address): Promise<TransactionID>;
   getBalance(account: Account): Promise<Balance>;
+  getTransactionHistory(account: Account): Promise<Transaction[]>;
 }
 
 export interface ArkService {
@@ -151,6 +155,7 @@ export interface ArkService {
   transfer(vtxo: ArkVTXO, recipientPublicKey: PublicKey): Promise<TransactionID>;
   getVTXOs(account: Account): Promise<ArkVTXO[]>;
   getBalance(account: Account): Promise<Balance>;
+  getTransactionHistory(account: Account): Promise<Transaction[]>;
 }
 
 export interface MiniscriptService {

@@ -61,4 +61,8 @@ export class MockArkClient implements ArkService {
       },
     };
   }
+
+  async getTransactionHistory(_account: Account): Promise<any[]> {
+    return [];
+  }
 }

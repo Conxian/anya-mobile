@@ -24,9 +24,9 @@ The wallet provides native support (or planned integration) for:
 *   **Wormhole Integration:** Seamlessly transfer assets between Bitcoin layers and other blockchains.
 *   **Boltz Swaps:** Trustless swaps between L1, Lightning, and Liquid. [PLANNED]
 
-### 3.3. Staking & Unified Balance
+### 3.3. Staking & Unified Wallet
 
-*   **Unified Balance:** A consolidated view of Bitcoin wealth across all layers. [COMPLETED]
+*   **Unified Wallet Activity:** A consolidated view of Bitcoin wealth and transaction history across all layers. [COMPLETED]
 *   **Stacks "Stacking":** User-friendly interface for locking STX and earning BTC rewards.
 
 ### 3.4. Performance & Security
@@ -45,9 +45,9 @@ The wallet provides native support (or planned integration) for:
 ### 4.2. Phase 3: Lightning, State Chains & Ecash (CURRENT)
 *   **LDK Integration:** Transition from mock clients to a functional Lightning Dev Kit (LDK) node (upgraded to v0.122+).
 *   **Mercury Layer & Ark:** Implement State Chain and VTXO support.
-*   **Ecash & Silent Payments:** Initial implementation of Cashu and BIP 352 protocols.
-*   **Message Signing:** Initial port for BIP 322 support.
-*   **Unified History:** A consolidated view of all transaction activities across layers.
+*   **Ecash & Silent Payments:** Real integration of @cashu/cashu-ts and BIP 352 `silent-payments` protocols. [INTEGRATED]
+*   **Message Signing:** Real implementation for BIP 322 using `bip322-js`. [INTEGRATED]
+*   **Unified History:** A consolidated view of all transaction activities across layers. [COMPLETED]
 
 ### 4.3. Phase 4: Advanced Privacy & Swaps
 *   **Silent Payments:** Implementation of BIP 352 for improved privacy.

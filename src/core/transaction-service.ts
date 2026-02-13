@@ -11,6 +11,7 @@ import {
   AddressType,
 } from './domain';
 import * as bitcoin from 'bitcoinjs-lib';
+import { Signer, Verifier } from 'bip322-js';
 
 export class TransactionServiceImpl implements TransactionService {
   constructor(
@@ -224,14 +225,16 @@ export class TransactionServiceImpl implements TransactionService {
   /**
    * ⚡ Bolt: Implement BIP 322 Generic Signed Messages.
    * This allows proving ownership of an address (Legacy, SegWit, or Taproot).
-   * Note: Current implementation is an INITIAL MOCK for architectural demonstration.
+   * Uses the best-in-class `bip322-js` library for production-ready compliance.
    */
   async signMessage(account: Account, message: string): Promise<string> {
-    console.warn('BIP 322 signMessage is currently an INITIAL MOCK.');
-    const signer = account.getSigner();
-    const hash = new Uint8Array(bitcoin.crypto.sha256(Buffer.from(message) as any));
-    const signature = signer.sign(hash);
-    return Buffer.from(signature).toString('base64');
+    try {
+      // bip322-js Signer.sign expects (privateKeyWIF, address, message)
+      return Signer.sign(account.privateKey, account.address, message);
+    } catch (err) {
+      console.error('BIP 322 signing failed:', err);
+      throw new Error(`BIP 322 signing failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
   }
 
   async verifyMessage(
@@ -239,10 +242,12 @@ export class TransactionServiceImpl implements TransactionService {
     message: string,
     signature: string
   ): Promise<boolean> {
-    console.warn('BIP 322 verifyMessage is NOT YET IMPLEMENTED and currently returns false for safety.');
-    // Real BIP 322 verification involves verifying the virtual transaction's script execution
-    // against the provided address's scriptPubKey.
-    // TODO: Integrate a BIP 322 library (e.g., bip322-js) for production use.
-    return false;
+    try {
+      // Verifier.verifySignature returns true/false or throws on basic validation errors
+      return Verifier.verifySignature(address, message, signature);
+    } catch (err) {
+      console.warn('BIP 322 verification failed or signature is invalid:', err);
+      return false;
+    }
   }
 }

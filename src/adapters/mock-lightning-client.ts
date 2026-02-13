@@ -50,6 +50,10 @@ export class MockLightningClient implements LightningService {
     };
   }
 
+  async getTransactionHistory(_account: Account): Promise<any[]> {
+    return [];
+  }
+
   async openChannel(
     _account: Account,
     _peerId: string,

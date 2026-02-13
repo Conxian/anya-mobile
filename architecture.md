@@ -15,7 +15,7 @@ This document describes the architecture of the multi-layer Bitcoin wallet. The 
 ### 3.1. The Core (Domain)
 Contains the essential business rules and data models:
 - **Models:** `Account`, `Wallet`, `Transaction`, `Asset`.
-- **Services:** `WalletServiceImpl`, `TransactionServiceImpl`, `UnifiedBalanceService`.
+- **Services:** `WalletServiceImpl`, `TransactionServiceImpl`, `UnifiedWalletService`.
 - **Ports:** Interfaces for external interaction (e.g., `BlockchainClient`, `Persistence`).
 
 ### 3.2. The Ports
@@ -34,4 +34,4 @@ The architectural foundation is fully established. Most core ports for L1, L2, a
 
 **Current Focus:**
 - Transitioning Lightning and State Chain adapters from mocks to functional implementations (LDK, Mercury).
-- Implementing unified transaction history across all adapters.
+- Expanding multi-layer privacy features (Silent Payments, BIP 322).

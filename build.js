@@ -23,7 +23,6 @@ const sharedConfig = {
     'vm': 'vm-browserify',
     'buffer': 'buffer',
     'crypto': 'crypto-browserify',
-    '@bitcoinerlab/silent-payments': path.resolve(__dirname, 'dummy.js'),
     'mercury-layer-sdk': path.resolve(__dirname, 'dummy.js'),
   },
   inject: ['./buffer-polyfill.js'],

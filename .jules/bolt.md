@@ -39,3 +39,7 @@ This journal is for CRITICAL, non-routine performance learnings that will help a
 ## 2026-02-07 - [Optimized Decimal to Satoshi Conversion]
 **Learning:** Standard string `split` and `padEnd` operations combined with BigInt exponentiation (`10n ** BigInt(8)`) introduce significant overhead when processing many balances or transaction amounts.
 **Action:** Use `indexOf` and `slice` to avoid array allocations, and implement a pre-calculated `POWERS_OF_10` lookup table to eliminate repeated exponentiation. Early returns for common zero values further reduce latency. This improved `toSats` performance by ~2x for typical values and >50x for zero.
+
+## 2026-02-13 - [Parallel Multi-Layer History Aggregation]
+**Learning:** Aggregating transaction history from 6+ different layers (L1, L2, Sidechains, Ecash, etc.) sequentially would be a disaster for UX, as the slowest service would block the entire view. Using `Promise.all` is better but risky; if a single service fails, the entire history call fails.
+**Action:** Use `Promise.allSettled` in `UnifiedWalletService.getUnifiedHistory` to fetch history from all adapters in parallel. This ensures the UI can still display available history even if one or more layers are temporarily unresponsive or misconfigured. This transforms the reliability of the consolidated timeline.

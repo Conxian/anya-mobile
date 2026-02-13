@@ -1,7 +1,7 @@
 import { BlockchainClient, LightningService, SidechainService, EcashService, StateChainService, ArkService } from './ports';
-import { Account, Asset, Balance } from './domain';
+import { Account, Asset, Balance, Transaction } from './domain';
 
-export class UnifiedBalanceService {
+export class UnifiedWalletService {
   constructor(
     private readonly l1Client: BlockchainClient,
     private readonly l2Client: LightningService,
@@ -38,7 +38,7 @@ export class UnifiedBalanceService {
     const dotIndex = absoluteVal.indexOf('.');
     let totalSats: bigint;
 
-    const power = UnifiedBalanceService.POWERS_OF_10[decimals] || 10n ** BigInt(decimals);
+    const power = UnifiedWalletService.POWERS_OF_10[decimals] || 10n ** BigInt(decimals);
 
     if (dotIndex === -1) {
       totalSats = BigInt(absoluteVal) * power;
@@ -71,12 +71,12 @@ export class UnifiedBalanceService {
       this.arkClient.getBalance(account),
     ]);
 
-    const total = UnifiedBalanceService.toSats(l1Balance.amount.value) +
-                  UnifiedBalanceService.toSats(l2Balance.amount.value) +
-                  UnifiedBalanceService.toSats(sidechainBalance.amount.value) +
-                  UnifiedBalanceService.toSats(ecashBalance.amount.value) +
-                  UnifiedBalanceService.toSats(statechainBalance.amount.value) +
-                  UnifiedBalanceService.toSats(arkBalance.amount.value);
+    const total = UnifiedWalletService.toSats(l1Balance.amount.value) +
+                  UnifiedWalletService.toSats(l2Balance.amount.value) +
+                  UnifiedWalletService.toSats(sidechainBalance.amount.value) +
+                  UnifiedWalletService.toSats(ecashBalance.amount.value) +
+                  UnifiedWalletService.toSats(statechainBalance.amount.value) +
+                  UnifiedWalletService.toSats(arkBalance.amount.value);
 
     return {
       l1: l1Balance,
@@ -87,5 +87,36 @@ export class UnifiedBalanceService {
       ark: arkBalance,
       total,
     };
+  }
+
+  /**
+   * ⚡ Bolt: Aggregate transaction history across all Bitcoin layers in parallel.
+   * This provides a single, consolidated timeline of all activity (L1, L2,
+   * Sidechains, Ecash, etc.), ensuring the "best full bitcoin wallet" experience.
+   * Individual layer failures are caught to prevent a single service outage
+   * from breaking the entire history view.
+   */
+  async getUnifiedHistory(account: Account): Promise<Transaction[]> {
+    const historyResults = await Promise.allSettled([
+      this.l1Client.getTransactionHistory(account.address),
+      this.l2Client.getTransactionHistory(account),
+      this.sidechainClient.getTransactionHistory(account),
+      this.ecashClient.getTransactionHistory(account),
+      this.stateChainClient.getTransactionHistory(account),
+      this.arkClient.getTransactionHistory(account),
+    ]);
+
+    const allTransactions: Transaction[] = [];
+
+    historyResults.forEach((result) => {
+      if (result.status === 'fulfilled') {
+        allTransactions.push(...result.value);
+      } else {
+        console.error('Failed to fetch history for a layer:', result.reason);
+      }
+    });
+
+    // Sort by timestamp descending (newest first)
+    return allTransactions.sort((a, b) => b.timestamp - a.timestamp);
   }
 }

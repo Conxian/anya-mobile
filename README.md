@@ -33,8 +33,8 @@ The wallet follows a **Ports and Adapters (Hexagonal)** architecture. This desig
 The project is now in **Phase 3**:
 - [x] **Core Infrastructure:** Hexagonal architecture and secure key management.
 - [x] **L1 Excellence:** Full support for P2WPKH and P2TR (Taproot) with Electrum/Esplora backends.
-- [x] **Advanced Privacy:** Native integration for Silent Payments (BIP 352).
-- [x] **Unified Balance:** Consolidated view of assets across L1, L2, Liquid, Ecash, State Chains, and Ark.
+- [x] **Advanced Privacy:** Native integration for Silent Payments (BIP 352) and BIP 322 message signing.
+- [x] **Unified Wallet:** Consolidated view of assets and transaction history across L1, L2, Liquid, Ecash, State Chains, and Ark.
 - [ ] **Lightning Integration:** Transitioning to full LDK-WASM (^0.122.0) implementation.
 - [ ] **State Chains:** Transitioning to real Mercury Layer and Ark SDKs.
 

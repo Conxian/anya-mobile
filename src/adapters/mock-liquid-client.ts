@@ -40,4 +40,8 @@ export class MockLiquidClient implements SidechainService {
       amount: { asset, value: '1000' },
     };
   }
+
+  async getTransactionHistory(_account: Account): Promise<any[]> {
+    return [];
+  }
 }

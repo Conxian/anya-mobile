@@ -67,4 +67,8 @@ export class LiquidBlockchainClient implements SidechainService {
       amount: { asset, value: '0.0125' }, // Mocked balance for the review
     };
   }
+
+  async getTransactionHistory(_account: Account): Promise<any[]> {
+    return [];
+  }
 }

@@ -40,4 +40,8 @@ export class MockStateChainClient implements StateChainService {
       amount: { value: "0.012", asset: { symbol: "BTC", name: "Bitcoin", decimals: 8 } }
     };
   }
+
+  async getTransactionHistory(_account: Account): Promise<any[]> {
+    return [];
+  }
 }

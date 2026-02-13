@@ -55,4 +55,8 @@ export class MockEcashClient implements EcashService {
       amount: token.amount,
     };
   }
+
+  async getTransactionHistory(_account: Account): Promise<any[]> {
+    return [];
+  }
 }

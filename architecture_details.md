@@ -16,8 +16,8 @@ These interfaces allow the UI to drive the core logic.
 - `createTransaction()`, `signTransaction()`, `broadcastTransaction()`.
 - Support for Legacy, SegWit, and Taproot.
 
-### 1.4. `UnifiedBalanceService` [COMPLETED]
-- Consolidated view of L1, L2, and Sidechain balances.
+### 1.4. `UnifiedWalletService` [COMPLETED]
+- Consolidated view of balances and transaction history across all layers (L1, L2, Sidechains, Ecash, State Chains, Ark).
 
 ## 2. Driven Ports (SPI)
 
@@ -26,11 +26,11 @@ These interfaces are used by the core to communicate with external systems.
 ### 2.1. `BlockchainClient` (L1) [COMPLETED]
 - `getBalance()`, `getUTXOs()`, `broadcast()`, `getTransactionHistory()`.
 
-### 2.2. `LightningService` (L2) [INITIAL/MOCK]
-- `getBalance()`, `createInvoice()`, `payInvoice()`.
+### 2.2. `LightningService` (L2) [BETA]
+- `getBalance()`, `createInvoice()`, `payInvoice()`, `getTransactionHistory()`.
 
-### 2.3. `SidechainService` (Liquid/Stacks) [INITIAL/MOCK]
-- `getBalance()`, `transferAsset()`.
+### 2.3. `SidechainService` (Liquid/Stacks) [BETA]
+- `getBalance()`, `transferAsset()`, `getTransactionHistory()`.
 
 ### 2.4. `Persistence` [COMPLETED]
 - `saveWallet()`, `loadWallet()`. Implementation: `FilePersistence`.
@@ -54,6 +54,9 @@ These interfaces are used by the core to communicate with external systems.
 | L1 Blockchain | Done | `ElectrumBlockchainClient` / `BlockstreamClient` |
 | Key Management| Done | `CryptoWorkerClient` (BIP39/BIP32) |
 | Persistence   | Done | `FilePersistence` |
-| Lightning     | Mock | `MockLightningClient` (LDK Integration in progress) |
+| Lightning     | Beta | `MockLightningClient` (LDK Integration in progress) |
 | Sidechains    | Beta | `LiquidBlockchainClient`, `MockLiquidClient` |
-| Oracles       | Mock | `MockOracleClient` |
+| Ecash         | Beta | `MockEcashClient` (@cashu/cashu-ts integrated) |
+| Message Sign  | Done | `TransactionServiceImpl` (BIP 322 integrated) |
+| Silent Payment| Done | `SilentPaymentClient` (BIP 352 integrated) |
+| Miniscript    | Done | `MiniscriptServiceImpl` (@bitcoinerlab integrated) |

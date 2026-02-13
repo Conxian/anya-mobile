@@ -2,7 +2,7 @@ import './palette-init';
 import { createWallet } from '../core/wallet';
 import { SecureStorageService } from '../services/secure-storage';
 import { uploadToIPFS, downloadFromIPFS } from '../services/ipfs';
-import { UnifiedBalanceService } from '../core/unified-balance-service';
+import { UnifiedWalletService } from '../core/unified-wallet-service';
 import { MockBlockchainClient } from '../adapters/mock-blockchain-client';
 import { MockLightningClient } from '../adapters/mock-lightning-client';
 import { LiquidBlockchainClient } from '../adapters/liquid-client';
@@ -23,7 +23,7 @@ const silentPaymentClient = new SilentPaymentClient();
 const ecashClient = new MockEcashClient();
 const stateChainClient = new MockStateChainClient();
 const arkClient = new MockArkClient();
-const balanceService = new UnifiedBalanceService(
+const balanceService = new UnifiedWalletService(
   l1Client,
   l2Client,
   sidechainClient,
